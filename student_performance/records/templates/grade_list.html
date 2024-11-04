@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head><title>Grades</title></head>
+<body>
+    <h1>Grades</h1>
+    <ul>
+        {% for grade in grades %}
+            <li>{{ grade.student }} - {{ grade.course }}: {{ grade.grade }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

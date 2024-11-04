@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Список студентов{% endblock %}
+
+{% block content %}
+<h2>Список студентов</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID Студента</th>
+            <th>ФИО</th>
+            <th>Группа</th>
+            <th>Оценки</th>
+            <th>Средняя оценка</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for student in students %}
+        <tr>
+            <td>{{ student.student_id }}</td>
+            <td>{{ student.last_name }} {{ student.first_name }} {{ student.middle_name }}</td>
+            <td>{{ student.group.name }}</td>
+            <td>
+                <ul>
+                    {% for grade in student.grade_set.all %}
+                    <li>{{ grade.course.name }}: {{ grade.grade }}</li>
+                    {% empty %}
+                    <li>Нет оценок</li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td>
+                {% if student.average_grade %}
+                    {{ student.average_grade|floatformat:2 }}
+                {% else %}
+                    Нет оценок
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">Нет студентов для отображения.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

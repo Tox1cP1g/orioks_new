@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Список курсов{% endblock %}
+
+{% block content %}
+<h1>Список курсов</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Название курса</th>
+            <th>Семестр</th>
+            <th>Часы</th>
+            <th>Преподаватель</th>
+            <th>Форма контроля</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for course in courses %}
+        <tr>
+            <td>{{ course.name }}</td>
+            <td>{{ course.semester }}</td>
+            <td>{{ course.hours }}</td>
+            <td>
+                {% if course.professor %}
+                    {{ course.professor.full_name }}
+                {% else %}
+                    Не назначен
+                {% endif %}
+            </td>
+            <td>{{ course.form_of_control }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">Нет курсов для отображения.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
