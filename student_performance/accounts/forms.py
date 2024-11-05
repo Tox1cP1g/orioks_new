@@ -1,22 +1,46 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from records.models import Student  # Импортируем Student из records
+from django.contrib.auth.models import User
+from .models import Profile
+from django.contrib.auth import authenticate
+
+from django import forms
+from django.contrib.auth import authenticate
 
 
-class StudentLoginForm(AuthenticationForm):
-    student_id = forms.CharField(max_length=20, label='ID студента')
+class StudentLoginForm(forms.Form):
+    username = forms.CharField(max_length=150)
+    password = forms.CharField(widget=forms.PasswordInput)
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)  # Извлекаем request, если он передан
+        super().__init__(*args, **kwargs)
 
     def clean(self):
         cleaned_data = super().clean()
-        student_id = cleaned_data.get('student_id')
+        username = cleaned_data.get("username")
+        password = cleaned_data.get("password")
 
-        if student_id:
-            try:
-                student = Student.objects.get(student_id=student_id)
-            except Student.DoesNotExist:
-                raise forms.ValidationError("Студент с таким ID не найден.")
+        # Здесь можно добавить вашу логику для проверки пользователя
+        if username and password:
+            user = authenticate(self.request, username=username, password=password)
+            if user is None:
+                raise forms.ValidationError("Invalid username or password.")
 
         return cleaned_data
+
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name']
+
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['student_id', 'bio', 'location', 'birth_date']
 
 
 # class ProfessorLoginForm(AuthenticationForm):

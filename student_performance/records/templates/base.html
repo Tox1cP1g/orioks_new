@@ -11,7 +11,7 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Система контроля</a>
+        <a class="navbar-brand" href="{% url 'dashboard_index' %}">Система контроля</a>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item active">
@@ -19,6 +19,12 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'course_list' %}">Дисциплины</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'grade_list' %}">Успеваемость</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'grades_info' %}">Отчет по студентам</a>
                 </li>
 {#                <li class="nav-item">#}
 {#                    <a class="nav-link" href="{% url 'report_list' %}">Reports</a>#}
