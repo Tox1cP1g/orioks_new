@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отчет студента</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Отчет об успеваемости студента</h1>
+        <h2>Студент: {{ student.get_full_name }}</h2>
+
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>Предмет</th>
+                    <th>Оценка</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for grade in grades %}
+                    <tr>
+                        <td>{{ grade.course.name }}</td>
+                        <td>{{ grade.grade }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center">Нет оценок для этого студента.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{% url 'grades' %}" class="btn btn-primary mt-3">Назад к списку</a>
+    </div>
+</body>
+</html>

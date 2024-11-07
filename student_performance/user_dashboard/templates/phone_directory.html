@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Телефонный справочник</title>
+</head>
+<body>
+    <h2>Телефонный справочник</h2>
+
+    <form id="search_form" onsubmit="return false;">
+        <label for="search_field">Поиск контакта:</label>
+        <input type="text" id="search_field" name="search_field" placeholder="Введите имя" required>
+        <button type="button" onclick="searchContact()">Поиск</button>
+    </form>
+
+    <div id="search_results">
+        <p id="result_name" style="display: none;">Иван Иванов — +7 (123) 456-7890</p>
+        <p id="no_results" style="display: none; color: red;">Контакт не найден</p>
+    </div>
+
+    <script>
+        function searchContact() {
+            // Получаем значение из поля поиска
+            const searchField = document.getElementById("search_field").value.toLowerCase().trim();
+
+            // Ссылки на элементы результата и сообщения об ошибке
+            const resultName = document.getElementById("result_name");
+            const noResults = document.getElementById("no_results");
+
+            console.log("Поисковый запрос:", searchField);  // Логируем запрос для отладки
+
+            // Проверяем наличие имени "иван" или "иванов"
+            if (searchField.includes("иванов") || searchField.includes("иван")) {
+                console.log("Контакт найден: Иван Иванов");  // Логируем успешный поиск
+
+                // Отображаем найденный контакт и скрываем сообщение об ошибке
+                resultName.style.display = "block";
+                noResults.style.display = "none";
+            } else {
+                console.log("Контакт не найден");  // Логируем отсутствие результата
+
+                // Показываем сообщение об ошибке и скрываем найденный контакт
+                resultName.style.display = "none";
+                noResults.style.display = "block";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!-- vote.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Голосование</title>
+</head>
+<body>
+    <h1>Проголосуйте за вариант</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {% for option in options %}
+            <div>
+                <input type="radio" id="option{{ option.id }}" name="option" value="{{ option.id }}">
+                <label for="option{{ option.id }}">{{ option.text }}</label>
+            </div>
+        {% endfor %}
+        <button type="submit" id="vote_button">Голосовать</button>
+    </form>
+</body>
+</html>
