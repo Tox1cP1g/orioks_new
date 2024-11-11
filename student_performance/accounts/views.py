@@ -5,6 +5,9 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from .models import Profile
 from records.models import Student  # Импортируем Student из records
+from django.contrib.auth.forms import AuthenticationForm
+
+
 
 
 
@@ -23,10 +26,15 @@ class StudentLoginView(LoginView):
     form_class = StudentLoginForm
     success_url = '/success/'  # Укажите путь к вашему успешному URL
 
+    pass
+
     def form_valid(self, form):
         user = form.get_user()
         login(self.request, user)
         return super().form_valid(form)
+
+    def get_user(self):
+        return self.cleaned_data.get('user')
 
 
 
