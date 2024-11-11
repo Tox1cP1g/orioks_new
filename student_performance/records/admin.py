@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Course, Grade, Group, Professor
+from .models import Student, Course, Grade, Group, Professor, Internship, Homework
 from import_export import resources
 
 
@@ -8,6 +8,7 @@ admin.site.register(Course)
 admin.site.register(Grade)
 admin.site.register(Group)
 admin.site.register(Professor)
+admin.site.register(Internship)
 
 
 class StudentResource(resources.ModelResource):
@@ -24,3 +25,15 @@ class StudentResource(resources.ModelResource):
 
 # admin.site.register(StudentAdmin)
 # Register your models here.
+
+class InternshipAdmin(admin.ModelAdmin):
+    list_display = ('company', 'company_representative', 'is_academic_supervisor', 'is_company_supervisor')
+
+
+class HomeworkAdmin(admin.ModelAdmin):
+    list_display = ['title', 'professor', 'due_date']
+    search_fields = ['title']
+    list_filter = ['professor']
+
+
+admin.site.register(Homework, HomeworkAdmin)

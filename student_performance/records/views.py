@@ -1,6 +1,7 @@
-from django.shortcuts import render, get_object_or_404
-from .models import Student, Course, Grade, Report
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Student, Course, Grade, Report, Professor, Homework, HomeworkFile
 from django.db.models import Avg
+from .forms import HomeworkForm
 from . import templates
 
 
@@ -12,11 +13,16 @@ def student_list(request):
 
 
 def subjects_list(request):
-    students = Student.objects.all()  # Получаем список всех студентов
-    subjects = Course.objects.prefetch_related('professor').all()
-    current_user = request.user.id
-    print(current_user)
-    return render(request, 'subjects_list.html', {'students': students, 'courses': subjects})
+    # Получаем студента, связанного с текущим пользователем
+    try:
+        student = Student.objects.get(user=request.user)  # Предполагается связь user-Student
+    except Student.DoesNotExist:
+        student = None
+
+    # Получаем список предметов с оценками для конкретного студента
+    courses = Course.objects.prefetch_related('professor').all()
+
+    return render(request, 'subjects_list.html', {'student': student, 'courses': courses})
 
 
 
@@ -68,7 +74,7 @@ def grades_view(request):
 
 
 from django.shortcuts import render
-from .models import Student, Grade
+from .models import Student, Grade, Internship
 
 
 def grades_info(request):
@@ -88,3 +94,37 @@ def grades_info(request):
         'grades': grades,
         'students': students,
     })
+
+
+def internship_list(request):
+    internships = Internship.objects.all()
+    return render(request, 'internship_list.html', {'internships': internships})
+
+
+def create_homework(request):
+    if request.method == "POST":
+        form = HomeworkForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Сохраняем домашку
+            homework = form.save(commit=False)
+            homework.user = request.user  # Назначаем текущего пользователя как создателя
+            homework.save()
+
+            # Сохраняем файлы
+            files = request.FILES.getlist('files')
+            for file in files:
+                HomeworkFile.objects.create(homework=homework, file=file)
+
+            return redirect('homework_list')
+    else:
+        form = HomeworkForm()
+
+    return render(request, 'create_homework.html', {'form': form})
+
+
+def homework_list(request):
+    homeworks = Homework.objects.all()  # Получаем все домашние задания из базы данных
+    print(homeworks)
+    homeworks_new = HomeworkFile.objects.all()
+    print(homeworks_new, '1111')
+    return render(request, 'homework_list.html', {'homeworks': homeworks, 'homeworks_new': homeworks_new})

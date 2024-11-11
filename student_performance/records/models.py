@@ -16,7 +16,7 @@ class Student(models.Model):
         ('Очно-заочная', 'Очно-заочная'),
         ('Заочная', 'Заочная'),
     ]
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     middle_name = models.CharField(max_length=100, blank=True, null=True)  # Поле может быть пустым
@@ -65,7 +65,7 @@ class Grade(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     grade = models.FloatField(default=0.0)  # Значение по умолчанию
-    date_of_grade = models.DateField()
+    date_of_grade = models.DateField(null=True, blank=True)
     attendance = models.IntegerField(default=100)  # Процент посещаемости по умолчанию
 
     def __str__(self):
@@ -88,3 +88,38 @@ class Report(models.Model):
 
     def __str__(self):
         return f"Отчет по {self.student} за {self.semester} семестр"
+
+
+class Internship(models.Model):
+    company = models.CharField("Компания", max_length=255)
+    company_representative = models.CharField("Представитель компании", max_length=255)
+    contact_details = models.TextField("Контактные данные компании")
+    is_academic_supervisor = models.BooleanField("Научный руководитель МИЭТ")
+    is_company_supervisor = models.BooleanField("Руководитель от предприятия")
+
+    def __str__(self):
+        return f"{self.company} - {self.company_representative}"
+
+
+# from django.db import models
+
+
+class Homework(models.Model):
+    title = models.CharField(max_length=255)
+    professor = models.ForeignKey(Professor, on_delete=models.CASCADE)
+    description = models.TextField()
+    due_date = models.DateField()
+    files = models.FileField(upload_to='homework_files/', blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='homeworks')  # поле для отправителя
+
+    def __str__(self):
+        return self.title
+
+
+class HomeworkFile(models.Model):
+    homework = models.ForeignKey(Homework, related_name='homework_files', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='homework_files/', blank=True, null=True)
+
+    def __str__(self):
+        return f"File for {self.homework.title}"
+

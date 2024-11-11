@@ -1,9 +1,12 @@
-{% extends 'base.html' %}
+{% extends 'base_students.html' %}
 
-{% block title %}Список предметов{% endblock %}
+{% block title %}Успеваемость{% endblock %}
 
 {% block content %}
-<h2>Список предметов</h2>
+<h2>Успеваемость</h2>
+
+{{student}}
+
 
 <table class="table table-striped">
     <thead>
@@ -25,28 +28,26 @@
             {% endif %}
         </td>
         <td>
-            <ul>
-                {% for student in students %}
-                    <li>
-                        {{ student.student }}:
-                        {% for grade in student.grade_set.all %}
-                            {{ grade.course.name }}: {{ grade.grade }} <br>
-                        {% empty %}
-                            Нет оценок
-                        {% endfor %}
-                    </li>
-                {% empty %}
-                    Нет студентов для отображения.
-                {% endfor %}
-            </ul>
+            {% if student %}
+                <ul>
+                    {% for grade in student.grade_set.all %}
+                        {% if grade.course == course %}
+                            <li>{{ grade.grade }} - {{ grade.date_of_grade|date:"d.m.Y" }}</li>
+                        {% endif %}
+                    {% empty %}
+                        <li>Нет оценок</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Студент не найден.</p>
+            {% endif %}
         </td>
     </tr>
     {% empty %}
         <tr>
-            <td colspan="5">Нет курсов для отображения.</td>
+            <td colspan="3">Нет курсов для отображения.</td>
         </tr>
     {% endfor %}
-</tbody>
-
+    </tbody>
 </table>
 {% endblock %}

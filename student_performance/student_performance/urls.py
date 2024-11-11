@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
+from django.conf import settings
+from django.conf.urls.static import static
 # from . import views
 
 
@@ -27,3 +29,6 @@ urlpatterns = [
     path('', RedirectView.as_view(url='/user_dashboard/', permanent=False)),
     path('user_dashboard/', include('user_dashboard.urls')),  # Подключение маршрутов приложения user_dashboard
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
