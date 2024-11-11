@@ -16,13 +16,13 @@ class Student(models.Model):
         ('Очно-заочная', 'Очно-заочная'),
         ('Заочная', 'Заочная'),
     ]
-
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     middle_name = models.CharField(max_length=100, blank=True, null=True)  # Поле может быть пустым
     enrollment_date = models.DateField()  # Дата зачисления обязательна
     student_id = models.CharField(max_length=20, unique=True)  # Убираем null=True и blank=True
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True)  # Временно сделаем поле необязательным
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)  # Временно сделаем поле необязательным
     form_of_education = models.CharField(max_length=20, choices=FORM_OF_EDUCATION_CHOICES, default='Очная')  # Значение по умолчанию
     phone_number = models.CharField(max_length=20, blank=True, null=True)  # Телефон можно сделать необязательным
     email = models.EmailField(blank=True, null=True)  # Электронную почту можно сделать необязательной
@@ -65,6 +65,7 @@ class Grade(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     grade = models.FloatField(default=0.0)  # Значение по умолчанию
+    date_of_grade = models.DateField()
     attendance = models.IntegerField(default=100)  # Процент посещаемости по умолчанию
 
     def __str__(self):
