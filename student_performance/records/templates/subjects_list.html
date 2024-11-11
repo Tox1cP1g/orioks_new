@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Список предметов{% endblock %}
+
+{% block content %}
+<h2>Список предметов</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Дисциплина</th>
+            <th>ФИО преподавателя</th>
+            <th>Оценки</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for course in courses %}
+    <tr>
+        <td>{{ course.name }}</td>
+        <td>
+            {% if course.professor %}
+                {{ course.professor.full_name }}
+            {% else %}
+                Не назначен
+            {% endif %}
+        </td>
+        <td>
+            <ul>
+                {% for student in course.student_set.all %}
+                    <li>
+                        {{ student.full_name }}:
+                        {% for grade in student.grade_set.all %}
+                            {{ grade.course.name }}: {{ grade.grade }} <br>
+                        {% empty %}
+                            Нет оценок
+                        {% endfor %}
+                    </li>
+                {% empty %}
+                    Нет студентов для отображения.
+                {% endfor %}
+            </ul>
+        </td>
+    </tr>
+    {% empty %}
+        <tr>
+            <td colspan="5">Нет курсов для отображения.</td>
+        </tr>
+    {% endfor %}
+</tbody>
+
+</table>
+{% endblock %}
