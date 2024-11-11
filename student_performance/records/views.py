@@ -10,6 +10,11 @@ def student_list(request):
     )
     return render(request, 'student_list.html', {'students': students})
 
+def subjects_list(request):
+    subjects = Course.objects.prefetch_related('professor').all()
+    return render(request, 'subjects_list.html', {'courses': subjects})
+
+
 
 def course_list(request):
     courses = Course.objects.prefetch_related('professor').all()
