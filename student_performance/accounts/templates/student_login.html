@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход студента</title>
+    <title>Вход в систему ОРИОКС</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
@@ -13,11 +13,11 @@
         <form method="post" class="mt-4">
             {% csrf_token %}
             {{ form.non_field_errors }}
-            <div class="form-group">
-                <label for="id_student_id">ID студента</label>
-                {{ form.student_id|add_class:"form-control" }}
-                {{ form.student_id.errors }}
-            </div>
+{#            <div class="form-group">#}
+{#                <label for="id_student_id">ID студента</label>#}
+{#                {{ form.student_id|add_class:"form-control" }}#}
+{#                {{ form.student_id.errors }}#}
+{#            </div>#}
             <div class="form-group">
                 <label for="id_username">Имя пользователя</label>
                 {{ form.username|add_class:"form-control" }}
