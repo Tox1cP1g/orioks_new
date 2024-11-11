@@ -5,6 +5,12 @@
 {% block content %}
 <h2>Список студентов</h2>
 
+{% if request.user.is_staff %}
+    <a href="/admin/records/student/add/?next=/records/students/" class="btn btn-primary mb-3">Добавить студента</a>
+{% endif %}
+
+
+
 <table class="table table-striped">
     <thead>
         <tr>

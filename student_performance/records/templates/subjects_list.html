@@ -26,9 +26,9 @@
         </td>
         <td>
             <ul>
-                {% for student in course.student_set.all %}
+                {% for student in students %}
                     <li>
-                        {{ student.full_name }}:
+                        {{ student.student }}:
                         {% for grade in student.grade_set.all %}
                             {{ grade.course.name }}: {{ grade.grade }} <br>
                         {% empty %}
