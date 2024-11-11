@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Student, Course, Grade, Report, Professor, Homework, HomeworkFile
 from django.db.models import Avg
 from .forms import HomeworkForm
+from django.contrib.auth.decorators import login_required
 from . import templates
 
 
@@ -128,3 +129,19 @@ def homework_list(request):
     homeworks_new = HomeworkFile.objects.all()
     print(homeworks_new, '1111')
     return render(request, 'homework_list.html', {'homeworks': homeworks, 'homeworks_new': homeworks_new})
+
+
+@login_required
+def profile(request):
+    try:
+        # Пытаемся получить профиль студента для текущего пользователя
+        student = Student.objects.get(user=request.user)  # Предполагается связь user-Student
+    except Student.DoesNotExist:
+        # Если профиль не существует, создаем новый
+        student = None
+
+    return render(request, 'profile.html', {'student_profile': student})
+
+
+def help_students(request):
+    return render(request, 'help_students.html')

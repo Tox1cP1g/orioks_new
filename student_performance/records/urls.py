@@ -11,10 +11,12 @@ urlpatterns = [
     path('report/', views.student_report_view, name='student_report'),
     path('grades/', views.grades_view, name='grades'),
     path('grades_info/', views.grades_info, name='grades_info'),
-    path('subjects_info/', views.subjects_list, name='subjects_list'),
+    path('subjects/', views.subjects_list, name='subjects_list'),
     path('internships/', views.internship_list, name='internships'),
     path('homework/create/', views.create_homework, name='create_homework'),
     path('homework/', views.homework_list, name='homework_list'),
+    path('profile/', views.profile, name='profile'),
+    path('help_students', views.help_students, name='help_students'),
 ]
 
 
