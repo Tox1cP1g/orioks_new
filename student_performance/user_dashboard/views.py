@@ -9,6 +9,12 @@ def index(request):
     return render(request, 'index.html', {'user': request.user})
 
 
+@login_required
+def index_staff(request):
+    if request.user.is_staff or request.user.is_superuser:
+        return render(request, 'index_staff.html', {'user': request.user})
+
+
 def register(request):
     return render(request, 'register.html')
 

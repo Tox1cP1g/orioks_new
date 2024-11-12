@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from .forms import StudentLoginForm, UserForm, ProfileForm
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from .models import Profile
 from records.models import Student  # Импортируем Student из records
 from django.contrib.auth.forms import AuthenticationForm
-
+from django.contrib.auth.models import User, auth
+from django.contrib.auth import logout
 
 
 
@@ -21,22 +22,42 @@ from django.contrib.auth.forms import AuthenticationForm
 
 
 
-class StudentLoginView(LoginView):
-    template_name = 'student_login.html'
-    form_class = StudentLoginForm
-    success_url = '/success/'  # Укажите путь к вашему успешному URL
+def student_login(request):
+    if request.method == "POST":
+        form = StudentLoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(username=username, password=password)
 
-    pass
+            if user is not None:
+                login(request, user)  # Аутентификация и вход в систему
+                return redirect('/')  # Редирект на главную страницу или страницу профиля
+            else:
+                form.add_error(None, "Неверное имя пользователя или пароль.")
+    else:
+        form = StudentLoginForm()
 
-    def form_valid(self, form):
-        user = form.get_user()
-        login(self.request, user)
-        return super().form_valid(form)
-
-    def get_user(self):
-        return self.cleaned_data.get('user')
+    return render(request, 'student_login.html', {'form': form})
 
 
+def staff_login(request):
+    if request.method == "POST":
+        form = StudentLoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(username=username, password=password)
+
+            if user is not None:
+                login(request, user)  # Аутентификация и вход в систему
+                return redirect('dashboard_staff')  # Редирект на главную страницу или страницу профиля
+            else:
+                form.add_error(None, "Неверное имя пользователя или пароль.")
+    else:
+        form = StudentLoginForm()
+
+    return render(request, 'staff_login.html', {'form': form})
 
 # @login_required
 # def profile_view(request):
@@ -62,3 +83,23 @@ class StudentLoginView(LoginView):
 #     }
 #
 #     return render(request, 'accounts/profile.html', context)
+
+
+def logout_confirm(request):
+    return render(request, 'logout_confirm.html')
+
+
+def login_choice(request):
+    return render(request, 'login_choice.html')  # Рендерим страницу выбора
+
+
+# from django.contrib.auth import logout
+
+from django.contrib.auth import logout
+from django.contrib.auth.views import LogoutView
+
+class UserLogoutView(LogoutView):
+
+    def get(self, request):
+        logout(request)
+        return redirect('login_choice')

@@ -3,14 +3,18 @@ from .models import Student, Course, Grade, Report, Professor, Homework, Homewor
 from django.db.models import Avg
 from .forms import HomeworkForm
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from . import templates
 
 
 def student_list(request):
-    students = Student.objects.prefetch_related('grade_set', 'group').annotate(
-        average_grade=Avg('grade__grade')  # Добавляем среднюю оценку
-    )
-    return render(request, 'student_list.html', {'students': students})
+    if request.user.is_superuser or request.user.is_staff:
+        students = Student.objects.prefetch_related('grade_set', 'group').annotate(
+            average_grade=Avg('grade__grade')  # Добавляем среднюю оценку
+        )
+        return render(request, 'student_list.html', {'students': students})
+    raise Http404("Страница не найдена")
+
 
 
 def subjects_list(request):
@@ -28,19 +32,23 @@ def subjects_list(request):
 
 
 def course_list(request):
-    courses = Course.objects.prefetch_related('professor').all()
-    return render(request, 'course_list.html', {'courses': courses})
+    if request.user.is_superuser or request.user.is_staff:
+        courses = Course.objects.prefetch_related('professor').all()
+        return render(request, 'course_list.html', {'courses': courses})
+    raise Http404("Страница не найдена")
 
 
 def grade_list(request):
-    course_id = request.GET.get('course', None)
-    if course_id:
-        grades = Grade.objects.filter(course_id=course_id)
-    else:
-        grades = Grade.objects.all()
+    if request.user.is_superuser or request.user.is_staff:
+        course_id = request.GET.get('course', None)
+        if course_id:
+            grades = Grade.objects.filter(course_id=course_id)
+        else:
+            grades = Grade.objects.all()
 
-    courses = Course.objects.all()  # Получаем список всех предметов
-    return render(request, 'grade_list.html', {'grades': grades, 'courses': courses})
+        courses = Course.objects.all()  # Получаем список всех предметов
+        return render(request, 'grade_list.html', {'grades': grades, 'courses': courses})
+    raise Http404("Страница не найдена")
 
 
 # def create_report(request, student_id, semester):
@@ -52,19 +60,22 @@ def grade_list(request):
 #     return render(request, 'records/report.html', {'report': report})
 
 def student_report_view(request):
-    students = Student.objects.all()  # Получаем список всех студентов
-    selected_student = None
-    grades = []
+    if request.user.is_superuser or request.user.is_staff:
+        students = Student.objects.all()  # Получаем список всех студентов
+        selected_student = None
+        grades = []
 
-    if request.GET.get('student'):
-        selected_student = get_object_or_404(Student, id=request.GET['student'])
-        grades = Grade.objects.filter(student=selected_student)
+        if request.GET.get('student'):
+            selected_student = get_object_or_404(Student, id=request.GET['student'])
+            grades = Grade.objects.filter(student=selected_student)
 
-    return render(request, 'student_report.html', {
-        'students': students,
-        'selected_student': selected_student,
-        'grades': grades,
-    })
+        return render(request, 'student_report.html', {
+            'students': students,
+            'selected_student': selected_student,
+            'grades': grades,
+        })
+    raise Http404("Страница не найдена")
+
 
 
 def grades_view(request):
@@ -79,23 +90,24 @@ from .models import Student, Grade, Internship
 
 
 def grades_info(request):
-    student_id = request.GET.get('student', None)
+    if request.user.is_superuser or request.user.is_staff:
+        student_id = request.GET.get('student', None)
 
-    if student_id:
-        # Фильтруем оценки по студенту
-        grades = Grade.objects.filter(student__id=student_id)
-    else:
-        # Если студент не выбран, выводим все оценки
-        grades = Grade.objects.all()
+        if student_id:
+            # Фильтруем оценки по студенту
+            grades = Grade.objects.filter(student__id=student_id)
+        else:
+            # Если студент не выбран, выводим все оценки
+            grades = Grade.objects.all()
 
-    # Получаем всех студентов для выпадающего списка
-    students = Student.objects.all()
+        # Получаем всех студентов для выпадающего списка
+        students = Student.objects.all()
 
-    return render(request, 'grades_info.html', {
-        'grades': grades,
-        'students': students,
-    })
-
+        return render(request, 'grades_info.html', {
+            'grades': grades,
+            'students': students,
+        })
+    raise Http404("Страница не найдена")
 
 def internship_list(request):
     internships = Internship.objects.all()
@@ -124,9 +136,9 @@ def create_homework(request):
 
 
 def homework_list(request):
-    homeworks = Homework.objects.all()  # Получаем все домашние задания из базы данных
+    homeworks = Homework.objects.filter(user=request.user)
     print(homeworks)
-    homeworks_new = HomeworkFile.objects.all()
+    homeworks_new = HomeworkFile.objects.filter(homework__user=request.user)
     print(homeworks_new, '1111')
     return render(request, 'homework_list.html', {'homeworks': homeworks, 'homeworks_new': homeworks_new})
 
@@ -141,6 +153,20 @@ def profile(request):
         student = None
 
     return render(request, 'profile.html', {'student_profile': student})
+
+
+@login_required
+def profile_staff(request):
+    if request.user.is_superuser or request.user.is_staff:
+        try:
+            # Пытаемся получить профиль студента для текущего пользователя
+            professor = Professor.objects.get(user=request.user)  # Предполагается связь user-Student
+        except Professor.DoesNotExist:
+            # Если профиль не существует, создаем новый
+            professor = None
+
+        return render(request, 'profile_staff.html', {'professor_profile': professor})
+    raise Http404("Страница не найдена")
 
 
 def help_students(request):

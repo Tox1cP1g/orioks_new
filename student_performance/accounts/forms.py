@@ -9,26 +9,24 @@ from django import forms
 from django.contrib.auth import authenticate
 
 
+# from django import forms
+# from django.contrib.auth import authenticate
+
 class StudentLoginForm(forms.Form):
     username = forms.CharField(max_length=150)
     password = forms.CharField(widget=forms.PasswordInput)
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)  # Извлекаем request, если он передан
-        super().__init__(*args, **kwargs)
 
     def clean(self):
         cleaned_data = super().clean()
         username = cleaned_data.get("username")
         password = cleaned_data.get("password")
 
-        # Здесь можно добавить вашу логику для проверки пользователя
-        if username and password:
-            user = authenticate(self.request, username=username, password=password)
-            if user is None:
-                raise forms.ValidationError("Invalid username or password.")
-
+        # Пытаемся аутентифицировать пользователя
+        user = authenticate(username=username, password=password)
+        if user is None:
+            raise forms.ValidationError("Неверное имя пользователя или пароль.")
         return cleaned_data
+
 
 
 class UserForm(forms.ModelForm):
