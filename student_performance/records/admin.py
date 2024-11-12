@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Course, Grade, Group, Professor, Internship, Homework
+from .models import Student, Course, Grade, Group, Professor, Internship, Homework, Schedule
 from import_export import resources
 
 
@@ -37,3 +37,11 @@ class HomeworkAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Homework, HomeworkAdmin)
+admin.site.register(Schedule)
+
+
+# @admin.register(Schedule)
+class ScheduleAdmin(admin.ModelAdmin):
+    list_display = ('subject', 'professor', 'group', 'day_of_week', 'time', 'location')
+    list_filter = ('day_of_week', 'group')
+    search_fields = ('subject', 'professor__name')

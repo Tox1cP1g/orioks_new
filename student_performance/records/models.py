@@ -16,7 +16,7 @@ class Student(models.Model):
         ('Очно-заочная', 'Очно-заочная'),
         ('Заочная', 'Заочная'),
     ]
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)  # например, ID существующего пользователя
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     middle_name = models.CharField(max_length=100, blank=True, null=True)  # Поле может быть пустым
@@ -110,7 +110,7 @@ class Homework(models.Model):
     description = models.TextField()
     due_date = models.DateField()
     files = models.FileField(upload_to='homework_files/', blank=True, null=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='homeworks')  # поле для отправителя
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1, related_name='homeworks')  # поле для отправителя
 
     def __str__(self):
         return self.title
@@ -123,3 +123,19 @@ class HomeworkFile(models.Model):
     def __str__(self):
         return f"File for {self.homework.title}"
 
+
+class Schedule(models.Model):
+    subject = models.CharField(max_length=100, verbose_name="Предмет")
+    professor = models.ForeignKey('Professor', on_delete=models.CASCADE, verbose_name="Преподаватель")
+    group = models.CharField(max_length=10, verbose_name="Группа")
+    day_of_week = models.CharField(
+        max_length=12,
+        choices=[('Понедельник', 'Понедельник'), ('Вторник', 'Вторник'), ('Среда', 'Среда'),
+                 ('Четверг', 'Четверг'), ('Пятница', 'Пятница'), ('Суббота', 'Суббота')],
+        verbose_name="День недели"
+    )
+    time = models.TimeField(verbose_name="Время начала занятия")
+    location = models.CharField(max_length=100, verbose_name="Аудитория")
+
+    def __str__(self):
+        return f"{self.subject} - {self.group} ({self.day_of_week} {self.time})"

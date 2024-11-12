@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Выбор входа{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 75vh;">
+    <div class="card shadow p-4 text-center" style="width: 100%; max-width: 500px;">
+        <h2 class="mb-4">Выберите тип входа</h2>
+        
+        <div class="mb-3">
+            <a href="{% url 'student_login' %}" class="btn btn-primary w-100 btn-lg">Вход для студентов</a>
+        </div>
+        
+        <div class="mb-3">
+            <a href="{% url 'staff_login' %}" class="btn btn-secondary w-100 btn-lg">Вход для сотрудников</a>
+        </div>
+        
+        <p class="mt-3">
+            Если у вас нет аккаунта, обратитесь в службу поддержки.
+        </p>
+    </div>
+</div>
+{% endblock %}

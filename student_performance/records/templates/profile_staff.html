@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Мой профиль</h2>
+
+    <h4>Информация о пользователе</h4>
+    <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
+    <p><strong>Электронная почта:</strong> {{ user.email }}</p>
+
+    {% if professor_profile %}
+    <h4>Информация о сотруднике</h4>
+    <p><strong>ФИО:</strong> {{ professor_profile }}</p>
+    {% else %}
+    <p>Информация о сотруднике не найдена.</p>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'logout' %}" class="btn btn-warning">Выйти из учетной записи</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Student, Course, Grade, Report, Professor, Homework, HomeworkFile
+from .models import Student, Course, Grade, Report, Professor, Homework, HomeworkFile, Schedule
 from django.db.models import Avg
 from .forms import HomeworkForm
 from django.contrib.auth.decorators import login_required
@@ -171,3 +171,8 @@ def profile_staff(request):
 
 def help_students(request):
     return render(request, 'help_students.html')
+
+
+def schedule_view(request):
+    schedule = Schedule.objects.all().order_by('day_of_week', 'time')
+    return render(request, 'schedule.html', {'schedule': schedule})
