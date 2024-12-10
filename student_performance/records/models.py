@@ -123,19 +123,39 @@ class HomeworkFile(models.Model):
     def __str__(self):
         return f"File for {self.homework.title}"
 
+#
+# class Schedule(models.Model):
+#     subject = models.CharField(max_length=100, verbose_name="Предмет")
+#     professor = models.ForeignKey('Professor', on_delete=models.CASCADE, verbose_name="Преподаватель")
+#     group = models.CharField(max_length=10, verbose_name="Группа")
+#     day_of_week = models.CharField(
+#         max_length=12,
+#         choices=[('Понедельник', 'Понедельник'), ('Вторник', 'Вторник'), ('Среда', 'Среда'),
+#                  ('Четверг', 'Четверг'), ('Пятница', 'Пятница'), ('Суббота', 'Суббота')],
+#         verbose_name="День недели"
+#     )
+#     time = models.TimeField(verbose_name="Время начала занятия")
+#     location = models.CharField(max_length=100, verbose_name="Аудитория")
+#
+#     def __str__(self):
+#         return f"{self.subject} - {self.group} ({self.day_of_week} {self.time})"
+
 
 class Schedule(models.Model):
-    subject = models.CharField(max_length=100, verbose_name="Предмет")
-    professor = models.ForeignKey('Professor', on_delete=models.CASCADE, verbose_name="Преподаватель")
-    group = models.CharField(max_length=10, verbose_name="Группа")
-    day_of_week = models.CharField(
-        max_length=12,
-        choices=[('Понедельник', 'Понедельник'), ('Вторник', 'Вторник'), ('Среда', 'Среда'),
-                 ('Четверг', 'Четверг'), ('Пятница', 'Пятница'), ('Суббота', 'Суббота')],
-        verbose_name="День недели"
-    )
-    time = models.TimeField(verbose_name="Время начала занятия")
-    location = models.CharField(max_length=100, verbose_name="Аудитория")
+    day_of_week = models.CharField(max_length=20, choices=[
+        ('Понедельник', 0),
+        ('Вторник', 1),
+        ('Среда', 2),
+        ('Четверг', 3),
+        ('Пятница', 4),
+        ('Суббота', 5),
+        ('Воскресенье', 6),
+    ])
+    time = models.TimeField()
+    subject = models.CharField(max_length=100)
+    professor = models.ForeignKey('Professor', on_delete=models.CASCADE)
+    group = models.CharField(max_length=20)
+    location = models.CharField(max_length=50)
 
-    def __str__(self):
-        return f"{self.subject} - {self.group} ({self.day_of_week} {self.time})"
+    def day_as_number(self):
+        return dict(self.DAYS_OF_WEEK).get(self.day_of_week, 7)  # Воскресенье как последний день

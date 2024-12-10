@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-f2*^dpsa*t6eqb6u-2gov_-y8%#953&-1%dv$s90k1qy)h)(=j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'https://835a-144-91-72-208.ngrok-free.app']
 
 
 # Application definition
@@ -140,3 +140,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # URL для доступа к файлам
 MEDIA_URL = '/media/'
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://835a-144-91-72-208.ngrok-free.app',
+]

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from .forms import StudentLoginForm, UserForm, ProfileForm
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from .models import Profile
@@ -22,6 +23,7 @@ from django.contrib.auth import logout
 
 
 
+@csrf_exempt
 def student_login(request):
     if request.method == "POST":
         form = StudentLoginForm(request.POST)

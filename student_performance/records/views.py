@@ -5,6 +5,9 @@ from .forms import HomeworkForm
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from . import templates
+from django.db.models import Case, When
+from records import models
+
 
 
 def student_list(request):
@@ -173,6 +176,23 @@ def help_students(request):
     return render(request, 'help_students.html')
 
 
+# def schedule_view(request):
+#     schedule = Schedule.objects.all().order_by('day_of_week', 'time')
+#     return render(request, 'schedule.html', {'schedule': schedule})
+
 def schedule_view(request):
-    schedule = Schedule.objects.all().order_by('day_of_week', 'time')
+    schedule = Schedule.objects.annotate(
+        day_number=Case(
+            When(day_of_week='Понедельник', then=0),
+            When(day_of_week='Вторник', then=1),
+            When(day_of_week='Среда', then=2),
+            When(day_of_week='Четверг', then=3),
+            When(day_of_week='Пятница', then=4),
+            When(day_of_week='Суббота', then=5),
+            When(day_of_week='Воскресенье', then=6),
+            default=7,
+            # output_field=models.IntegerField()
+        )
+    ).order_by('day_number', 'time')  # Сортировка по дням недели и времени
+
     return render(request, 'schedule.html', {'schedule': schedule})
