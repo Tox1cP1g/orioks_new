@@ -1,0 +1,182 @@
+{% extends 'student_performance/base.html' %}
+
+{% block title %}Посещаемость - ОРИОКС{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-4 mb-3">Посещаемость</h1>
+        <p class="lead text-muted">Статистика посещаемости занятий</p>
+    </div>
+</div>
+
+<!-- Фильтры -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="subject" class="form-label">Предмет</label>
+                <select name="subject" id="subject" class="form-select">
+                    <option value="">Все предметы</option>
+                    {% for subject in subjects %}
+                        <option value="{{ subject.id }}" {% if selected_subject == subject.id %}selected{% endif %}>
+                            {{ subject.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="semester" class="form-label">Семестр</label>
+                <select name="semester" id="semester" class="form-select">
+                    <option value="">Все семестры</option>
+                    {% for semester in semesters %}
+                        <option value="{{ semester.id }}" {% if selected_semester == semester.id %}selected{% endif %}>
+                            {{ semester.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter me-1"></i>Применить фильтры
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Общая статистика -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-title">Общая посещаемость</h6>
+                <h2 class="mb-0">{{ total_attendance|floatformat:1 }}%</h2>
+                <small>из 100%</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-title">Посещено занятий</h6>
+                <h2 class="mb-0">{{ attended_lessons }}</h2>
+                <small>из {{ total_lessons }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h6 class="card-title">Пропущено занятий</h6>
+                <h2 class="mb-0">{{ missed_lessons }}</h2>
+                <small>из {{ total_lessons }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h6 class="card-title">Уважительные пропуски</h6>
+                <h2 class="mb-0">{{ excused_absences }}</h2>
+                <small>из {{ missed_lessons }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- График посещаемости -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Динамика посещаемости
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Посещаемость по предметам -->
+<div class="row">
+    {% for subject in subjects_attendance %}
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">{{ subject.name }}</h5>
+                <span class="badge {% if subject.attendance_percentage >= 90 %}bg-success{% elif subject.attendance_percentage >= 75 %}bg-warning{% else %}bg-danger{% endif %}">
+                    {{ subject.attendance_percentage|floatformat:1 }}%
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-3">
+                    <div class="progress-bar {% if subject.attendance_percentage >= 90 %}bg-success{% elif subject.attendance_percentage >= 75 %}bg-warning{% else %}bg-danger{% endif %}" 
+                         role="progressbar" 
+                         style="width: {{ subject.attendance_percentage }}%">
+                        {{ subject.attendance_percentage|floatformat:1 }}%
+                    </div>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for record in subject.records %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ record.date|date:"d.m.Y" }}</h6>
+                                    <small class="text-muted">{{ record.time|time:"H:i" }}</small>
+                                </div>
+                                <div>
+                                    {% if record.status == 'present' %}
+                                        <span class="badge bg-success">Присутствовал</span>
+                                    {% elif record.status == 'excused' %}
+                                        <span class="badge bg-info">Уважительная причина</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Отсутствовал</span>
+                                    {% endif %}
+                                    {% if record.comment %}
+                                        <small class="d-block text-muted">{{ record.comment }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Посещаемость',
+                data: {{ chart_data|safe }},
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,102 @@
+{% extends 'teaching/base.html' %}
+
+{% block title %}Главная - Портал преподавателя{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <h2>Добро пожаловать, {{ user.get_full_name }}!</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Мои курсы</h5>
+            </div>
+            <div class="card-body">
+                {% if subjects %}
+                <ul class="list-group">
+                    {% for subject in subjects %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="/courses/{{ subject.id }}/" class="text-decoration-none text-dark">
+                            {{ subject.name }}
+                        </a>
+                        <span class="badge bg-primary rounded-pill">{{ subject.students_count }} студентов</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">У вас пока нет назначенных курсов.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Последние задания</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_assignments %}
+                <ul class="list-group">
+                    {% for assignment in recent_assignments %}
+                    <li class="list-group-item">
+                        <h6 class="mb-1">{{ assignment.title }}</h6>
+                        <p class="mb-1 text-muted">{{ assignment.subject.name }}</p>
+                        <small class="text-muted">Срок сдачи: {{ assignment.due_date|date:"d.m.Y" }}</small>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">Нет активных заданий.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Работы на проверку</h5>
+            </div>
+            <div class="card-body">
+                {% if pending_submissions %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Студент</th>
+                                <th>Задание</th>
+                                <th>Предмет</th>
+                                <th>Дата сдачи</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for submission in pending_submissions %}
+                            <tr>
+                                <td>{{ submission.student.get_full_name }}</td>
+                                <td>{{ submission.assignment.title }}</td>
+                                <td>{{ submission.assignment.subject.name }}</td>
+                                <td>{{ submission.submitted_at|date:"d.m.Y H:i" }}</td>
+                                <td>
+                                    <a href="/submissions/{{ submission.id }}/" class="btn btn-sm btn-primary">Проверить</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">Нет работ, ожидающих проверки.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

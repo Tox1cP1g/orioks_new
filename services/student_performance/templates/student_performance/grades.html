@@ -1,0 +1,171 @@
+{% extends 'student_performance/base.html' %}
+
+{% block title %}Оценки - ОРИОКС{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-4 mb-3">Мои оценки</h1>
+        <p class="lead text-muted">Успеваемость по предметам</p>
+    </div>
+</div>
+
+<!-- Фильтры -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="subject" class="form-label">Предмет</label>
+                <select name="subject" id="subject" class="form-select">
+                    <option value="">Все предметы</option>
+                    {% for subject in subjects %}
+                        <option value="{{ subject.id }}" {% if selected_subject == subject.id %}selected{% endif %}>
+                            {{ subject.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="semester" class="form-label">Семестр</label>
+                <select name="semester" id="semester" class="form-select">
+                    <option value="">Все семестры</option>
+                    {% for semester in semesters %}
+                        <option value="{{ semester.id }}" {% if selected_semester == semester.id %}selected{% endif %}>
+                            {{ semester.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter me-1"></i>Применить фильтры
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Общая статистика -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-title">Средний балл</h6>
+                <h2 class="mb-0">{{ average_grade|floatformat:1 }}</h2>
+                <small>из 5.0</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-title">Отличные оценки</h6>
+                <h2 class="mb-0">{{ excellent_grades_count }}</h2>
+                <small>из {{ total_grades }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h6 class="card-title">Хорошие оценки</h6>
+                <h2 class="mb-0">{{ good_grades_count }}</h2>
+                <small>из {{ total_grades }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h6 class="card-title">Требуют внимания</h6>
+                <h2 class="mb-0">{{ low_grades_count }}</h2>
+                <small>из {{ total_grades }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Оценки по предметам -->
+<div class="row">
+    {% for subject in subjects_with_grades %}
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">{{ subject.name }}</h5>
+                <span class="badge bg-primary">{{ subject.average_grade|floatformat:1 }}</span>
+            </div>
+            <div class="card-body">
+                {% if subject.grades %}
+                    <div class="list-group list-group-flush">
+                        {% for grade in subject.grades %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ grade.type }}</h6>
+                                        <small class="text-muted">{{ grade.date|date:"d.m.Y" }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge {% if grade.value >= 4 %}bg-success{% elif grade.value >= 3 %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ grade.value }}
+                                        </span>
+                                        {% if grade.comment %}
+                                            <small class="d-block text-muted">{{ grade.comment }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Нет оценок по данному предмету</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- График успеваемости -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Динамика успеваемости
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="gradesChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('gradesChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Средний балл',
+                data: {{ chart_data|safe }},
+                borderColor: '#3498db',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5
+                }
+            }
+        }
+    });
+</script>
+{% endblock %} 

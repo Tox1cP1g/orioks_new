@@ -1,0 +1,241 @@
+{% extends 'student_performance/base.html' %}
+
+{% block title %}Помощь - ОРИОКС{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-4 mb-3">Помощь</h1>
+        <p class="lead text-muted">Часто задаваемые вопросы и инструкции по использованию портала</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Навигация по разделам -->
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Содержание</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="#general" class="list-group-item list-group-item-action active">
+                    <i class="fas fa-info-circle me-2"></i>Общая информация
+                </a>
+                <a href="#grades" class="list-group-item list-group-item-action">
+                    <i class="fas fa-star me-2"></i>Оценки
+                </a>
+                <a href="#schedule" class="list-group-item list-group-item-action">
+                    <i class="fas fa-calendar-alt me-2"></i>Расписание
+                </a>
+                <a href="#attendance" class="list-group-item list-group-item-action">
+                    <i class="fas fa-user-check me-2"></i>Посещаемость
+                </a>
+                <a href="#profile" class="list-group-item list-group-item-action">
+                    <i class="fas fa-user-circle me-2"></i>Профиль
+                </a>
+                <a href="#contact" class="list-group-item list-group-item-action">
+                    <i class="fas fa-envelope me-2"></i>Контакты
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="col-md-9">
+        <!-- Общая информация -->
+        <div class="card mb-4" id="general">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Общая информация
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Что такое ОРИОКС?</h6>
+                <p>ОРИОКС - это информационная система для управления учебным процессом. Она позволяет студентам:</p>
+                <ul>
+                    <li>Просматривать свои оценки и успеваемость</li>
+                    <li>Отслеживать расписание занятий</li>
+                    <li>Контролировать посещаемость</li>
+                    <li>Получать уведомления о важных событиях</li>
+                </ul>
+
+                <h6 class="mt-4">Как начать работу?</h6>
+                <ol>
+                    <li>Войдите в систему, используя свои учетные данные</li>
+                    <li>На главной странице вы увидите краткую информацию о вашей успеваемости</li>
+                    <li>Используйте навигационное меню для доступа к различным разделам</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Оценки -->
+        <div class="card mb-4" id="grades">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-star me-2"></i>Оценки
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Как просматривать оценки?</h6>
+                <p>Для просмотра оценок:</p>
+                <ol>
+                    <li>Перейдите в раздел "Оценки"</li>
+                    <li>Используйте фильтры для выбора предмета и семестра</li>
+                    <li>Оценки отображаются в виде карточек с детальной информацией</li>
+                </ol>
+
+                <h6 class="mt-4">Как рассчитывается средний балл?</h6>
+                <p>Средний балл рассчитывается автоматически с учетом:</p>
+                <ul>
+                    <li>Весомости различных типов работ</li>
+                    <li>Количества оценок по каждому предмету</li>
+                    <li>Текущего семестра</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Расписание -->
+        <div class="card mb-4" id="schedule">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>Расписание
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Как просматривать расписание?</h6>
+                <p>Для просмотра расписания:</p>
+                <ol>
+                    <li>Перейдите в раздел "Расписание"</li>
+                    <li>Выберите нужную неделю с помощью календаря</li>
+                    <li>Текущее занятие будет выделено специальным образом</li>
+                </ol>
+
+                <h6 class="mt-4">Как узнать о заменах?</h6>
+                <p>Информация о заменах:</p>
+                <ul>
+                    <li>Отображается в расписании с пометкой "Замена"</li>
+                    <li>Дублируется в разделе уведомлений</li>
+                    <li>Может быть отправлена на email</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Посещаемость -->
+        <div class="card mb-4" id="attendance">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-user-check me-2"></i>Посещаемость
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Как отслеживать посещаемость?</h6>
+                <p>Для просмотра посещаемости:</p>
+                <ol>
+                    <li>Перейдите в раздел "Посещаемость"</li>
+                    <li>Выберите предмет и период</li>
+                    <li>Статистика отображается в виде графиков и таблиц</li>
+                </ol>
+
+                <h6 class="mt-4">Как отметить уважительную причину отсутствия?</h6>
+                <p>Для отметки уважительной причины:</p>
+                <ul>
+                    <li>Обратитесь к преподавателю</li>
+                    <li>Предоставьте необходимые документы</li>
+                    <li>Дождитесь подтверждения в системе</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Профиль -->
+        <div class="card mb-4" id="profile">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-user-circle me-2"></i>Профиль
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Как изменить данные профиля?</h6>
+                <p>Для изменения данных:</p>
+                <ol>
+                    <li>Нажмите на свое имя в правом верхнем углу</li>
+                    <li>Выберите "Редактировать профиль"</li>
+                    <li>Внесите необходимые изменения</li>
+                </ol>
+
+                <h6 class="mt-4">Как настроить уведомления?</h6>
+                <p>Для настройки уведомлений:</p>
+                <ul>
+                    <li>Перейдите в настройки профиля</li>
+                    <li>Выберите тип уведомлений</li>
+                    <li>Укажите предпочтительный способ получения</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Контакты -->
+        <div class="card mb-4" id="contact">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-envelope me-2"></i>Контакты
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Куда обращаться за помощью?</h6>
+                <p>При возникновении проблем:</p>
+                <ul>
+                    <li>Техническая поддержка: support@orioks.ru</li>
+                    <li>Телефон: +7 (XXX) XXX-XX-XX</li>
+                    <li>Время работы: Пн-Пт, 9:00-18:00</li>
+                </ul>
+
+                <h6 class="mt-4">Как сообщить об ошибке?</h6>
+                <p>Для сообщения об ошибке:</p>
+                <ol>
+                    <li>Сделайте скриншот проблемы</li>
+                    <li>Опишите последовательность действий</li>
+                    <li>Отправьте информацию на support@orioks.ru</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Плавная прокрутка к разделам
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Подсветка активного раздела при прокрутке
+    window.addEventListener('scroll', function() {
+        const sections = document.querySelectorAll('.card[id]');
+        const navLinks = document.querySelectorAll('.list-group-item');
+        
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop - 100;
+            const sectionHeight = section.clientHeight;
+            
+            if (window.pageYOffset >= sectionTop && window.pageYOffset < sectionTop + sectionHeight) {
+                const id = section.getAttribute('id');
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,59 @@
+{% extends 'teaching/base.html' %}
+
+{% block title %}Профиль - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Профиль преподавателя</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="fullName" class="form-label">ФИО</label>
+                        <input type="text" class="form-control" id="fullName" value="{{ user.get_full_name }}" disabled>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" value="{{ user.email }}" disabled>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="department" class="form-label">Кафедра</label>
+                        <input type="text" class="form-control" id="department" name="department" value="{{ teacher.department }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="position" class="form-label">Должность</label>
+                        <input type="text" class="form-control" id="position" name="position" value="{{ teacher.position }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="academic_degree" class="form-label">Ученая степень</label>
+                        <input type="text" class="form-control" id="academic_degree" name="academic_degree" value="{{ teacher.academic_degree }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Телефон</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" value="{{ teacher.phone }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="office_hours" class="form-label">Часы консультаций</label>
+                        <textarea class="form-control" id="office_hours" name="office_hours" rows="3">{{ teacher.office_hours }}</textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,137 @@
+{% extends 'student_performance/base.html' %}
+
+{% block title %}Главная - ОРИОКС{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-4 mb-3">Добро пожаловать, {{ user.first_name }}!</h1>
+        <p class="lead text-muted">Ваш персональный кабинет студента</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Карточка с оценками -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-star me-2"></i>Текущие оценки
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if latest_grades %}
+                    <div class="list-group list-group-flush">
+                        {% for grade in latest_grades %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ grade.subject }}</h6>
+                                    <small class="text-muted">{{ grade.date }}</small>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">{{ grade.value }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Нет новых оценок</p>
+                {% endif %}
+                <a href="{% url 'grades' %}" class="btn btn-outline-primary mt-3 w-100">
+                    <i class="fas fa-list me-1"></i>Все оценки
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Карточка с расписанием -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>Расписание на сегодня
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if today_schedule %}
+                    <div class="list-group list-group-flush">
+                        {% for lesson in today_schedule %}
+                            <div class="list-group-item">
+                                <h6 class="mb-1">{{ lesson.time }}</h6>
+                                <p class="mb-1">{{ lesson.subject }}</p>
+                                <small class="text-muted">{{ lesson.room }}</small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Сегодня нет занятий</p>
+                {% endif %}
+                <a href="{% url 'schedule' %}" class="btn btn-outline-primary mt-3 w-100">
+                    <i class="fas fa-calendar me-1"></i>Полное расписание
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Карточка с посещаемостью -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-user-check me-2"></i>Посещаемость
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if attendance_stats %}
+                    <div class="text-center mb-3">
+                        <h3 class="display-4">{{ attendance_stats.percentage }}%</h3>
+                        <p class="text-muted">Успеваемость посещаемости</p>
+                    </div>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ attendance_stats.percentage }}%">
+                            {{ attendance_stats.percentage }}%
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted">
+                        <small>Пропущено: {{ attendance_stats.missed }}</small>
+                        <small>Всего: {{ attendance_stats.total }}</small>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Нет данных о посещаемости</p>
+                {% endif %}
+                <a href="{% url 'attendance' %}" class="btn btn-outline-primary mt-3 w-100">
+                    <i class="fas fa-chart-bar me-1"></i>Подробная статистика
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Уведомления и важные события -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bell me-2"></i>Уведомления
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if notifications %}
+                    <div class="list-group list-group-flush">
+                        {% for notification in notifications %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ notification.title }}</h6>
+                                    <small class="text-muted">{{ notification.date }}</small>
+                                </div>
+                                <p class="mb-1">{{ notification.message }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Нет новых уведомлений</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
