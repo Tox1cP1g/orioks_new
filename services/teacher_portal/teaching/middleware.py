@@ -21,7 +21,8 @@ class JWTAuthenticationMiddleware:
             '/login/',
             '/api/',
             '/favicon.ico',
-            '/media/'
+            '/media/',
+            '/logout/'
         ]
 
     def __call__(self, request):
