@@ -5,7 +5,7 @@
 {% block content %}
 <div class="row mb-4">
     <div class="col-12">
-        <h1 class="h3 mb-3">Добро пожаловать, {{ user.first_name }}!</h1>
+        <h1 class="mb-3">Добро пожаловать, {{ user.first_name }}!</h1>
         <p class="dashboard-subtitle mb-0">Ваш персональный кабинет студента</p>
     </div>
 </div>
@@ -104,21 +104,23 @@
                 <i class="fas fa-user-check me-2 text-primary"></i>
                 <h5 class="card-title mb-0">Посещаемость</h5>
             </div>
-            <div class="card-body d-flex flex-column align-items-center justify-content-center">
+            <div class="card-body p-0">
                 {% if attendance_stats.total > 0 %}
-                    <div class="attendance-display">
-                        <h2 class="display-1 mb-0">{{ attendance_stats.percentage|floatformat:1 }}%</h2>
-                        <p class="text-center mb-3">Успеваемость посещаемости</p>
+                    <div class="stats-item">
+                        <div class="text-center py-3">
+                            <div class="attendance-percentage">{{ attendance_stats.percentage|floatformat:1 }}%</div>
+                            <p class="attendance-subtitle mb-0">Успеваемость посещаемости</p>
+                        </div>
                     </div>
-                    <div class="attendance-details w-100 mt-auto">
+                    <div class="stats-item border-top">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <span class="detail-label">Пропущено</span>
-                                <span class="detail-value text-danger">{{ attendance_stats.missed }}</span>
+                                <span class="attendance-label">Пропущено</span>
+                                <span class="text-danger fw-bold">{{ attendance_stats.missed }}</span>
                             </div>
-                            <div class="text-end">
-                                <span class="detail-label">Всего</span>
-                                <span class="detail-value">{{ attendance_stats.total }}</span>
+                            <div>
+                                <span class="attendance-label">Всего</span>
+                                <span class="fw-bold">{{ attendance_stats.total }}</span>
                             </div>
                         </div>
                     </div>
@@ -207,8 +209,7 @@
     }
 
     .dashboard-subtitle {
-        color: var(--text-color);
-        opacity: 0.8;
+        color: var(--subtitle-color);
     }
 
     .progress {
@@ -238,110 +239,21 @@
         font-size: 1rem;
     }
 
-    .attendance-display {
-        text-align: center;
-        padding: 1.5rem 0;
-    }
-
-    .attendance-display .display-1 {
+    .attendance-percentage {
+        font-size: 2rem;
         font-weight: 600;
         color: var(--text-color);
+        line-height: 1.2;
     }
 
-    .attendance-details {
-        padding: 0.75rem 1rem;
-        border-top: 1px solid var(--border-color);
+    .attendance-subtitle {
+        font-size: 0.9rem;
+        color: var(--subtitle-color);
     }
-
-    .detail-label {
-        color: var(--text-color);
-        opacity: 0.8;
+    
+    .attendance-label {
+        color: var(--subtitle-color);
         margin-right: 0.5rem;
-    }
-
-    .detail-value {
-        font-weight: 600;
-    }
-
-    /* Цвета текста для тем */
-    [data-theme="light"] {
-        --success-color: #28a745;
-        --warning-color: #ffc107;
-        --danger-color: #dc3545;
-        --info-color: #17a2b8;
-        --primary-color-accent: #0d6efd;
-    }
-
-    [data-theme="dark"] {
-        --success-color: #5cb85c;
-        --warning-color: #f0ad4e;
-        --danger-color: #d9534f;
-        --info-color: #5bc0de;
-        --primary-color-accent: #4e9fff;
-    }
-
-    .text-success {
-        color: var(--success-color) !important;
-    }
-
-    .text-warning {
-        color: var(--warning-color) !important;
-    }
-
-    .text-danger {
-        color: var(--danger-color) !important;
-    }
-
-    .text-info {
-        color: var(--info-color) !important;
-    }
-
-    .text-primary {
-        color: var(--primary-color-accent) !important;
-    }
-
-    /* Стили для темной темы */
-    [data-theme="dark"] {
-        --text-default: #ffffff;
-    }
-
-    [data-theme="dark"] .card-title,
-    [data-theme="dark"] .card-header,
-    [data-theme="dark"] .stats-item,
-    [data-theme="dark"] .empty-text,
-    [data-theme="dark"] .attendance-display p,
-    [data-theme="dark"] .attendance-display .display-1,
-    [data-theme="dark"] .detail-label,
-    [data-theme="dark"] .detail-value {
-        color: var(--text-default);
-    }
-
-    [data-theme="dark"] .stats-item span:not(.text-success):not(.text-warning):not(.text-danger) {
-        color: var(--text-default);
-    }
-
-    /* Кнопки */
-    .btn-outline-primary {
-        border-color: var(--secondary-color);
-        color: var(--secondary-color);
-    }
-
-    .btn-outline-primary:hover {
-        background-color: var(--secondary-color);
-        color: #fff;
-    }
-
-    /* Границы в темной теме */
-    [data-theme="dark"] .card-header {
-        border-bottom-color: var(--border-color);
-    }
-
-    [data-theme="dark"] .card-footer {
-        border-top-color: var(--border-color);
-    }
-
-    [data-theme="dark"] .stats-item {
-        border-bottom-color: var(--border-color);
     }
 </style>
 {% endblock %} 

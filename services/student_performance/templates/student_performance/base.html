@@ -41,6 +41,11 @@
             --primary-bright: #0d6efd;
             --list-hover-bg: #f8f9fa;
             --muted-text: #6c757d;
+            
+            /* Единообразие цветов текста */
+            --heading-color: #2c3e50;
+            --subtitle-color: #495057;
+            --section-title-color: #2c3e50;
         }
 
         :root[data-theme="dark"] {
@@ -84,6 +89,11 @@
             --primary-bright: #4e9fff;
             --list-hover-bg: #3d434c;
             --muted-text: #adb5bd;
+            
+            /* Единообразие цветов текста */
+            --heading-color: #ffffff;
+            --subtitle-color: #e9ecef;
+            --section-title-color: #e9ecef;
         }
         
         body {
@@ -96,15 +106,70 @@
             transition: background-color 0.3s, color 0.3s;
         }
         
-        .navbar {
-            background-color: var(--navbar-bg) !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        /* Единообразие заголовков и подзаголовков */
+        h1, .h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--heading-color);
+            margin-bottom: 1rem;
         }
         
+        h2, .h2, .display-4 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--heading-color);
+            margin-bottom: 0.75rem;
+        }
+        
+        h3, .h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--heading-color);
+            margin-bottom: 0.75rem;
+        }
+        
+        h4, .h4, h5, .h5, h6, .h6 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--heading-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .lead, p.dashboard-subtitle, .text-secondary {
+            font-size: 1.1rem;
+            color: var(--subtitle-color);
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--section-title-color);
+        }
+        
+        /* Убираем несогласованные размеры дисплеев */
+        .display-1, .display-2, .display-3, .display-4 {
+            font-size: 2rem;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        
+        /* Единые стили для блоков */
+        .stats-item span, .schedule-item h6, .subject {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        /* Единообразие текста в навигации */
         .navbar-brand {
             color: var(--navbar-text) !important;
             font-weight: bold;
             font-size: 1.5rem;
+        }
+        
+        .navbar {
+            background-color: var(--navbar-bg) !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .nav-link {
@@ -831,7 +896,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6 text-center text-md-start">
-                    © 2024 ОРИОКС. Все права защищены.
+                    © 2025 ОРИОКС (разработан @Tox1cP1g и @KindPerson007). Все права защищены.
                 </div>
                 <div class="col-md-6 text-center text-md-end">
                     <a href="{% url 'help' %}"><i class="fas fa-question-circle me-1"></i>Помощь</a>

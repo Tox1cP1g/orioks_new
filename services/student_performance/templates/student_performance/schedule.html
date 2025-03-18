@@ -7,8 +7,8 @@
 {% block content %}
 <div class="row mb-4">
     <div class="col">
-        <h1 class="h3 mb-2">Расписание занятий</h1>
-        <p class="text-secondary">Неделя с {{ week_start|date:"d.m.Y" }} по {{ week_end|date:"d.m.Y" }}</p>
+        <h1 class="mb-2">Расписание занятий</h1>
+        <p class="dashboard-subtitle">Неделя с {{ week_start|date:"d.m.Y" }} по {{ week_end|date:"d.m.Y" }}</p>
     </div>
 </div>
 
@@ -44,7 +44,7 @@
     <a href="?week={{ prev_week|date:'Y-m-d' }}&group={{ selected_group.id }}" class="btn btn-outline-primary">
         <i class="fas fa-chevron-left me-1"></i>Предыдущая неделя
     </a>
-    <span class="h5 mb-0">{{ week_start|date:"d.m.Y" }} - {{ week_end|date:"d.m.Y" }}</span>
+    <h5 class="mb-0">{{ week_start|date:"d.m.Y" }} - {{ week_end|date:"d.m.Y" }}</h5>
     <a href="?week={{ next_week|date:'Y-m-d' }}&group={{ selected_group.id }}" class="btn btn-outline-primary">
         Следующая неделя<i class="fas fa-chevron-right ms-1"></i>
     </a>
@@ -169,11 +169,6 @@
 
     .table tbody tr:hover {
         background-color: var(--card-bg);
-    }
-
-    .text-secondary {
-        color: var(--text-color) !important;
-        opacity: 0.65;
     }
 
     .card {
