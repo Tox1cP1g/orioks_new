@@ -1,0 +1,48 @@
+{% extends 'teaching/base.html' %}
+
+{% block title %}Создать курс - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Создать новый курс</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Название курса</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Описание курса</label>
+                        <textarea class="form-control" id="description" name="description" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="semester" class="form-label">Семестр</label>
+                        <input type="number" class="form-control" id="semester" name="semester" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="teachers" class="form-label">Преподаватели</label>
+                        <select multiple class="form-control" id="teachers" name="teachers">
+                            {% for teacher in teachers %}
+                                <option value="{{ teacher.id }}">{{ teacher.user.get_full_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Создать курс</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

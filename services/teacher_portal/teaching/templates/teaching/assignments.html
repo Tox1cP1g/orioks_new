@@ -1,0 +1,62 @@
+{% extends 'teaching/base.html' %}
+
+{% block title %}Задания - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>Список заданий</h4>
+            <a href="{% url 'assignment_form' %}" class="btn btn-primary">Создать задание</a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                {% if assignments %}
+                    <div class="list-group">
+                        {% for assignment in assignments %}
+                            <div class="list-group-item">
+                                <h5>{{ assignment.get_type_display }}: {{ assignment.title }}</h5>
+                                <p><strong>Описание:</strong> {{ assignment.description }}</p>
+                                <p><strong>Срок сдачи:</strong> {{ assignment.deadline|date:"d M Y, H:i" }}</p>
+                                <p><strong>Максимальный балл:</strong> {{ assignment.max_score }}</p>
+                                <p><strong>Курс:</strong> {{ assignment.course.name }}</p>
+                                <p><strong>Преподаватель:</strong> {{ assignment.created_by.user.get_full_name }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>На данный момент нет заданий для ваших курсов.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+    }
+
+    .list-group-item {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    .list-group-item h5 {
+        color: var(--text-color);
+    }
+
+    .list-group-item p {
+        color: var(--text-color);
+        opacity: 0.9;
+    }
+
+    .list-group-item strong {
+        color: var(--text-color);
+        opacity: 1;
+    }
+</style>
+{% endblock %}

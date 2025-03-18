@@ -1,0 +1,63 @@
+{% extends 'teaching/base.html' %}
+
+{% block title %}Создать задание - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Создать новое задание</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Название задания</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Описание</label>
+                        <textarea class="form-control" id="description" name="description" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="course" class="form-label">Курс</label>
+                        <select class="form-control" id="course" name="course" required>
+                            {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Тип задания</label>
+                        <select class="form-control" id="type" name="type" required>
+                            {% for key, value in assignment_types %}
+                                <option value="{{ key }}">{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="max_score" class="form-label">Максимальный балл</label>
+                        <input type="number" class="form-control" id="max_score" name="max_score" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="deadline" class="form-label">Срок сдачи</label>
+                        <input type="datetime-local" class="form-control" id="deadline" name="deadline" required>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Создать задание</button>
+                        <a href="{% url 'assignments_list' %}" class="btn btn-secondary">Назад к списку</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
