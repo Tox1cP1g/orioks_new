@@ -54,7 +54,7 @@
 
 - **Backend**: Python 3.9+, Django 4.2
 - **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
-- **Базы данных**: PostgreSQL
+- **Базы данных**: MySQL (на удаленном сервере)
 - **Контейнеризация**: Docker, Docker Compose
 - **Инструменты разработки**: Git, VS Code
 - **Визуализация данных**: Chart.js
@@ -66,6 +66,7 @@
 - Docker и Docker Compose
 - Git
 - Минимум 2GB RAM для развертывания системы
+- Доступ к удаленному серверу MySQL
 
 ### Шаги по установке
 
@@ -80,14 +81,15 @@
    cp .env.example .env
    ```
 
-3. Отредактируйте файл .env, указав нужные параметры:
+3. Отредактируйте файл .env, указав параметры подключения к удаленной MySQL:
    ```
    SECRET_KEY=your_secret_key
    DEBUG=True
    DB_NAME=orioks
-   DB_USER=postgres
+   DB_USER=your_db_user
    DB_PASSWORD=your_db_password
-   DB_HOST=db
+   DB_HOST=remote_mysql_host
+   DB_PORT=3306
    ```
 
 4. Запустите сервисы с помощью Docker Compose:
