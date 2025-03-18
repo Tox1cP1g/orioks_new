@@ -5,37 +5,59 @@
 {% block content %}
 <div class="row mb-4">
     <div class="col-12">
-        <h1 class="display-4 mb-3">Добро пожаловать, {{ user.first_name }}!</h1>
-        <p class="lead text-muted">Ваш персональный кабинет студента</p>
+        <h1 class="h3 mb-3">Добро пожаловать, {{ user.first_name }}!</h1>
+        <p class="dashboard-subtitle mb-0">Ваш персональный кабинет студента</p>
     </div>
 </div>
 
 <div class="row g-4">
     <!-- Карточка с оценками -->
     <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-star me-2"></i>Текущие оценки
-                </h5>
+        <div class="card h-100 dashboard-card">
+            <div class="card-header d-flex align-items-center">
+                <i class="fas fa-star me-2 text-warning"></i>
+                <h5 class="card-title mb-0">Текущие оценки</h5>
             </div>
-            <div class="card-body">
-                {% if latest_grades %}
-                    <div class="list-group list-group-flush">
-                        {% for grade in latest_grades %}
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">{{ grade.subject }}</h6>
-                                    <small class="text-muted">{{ grade.date }}</small>
-                                </div>
-                                <span class="badge bg-primary rounded-pill">{{ grade.value }}</span>
+            <div class="card-body p-0">
+                <div class="dashboard-stats-list">
+                    {% if latest_grades %}
+                        <div class="stats-item">
+                            <div class="d-flex justify-content-between">
+                                <span>Средний балл</span>
+                                <span class="text-success fw-bold">{{ grades_stats.average|floatformat:1 }}</span>
                             </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <p class="text-muted mb-0">Нет новых оценок</p>
-                {% endif %}
-                <a href="{% url 'grades' %}" class="btn btn-outline-primary mt-3 w-100">
+                            <div class="progress mt-2" style="height: 4px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: {% widthratio grades_stats.average 10 100 %}%"></div>
+                            </div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="d-flex justify-content-between">
+                                <span>Отличные оценки</span>
+                                <span class="text-success fw-bold">{{ grades_stats.excellent }}</span>
+                            </div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="d-flex justify-content-between">
+                                <span>Хорошие оценки</span>
+                                <span class="text-warning fw-bold">{{ grades_stats.good }}</span>
+                            </div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="d-flex justify-content-between">
+                                <span>Всего оценок</span>
+                                <span class="fw-bold">{{ grades_stats.total }}</span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="stats-item">
+                            <p class="text-center mb-0">Нет новых оценок</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-footer bg-transparent">
+                <a href="{% url 'grades' %}" class="btn btn-outline-primary w-100">
                     <i class="fas fa-list me-1"></i>Все оценки
                 </a>
             </div>
@@ -44,27 +66,31 @@
 
     <!-- Карточка с расписанием -->
     <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-calendar-alt me-2"></i>Расписание на сегодня
-                </h5>
+        <div class="card h-100 dashboard-card">
+            <div class="card-header d-flex align-items-center">
+                <i class="fas fa-calendar-alt me-2 text-info"></i>
+                <h5 class="card-title mb-0">Расписание на сегодня</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body d-flex align-items-center justify-content-center">
                 {% if today_schedule %}
-                    <div class="list-group list-group-flush">
+                    <div class="schedule-list w-100">
                         {% for lesson in today_schedule %}
-                            <div class="list-group-item">
-                                <h6 class="mb-1">{{ lesson.time }}</h6>
-                                <p class="mb-1">{{ lesson.subject }}</p>
-                                <small class="text-muted">{{ lesson.room }}</small>
+                            <div class="schedule-item mb-2">
+                                <div class="time-badge mb-1">{{ lesson.time }}</div>
+                                <h6 class="mb-1">{{ lesson.subject }}</h6>
+                                <p class="small mb-0">{{ lesson.room }}</p>
                             </div>
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p class="text-muted mb-0">Сегодня нет занятий</p>
+                    <div class="text-center empty-state">
+                        <i class="fas fa-coffee mb-3 empty-icon"></i>
+                        <p class="empty-text">Сегодня нет занятий</p>
+                    </div>
                 {% endif %}
-                <a href="{% url 'schedule' %}" class="btn btn-outline-primary mt-3 w-100">
+            </div>
+            <div class="card-footer bg-transparent">
+                <a href="{% url 'schedule' %}" class="btn btn-outline-primary w-100">
                     <i class="fas fa-calendar me-1"></i>Полное расписание
                 </a>
             </div>
@@ -73,31 +99,37 @@
 
     <!-- Карточка с посещаемостью -->
     <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-user-check me-2"></i>Посещаемость
-                </h5>
+        <div class="card h-100 dashboard-card">
+            <div class="card-header d-flex align-items-center">
+                <i class="fas fa-user-check me-2 text-primary"></i>
+                <h5 class="card-title mb-0">Посещаемость</h5>
             </div>
-            <div class="card-body">
-                {% if attendance_stats %}
-                    <div class="text-center mb-3">
-                        <h3 class="display-4">{{ attendance_stats.percentage }}%</h3>
-                        <p class="text-muted">Успеваемость посещаемости</p>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                {% if attendance_stats.total > 0 %}
+                    <div class="attendance-display">
+                        <h2 class="display-1 mb-0">{{ attendance_stats.percentage|floatformat:1 }}%</h2>
+                        <p class="text-center mb-3">Успеваемость посещаемости</p>
                     </div>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ attendance_stats.percentage }}%">
-                            {{ attendance_stats.percentage }}%
+                    <div class="attendance-details w-100 mt-auto">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <span class="detail-label">Пропущено</span>
+                                <span class="detail-value text-danger">{{ attendance_stats.missed }}</span>
+                            </div>
+                            <div class="text-end">
+                                <span class="detail-label">Всего</span>
+                                <span class="detail-value">{{ attendance_stats.total }}</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="d-flex justify-content-between text-muted">
-                        <small>Пропущено: {{ attendance_stats.missed }}</small>
-                        <small>Всего: {{ attendance_stats.total }}</small>
-                    </div>
                 {% else %}
-                    <p class="text-muted mb-0">Нет данных о посещаемости</p>
+                    <div class="text-center empty-state">
+                        <p class="empty-text">Нет данных о посещаемости</p>
+                    </div>
                 {% endif %}
-                <a href="{% url 'attendance' %}" class="btn btn-outline-primary mt-3 w-100">
+            </div>
+            <div class="card-footer bg-transparent">
+                <a href="{% url 'attendance' %}" class="btn btn-outline-primary w-100">
                     <i class="fas fa-chart-bar me-1"></i>Подробная статистика
                 </a>
             </div>
@@ -121,17 +153,195 @@
                             <div class="list-group-item">
                                 <div class="d-flex w-100 justify-content-between">
                                     <h6 class="mb-1">{{ notification.title }}</h6>
-                                    <small class="text-muted">{{ notification.date }}</small>
+                                    <small class="text-secondary">{{ notification.date }}</small>
                                 </div>
                                 <p class="mb-1">{{ notification.message }}</p>
                             </div>
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p class="text-muted mb-0">Нет новых уведомлений</p>
+                    <p class="text-secondary mb-0">Нет новых уведомлений</p>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        border-radius: 0;
+        border: 1px solid var(--border-color);
+        box-shadow: none;
+        background-color: var(--card-bg);
+    }
+
+    .dashboard-card .card-header {
+        background-color: var(--card-bg);
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.75rem 1rem;
+    }
+
+    .dashboard-card .card-body {
+        padding: 0;
+    }
+
+    .dashboard-card .card-footer {
+        background-color: transparent;
+        border-top: 1px solid var(--border-color);
+        padding: 0.75rem 1rem;
+    }
+
+    .dashboard-stats-list {
+        padding: 0;
+    }
+
+    .stats-item {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .stats-item:last-child {
+        border-bottom: none;
+    }
+
+    .dashboard-subtitle {
+        color: var(--text-color);
+        opacity: 0.8;
+    }
+
+    .progress {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 0;
+    }
+
+    .progress-bar {
+        border-radius: 0;
+    }
+
+    .empty-state {
+        padding: 2rem 1rem;
+        width: 100%;
+    }
+
+    .empty-icon {
+        font-size: 2rem;
+        color: var(--secondary-color);
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .empty-text {
+        color: var(--text-color);
+        margin-bottom: 0;
+        font-size: 1rem;
+    }
+
+    .attendance-display {
+        text-align: center;
+        padding: 1.5rem 0;
+    }
+
+    .attendance-display .display-1 {
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .attendance-details {
+        padding: 0.75rem 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .detail-label {
+        color: var(--text-color);
+        opacity: 0.8;
+        margin-right: 0.5rem;
+    }
+
+    .detail-value {
+        font-weight: 600;
+    }
+
+    /* Цвета текста для тем */
+    [data-theme="light"] {
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+        --primary-color-accent: #0d6efd;
+    }
+
+    [data-theme="dark"] {
+        --success-color: #5cb85c;
+        --warning-color: #f0ad4e;
+        --danger-color: #d9534f;
+        --info-color: #5bc0de;
+        --primary-color-accent: #4e9fff;
+    }
+
+    .text-success {
+        color: var(--success-color) !important;
+    }
+
+    .text-warning {
+        color: var(--warning-color) !important;
+    }
+
+    .text-danger {
+        color: var(--danger-color) !important;
+    }
+
+    .text-info {
+        color: var(--info-color) !important;
+    }
+
+    .text-primary {
+        color: var(--primary-color-accent) !important;
+    }
+
+    /* Стили для темной темы */
+    [data-theme="dark"] {
+        --text-default: #ffffff;
+    }
+
+    [data-theme="dark"] .card-title,
+    [data-theme="dark"] .card-header,
+    [data-theme="dark"] .stats-item,
+    [data-theme="dark"] .empty-text,
+    [data-theme="dark"] .attendance-display p,
+    [data-theme="dark"] .attendance-display .display-1,
+    [data-theme="dark"] .detail-label,
+    [data-theme="dark"] .detail-value {
+        color: var(--text-default);
+    }
+
+    [data-theme="dark"] .stats-item span:not(.text-success):not(.text-warning):not(.text-danger) {
+        color: var(--text-default);
+    }
+
+    /* Кнопки */
+    .btn-outline-primary {
+        border-color: var(--secondary-color);
+        color: var(--secondary-color);
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--secondary-color);
+        color: #fff;
+    }
+
+    /* Границы в темной теме */
+    [data-theme="dark"] .card-header {
+        border-bottom-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .card-footer {
+        border-top-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .stats-item {
+        border-bottom-color: var(--border-color);
+    }
+</style>
 {% endblock %} 

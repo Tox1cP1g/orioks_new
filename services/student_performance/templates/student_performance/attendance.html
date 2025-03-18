@@ -6,7 +6,7 @@
 <div class="row mb-4">
     <div class="col-12">
         <h1 class="display-4 mb-3">Посещаемость</h1>
-        <p class="lead text-muted">Статистика посещаемости занятий</p>
+        <p class="lead dashboard-subtitle">Статистика посещаемости занятий</p>
     </div>
 </div>
 
@@ -126,7 +126,7 @@
                             <div class="d-flex w-100 justify-content-between align-items-center">
                                 <div>
                                     <h6 class="mb-1">{{ record.date|date:"d.m.Y" }}</h6>
-                                    <small class="text-muted">{{ record.time|time:"H:i" }}</small>
+                                    <small class="text-secondary">{{ record.time|time:"H:i" }}</small>
                                 </div>
                                 <div>
                                     {% if record.status == 'present' %}
@@ -137,7 +137,7 @@
                                         <span class="badge bg-danger">Отсутствовал</span>
                                     {% endif %}
                                     {% if record.comment %}
-                                        <small class="d-block text-muted">{{ record.comment }}</small>
+                                        <small class="d-block text-secondary">{{ record.comment }}</small>
                                     {% endif %}
                                 </div>
                             </div>
@@ -155,6 +155,15 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const ctx = document.getElementById('attendanceChart').getContext('2d');
+    const isDarkTheme = document.documentElement.getAttribute('data-theme') === 'dark';
+    
+    const chartColors = {
+        gridColor: isDarkTheme ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+        textColor: isDarkTheme ? '#e9ecef' : '#666',
+        lineColor: isDarkTheme ? '#5cb85c' : '#28a745',
+        fillColor: isDarkTheme ? 'rgba(92, 184, 92, 0.2)' : 'rgba(40, 167, 69, 0.1)'
+    };
+
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -162,8 +171,8 @@
             datasets: [{
                 label: 'Посещаемость',
                 data: {{ chart_data|safe }},
-                borderColor: '#28a745',
-                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                borderColor: chartColors.lineColor,
+                backgroundColor: chartColors.fillColor,
                 tension: 0.1,
                 fill: true
             }]
@@ -173,9 +182,56 @@
             scales: {
                 y: {
                     beginAtZero: true,
-                    max: 100
+                    max: 100,
+                    grid: {
+                        color: chartColors.gridColor
+                    },
+                    ticks: {
+                        color: chartColors.textColor
+                    }
+                },
+                x: {
+                    grid: {
+                        color: chartColors.gridColor
+                    },
+                    ticks: {
+                        color: chartColors.textColor
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: chartColors.textColor
+                    }
                 }
             }
+        }
+    });
+    
+    // Обновление графика при переключении темы
+    document.addEventListener('themeChanged', function(e) {
+        const isDarkTheme = e.detail.theme === 'dark';
+        const chart = Chart.getChart(ctx);
+        
+        if (chart) {
+            const newColors = {
+                gridColor: isDarkTheme ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                textColor: isDarkTheme ? '#e9ecef' : '#666',
+                lineColor: isDarkTheme ? '#5cb85c' : '#28a745',
+                fillColor: isDarkTheme ? 'rgba(92, 184, 92, 0.2)' : 'rgba(40, 167, 69, 0.1)'
+            };
+
+            chart.data.datasets[0].borderColor = newColors.lineColor;
+            chart.data.datasets[0].backgroundColor = newColors.fillColor;
+            
+            chart.options.scales.y.grid.color = newColors.gridColor;
+            chart.options.scales.x.grid.color = newColors.gridColor;
+            chart.options.scales.y.ticks.color = newColors.textColor;
+            chart.options.scales.x.ticks.color = newColors.textColor;
+            chart.options.plugins.legend.labels.color = newColors.textColor;
+            
+            chart.update();
         }
     });
 </script>

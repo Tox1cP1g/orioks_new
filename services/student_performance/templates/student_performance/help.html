@@ -6,7 +6,7 @@
 <div class="row mb-4">
     <div class="col-12">
         <h1 class="display-4 mb-3">Помощь</h1>
-        <p class="lead text-muted">Часто задаваемые вопросы и инструкции по использованию портала</p>
+        <p class="lead">Часто задаваемые вопросы и инструкции по использованию портала</p>
     </div>
 </div>
 
@@ -18,7 +18,7 @@
                 <h5 class="card-title mb-0">Содержание</h5>
             </div>
             <div class="list-group list-group-flush">
-                <a href="#general" class="list-group-item list-group-item-action active">
+                <a href="#general" class="list-group-item list-group-item-action">
                     <i class="fas fa-info-circle me-2"></i>Общая информация
                 </a>
                 <a href="#grades" class="list-group-item list-group-item-action">
@@ -199,6 +199,33 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .list-group-item-action {
+        color: var(--text-color);
+    }
+
+    .list-group-item-action:hover {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+    }
+
+    .list-group-item-action.active {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+        color: #ffffff;
+    }
+
+    .card {
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}

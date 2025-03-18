@@ -3,38 +3,63 @@
 
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-    <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
-        <h2 class="text-center mb-4">Вход в систему<p></p>(для студентов)</h2>
+    <div class="card shadow p-4" style="width: 100%; max-width: 400px; background-color: var(--card-bg); border-color: var(--border-color);">
+        <h2 class="text-center mb-4" style="color: var(--text-color);">Вход для студентов</h2>
 
-        <form method="post">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'student_login' %}" novalidate>
             {% csrf_token %}
             <div class="mb-3">
-                <label for="username" class="form-label">Имя пользователя</label>
-                <input type="text" class="form-control" id="username" name="username" required>
+                <label for="username" class="form-label" style="color: var(--text-color);">Номер зачетной книжки</label>
+                <input type="text" class="form-control" id="username" name="username" required
+                       style="background-color: var(--bg-color); color: var(--text-color); border-color: var(--border-color);">
             </div>
             <div class="mb-3">
-                <label for="password" class="form-label">Пароль</label>
-                <input type="password" class="form-control" id="password" name="password" required>
+                <label for="password" class="form-label" style="color: var(--text-color);">Пароль</label>
+                <input type="password" class="form-control" id="password" name="password" required
+                       style="background-color: var(--bg-color); color: var(--text-color); border-color: var(--border-color);">
             </div>
 
             <button type="submit" class="btn btn-primary w-100">Войти</button>
         </form>
 
-        {% if form.errors %}
-            <div class="alert alert-danger mt-3">
-                <ul class="mb-0">
-                    {% for field, errors in form.errors.items %}
-                        {% for error in errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-
         <div class="mt-3 text-center">
-            <a href="{% url 'password_reset' %}" class="text-muted">Забыли пароль?</a>
+            <a href="#" style="color: var(--text-color); opacity: 0.7;">Забыли пароль?</a>
         </div>
     </div>
 </div>
+
+<style>
+    .form-control:focus {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        border-color: var(--border-color);
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .alert {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    .card {
+        transition: background-color 0.3s, border-color 0.3s;
+    }
+</style>
 {% endblock %} 

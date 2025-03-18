@@ -3,8 +3,8 @@
 
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-    <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
-        <h2 class="text-center mb-4">Вход в систему</h2>
+    <div class="card shadow p-4" style="width: 100%; max-width: 400px; background-color: var(--card-bg); border-color: var(--border-color);">
+        <h2 class="text-center mb-4" style="color: var(--text-color);">Вход в систему</h2>
 
         {% if messages %}
         <div class="messages">
@@ -25,20 +25,41 @@
         <form method="post" action="{% url 'login' %}" novalidate>
             {% csrf_token %}
             <div class="mb-3">
-                <label for="username" class="form-label">Имя пользователя</label>
-                <input type="text" class="form-control" id="username" name="username" required>
+                <label for="username" class="form-label" style="color: var(--text-color);">Имя пользователя</label>
+                <input type="text" class="form-control" id="username" name="username" required 
+                       style="background-color: var(--bg-color); color: var(--text-color); border-color: var(--border-color);">
             </div>
             <div class="mb-3">
-                <label for="password" class="form-label">Пароль</label>
-                <input type="password" class="form-control" id="password" name="password" required>
+                <label for="password" class="form-label" style="color: var(--text-color);">Пароль</label>
+                <input type="password" class="form-control" id="password" name="password" required
+                       style="background-color: var(--bg-color); color: var(--text-color); border-color: var(--border-color);">
             </div>
 
             <button type="submit" class="btn btn-primary w-100">Войти</button>
         </form>
 
         <div class="mt-3 text-center">
-            <a href="#" class="text-muted">Забыли пароль?</a>
+            <a href="#" style="color: var(--text-color); opacity: 0.7;">Забыли пароль?</a>
         </div>
     </div>
 </div>
+
+<style>
+    .form-control:focus {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        border-color: var(--border-color);
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .alert {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    .card {
+        transition: background-color 0.3s, border-color 0.3s;
+    }
+</style>
 {% endblock %} 

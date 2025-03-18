@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Sum, Count, F
+from django.db.models import Sum, Count, F, Avg
 from django.shortcuts import get_object_or_404
 from .models import Semester, Subject, Grade, Schedule, Attendance, Student
 from .serializers import (
@@ -21,6 +21,8 @@ from django.contrib import messages
 from django.urls import reverse
 from django.shortcuts import redirect
 from django.contrib.auth import logout
+from django.db import models
+from datetime import datetime
 
 class TeacherPermission(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -169,13 +171,79 @@ def help(request):
 def dashboard(request):
     user = request.user
     current_semester = Semester.objects.filter(is_current=True).first()
+    
+    # Получаем предметы текущего семестра
     subjects = Subject.objects.filter(semester=current_semester) if current_semester else []
-    recent_grades = Grade.objects.filter(student_id=user.id).order_by('-date')[:5]
+    
+    # Получаем последние оценки
+    latest_grades = Grade.objects.filter(
+        student_id=str(user.id),
+        subject__semester=current_semester
+    ).select_related('subject').order_by('-date')[:5]
+    
+    # Получаем расписание на сегодня
+    today = datetime.now().date()
+    today_schedule = Schedule.objects.filter(
+        subject__semester=current_semester,
+        day_of_week=today.weekday() + 1
+    ).select_related('subject').order_by('lesson_number') if current_semester else []
+    
+    # Получаем статистику посещаемости
+    schedule_items = Schedule.objects.filter(subject__semester=current_semester) if current_semester else []
+    attendance_records = Attendance.objects.filter(
+        student_id=str(user.id),
+        schedule_item__in=schedule_items
+    )
+    
+    attendance_stats = {
+        'total': attendance_records.count(),
+        'missed': attendance_records.filter(is_present=False).count(),
+        'percentage': (attendance_records.filter(is_present=True).count() / attendance_records.count() * 100) if attendance_records.exists() else 0
+    }
+    
+    # Получаем статистику по оценкам
+    grades_stats = {
+        'average': Grade.objects.filter(
+            student_id=str(user.id),
+            subject__semester=current_semester
+        ).aggregate(avg=Avg('score'))['avg'] or 0,
+        'total': Grade.objects.filter(
+            student_id=str(user.id),
+            subject__semester=current_semester
+        ).count(),
+        'excellent': Grade.objects.filter(
+            student_id=str(user.id),
+            subject__semester=current_semester,
+            score__gte=4.5
+        ).count(),
+        'good': Grade.objects.filter(
+            student_id=str(user.id),
+            subject__semester=current_semester,
+            score__gte=3.5,
+            score__lt=4.5
+        ).count()
+    }
+    
+    # Получаем уведомления (если есть)
+    notifications = []  # Здесь можно добавить логику получения уведомлений
     
     context = {
+        'user': user,
         'current_semester': current_semester,
         'subjects': subjects,
-        'recent_grades': recent_grades,
+        'latest_grades': [{
+            'subject': grade.subject.name,
+            'value': grade.score,
+            'date': grade.date.strftime('%d.%m.%Y')
+        } for grade in latest_grades],
+        'today_schedule': [{
+            'time': schedule.get_lesson_number_display(),
+            'subject': schedule.subject.name,
+            'room': schedule.room
+        } for schedule in today_schedule],
+        'attendance_stats': attendance_stats,
+        'grades_stats': grades_stats,
+        'notifications': notifications,
     }
     return render(request, 'student_performance/dashboard.html', context)
 
@@ -192,10 +260,48 @@ def grades_view(request):
         current_semester = Semester.objects.filter(is_current=True).first()
         grades = Grade.objects.filter(student_id=str(user.id), subject__semester=current_semester) if current_semester else []
     
+    # Получаем все предметы с оценками
+    subjects_with_grades = []
+    for subject in Subject.objects.filter(grades__student_id=str(user.id)).distinct():
+        subject_grades = grades.filter(subject=subject)
+        if subject_grades.exists():
+            subjects_with_grades.append({
+                'name': subject.name,
+                'grades': [{
+                    'type': grade.get_grade_type_display(),
+                    'value': grade.score,
+                    'date': grade.date,
+                    'comment': grade.comment
+                } for grade in subject_grades],
+                'average_grade': subject_grades.aggregate(avg=Avg('score'))['avg']
+            })
+    
+    # Рассчитываем статистику
+    total_grades = grades.count()
+    excellent_grades_count = grades.filter(score__gte=4.5).count()
+    good_grades_count = grades.filter(score__gte=3.5, score__lt=4.5).count()
+    low_grades_count = grades.filter(score__lt=3.5).count()
+    average_grade = grades.aggregate(avg=Avg('score'))['avg'] or 0
+    
+    # Подготавливаем данные для графика
+    chart_data = []
+    chart_labels = []
+    for grade in grades.order_by('date'):
+        chart_data.append(float(grade.score))
+        chart_labels.append(grade.date.strftime('%d.%m'))
+    
     context = {
         'semesters': semesters,
         'grades': grades,
         'selected_semester': selected_semester,
+        'subjects_with_grades': subjects_with_grades,
+        'total_grades': total_grades,
+        'excellent_grades_count': excellent_grades_count,
+        'good_grades_count': good_grades_count,
+        'low_grades_count': low_grades_count,
+        'average_grade': average_grade,
+        'chart_data': chart_data,
+        'chart_labels': chart_labels,
     }
     return render(request, 'student_performance/grades.html', context)
 
@@ -216,25 +322,73 @@ def schedule_view(request):
 def attendance_view(request):
     user = request.user
     current_semester = Semester.objects.filter(is_current=True).first()
-    subjects = Subject.objects.filter(semester=current_semester) if current_semester else []
+    semesters = Semester.objects.all()
+    selected_semester = request.GET.get('semester')
     
-    selected_subject = request.GET.get('subject')
-    if selected_subject:
-        # Получаем все расписание для выбранного предмета
-        schedule_items = Schedule.objects.filter(subject_id=selected_subject)
-        
-        # Получаем посещаемость для всех занятий этого предмета
-        attendance = Attendance.objects.filter(
-            student_id=str(user.id),  # Преобразуем ID в строку
-            schedule_item__in=schedule_items
-        ).select_related('schedule_item__subject').order_by('-date')
+    if selected_semester:
+        semester = Semester.objects.get(id=selected_semester)
     else:
-        attendance = []
+        semester = current_semester
+    
+    subjects = Subject.objects.filter(semester=semester) if semester else []
+    selected_subject = request.GET.get('subject')
+    
+    # Получаем все расписание для выбранного семестра
+    schedule_items = Schedule.objects.filter(subject__semester=semester) if semester else []
+    
+    # Получаем посещаемость
+    attendance_records = Attendance.objects.filter(
+        student_id=str(user.id),
+        schedule_item__in=schedule_items
+    ).select_related('schedule_item__subject').order_by('-date')
+    
+    # Рассчитываем общую статистику
+    total_lessons = attendance_records.count()
+    attended_lessons = attendance_records.filter(is_present=True).count()
+    missed_lessons = total_lessons - attended_lessons
+    excused_absences = attendance_records.filter(is_present=False, reason__isnull=False).count()
+    total_attendance = (attended_lessons / total_lessons * 100) if total_lessons > 0 else 0
+    
+    # Подготавливаем данные для графика
+    chart_data = []
+    chart_labels = []
+    for record in attendance_records.order_by('date'):
+        chart_data.append(100 if record.is_present else 0)
+        chart_labels.append(record.date.strftime('%d.%m'))
+    
+    # Группируем посещаемость по предметам
+    subjects_attendance = []
+    for subject in subjects:
+        subject_records = attendance_records.filter(schedule_item__subject=subject)
+        if subject_records.exists():
+            total_subject_lessons = subject_records.count()
+            attended_subject_lessons = subject_records.filter(is_present=True).count()
+            attendance_percentage = (attended_subject_lessons / total_subject_lessons * 100) if total_subject_lessons > 0 else 0
+            
+            subjects_attendance.append({
+                'name': subject.name,
+                'attendance_percentage': attendance_percentage,
+                'records': [{
+                    'date': record.date,
+                    'time': record.schedule_item.get_lesson_number_display(),
+                    'status': 'present' if record.is_present else ('excused' if record.reason else 'absent'),
+                    'comment': record.reason
+                } for record in subject_records]
+            })
     
     context = {
         'subjects': subjects,
-        'attendance': attendance,
+        'semesters': semesters,
         'selected_subject': selected_subject,
+        'selected_semester': selected_semester,
+        'total_attendance': total_attendance,
+        'attended_lessons': attended_lessons,
+        'total_lessons': total_lessons,
+        'missed_lessons': missed_lessons,
+        'excused_absences': excused_absences,
+        'subjects_attendance': subjects_attendance,
+        'chart_data': chart_data,
+        'chart_labels': chart_labels,
     }
     return render(request, 'student_performance/attendance.html', context)
 

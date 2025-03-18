@@ -6,7 +6,7 @@
 <div class="row mb-4">
     <div class="col-12">
         <h1 class="display-4 mb-3">Мои оценки</h1>
-        <p class="lead text-muted">Успеваемость по предметам</p>
+        <p class="lead">Успеваемость по предметам</p>
     </div>
 </div>
 
@@ -48,7 +48,7 @@
 <!-- Общая статистика -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card bg-primary text-white">
+        <div class="stats-card stats-card-primary">
             <div class="card-body">
                 <h6 class="card-title">Средний балл</h6>
                 <h2 class="mb-0">{{ average_grade|floatformat:1 }}</h2>
@@ -57,7 +57,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card bg-success text-white">
+        <div class="stats-card stats-card-success">
             <div class="card-body">
                 <h6 class="card-title">Отличные оценки</h6>
                 <h2 class="mb-0">{{ excellent_grades_count }}</h2>
@@ -66,7 +66,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card bg-warning text-white">
+        <div class="stats-card stats-card-warning">
             <div class="card-body">
                 <h6 class="card-title">Хорошие оценки</h6>
                 <h2 class="mb-0">{{ good_grades_count }}</h2>
@@ -75,7 +75,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card bg-danger text-white">
+        <div class="stats-card stats-card-danger">
             <div class="card-body">
                 <h6 class="card-title">Требуют внимания</h6>
                 <h2 class="mb-0">{{ low_grades_count }}</h2>
@@ -102,14 +102,14 @@
                                 <div class="d-flex w-100 justify-content-between align-items-center">
                                     <div>
                                         <h6 class="mb-1">{{ grade.type }}</h6>
-                                        <small class="text-muted">{{ grade.date|date:"d.m.Y" }}</small>
+                                        <small>{{ grade.date|date:"d.m.Y" }}</small>
                                     </div>
                                     <div class="text-end">
                                         <span class="badge {% if grade.value >= 4 %}bg-success{% elif grade.value >= 3 %}bg-warning{% else %}bg-danger{% endif %}">
                                             {{ grade.value }}
                                         </span>
                                         {% if grade.comment %}
-                                            <small class="d-block text-muted">{{ grade.comment }}</small>
+                                            <small class="d-block">{{ grade.comment }}</small>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -146,6 +146,14 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const ctx = document.getElementById('gradesChart').getContext('2d');
+    const isDarkTheme = document.documentElement.getAttribute('data-theme') === 'dark';
+    
+    const chartColors = {
+        gridColor: isDarkTheme ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+        textColor: isDarkTheme ? '#e9ecef' : '#666',
+        lineColor: isDarkTheme ? '#5c9ce6' : '#3498db'
+    };
+
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -153,8 +161,10 @@
             datasets: [{
                 label: 'Средний балл',
                 data: {{ chart_data|safe }},
-                borderColor: '#3498db',
-                tension: 0.1
+                borderColor: chartColors.lineColor,
+                backgroundColor: chartColors.lineColor + '20',
+                tension: 0.1,
+                fill: true
             }]
         },
         options: {
@@ -162,10 +172,54 @@
             scales: {
                 y: {
                     beginAtZero: true,
-                    max: 5
+                    max: 5,
+                    grid: {
+                        color: chartColors.gridColor
+                    },
+                    ticks: {
+                        color: chartColors.textColor
+                    }
+                },
+                x: {
+                    grid: {
+                        color: chartColors.gridColor
+                    },
+                    ticks: {
+                        color: chartColors.textColor
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: chartColors.textColor
+                    }
                 }
             }
         }
+    });
+
+    // Обновление графика при переключении темы
+    document.addEventListener('themeChanged', function(e) {
+        const isDarkTheme = e.detail.theme === 'dark';
+        const chart = Chart.getChart('gradesChart');
+        
+        const newColors = {
+            gridColor: isDarkTheme ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+            textColor: isDarkTheme ? '#e9ecef' : '#666',
+            lineColor: isDarkTheme ? '#5c9ce6' : '#3498db'
+        };
+
+        chart.data.datasets[0].borderColor = newColors.lineColor;
+        chart.data.datasets[0].backgroundColor = newColors.lineColor + '20';
+        
+        chart.options.scales.y.grid.color = newColors.gridColor;
+        chart.options.scales.x.grid.color = newColors.gridColor;
+        chart.options.scales.y.ticks.color = newColors.textColor;
+        chart.options.scales.x.ticks.color = newColors.textColor;
+        chart.options.plugins.legend.labels.color = newColors.textColor;
+        
+        chart.update();
     });
 </script>
 {% endblock %} 
