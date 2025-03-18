@@ -1,8 +1,8 @@
-version: '3.8'
-
 services:
   auth:
-    build: ./services/auth
+    build: 
+      context: ./services/auth
+      dockerfile: Dockerfile
     ports:
       - "8002:8002"
     environment:
@@ -14,9 +14,12 @@ services:
       - ./services/auth:/app
     networks:
       - orioks_network
+    restart: unless-stopped
 
   student_portal:
-    build: ./services/student_performance
+    build: 
+      context: ./services/student_performance
+      dockerfile: Dockerfile
     ports:
       - "8003:8003"
     environment:
@@ -31,9 +34,12 @@ services:
       - auth
     networks:
       - orioks_network
+    restart: unless-stopped
 
   teacher_portal:
-    build: ./services/teacher_portal
+    build: 
+      context: ./services/teacher_portal
+      dockerfile: Dockerfile
     ports:
       - "8004:8004"
     environment:
@@ -47,23 +53,8 @@ services:
       - auth
     networks:
       - orioks_network
-
-  postgres:
-    image: postgres:16
-    environment:
-      - POSTGRES_DB=orioks
-      - POSTGRES_USER=orioks_user
-      - POSTGRES_PASSWORD=orioks_password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - orioks_network
+    restart: unless-stopped
 
 networks:
   orioks_network:
-    driver: bridge
-
-volumes:
-  postgres_data: 
+    driver: bridge 
