@@ -97,13 +97,44 @@
    docker-compose up -d
    ```
 
-5. Выполните миграции и создайте суперпользователя:
+5. Выполните миграции для каждого сервиса:
    ```bash
-   docker-compose exec web python manage.py migrate
-   docker-compose exec web python manage.py createsuperuser
+   docker-compose exec authorization python manage.py migrate
+   docker-compose exec student_performance python manage.py migrate
+   docker-compose exec teacher_portal python manage.py migrate
    ```
 
-6. Система будет доступна по адресу: `http://localhost:8000`
+6. При необходимости создайте суперпользователя для администрирования:
+   ```bash
+   docker-compose exec authorization python manage.py createsuperuser
+   ```
+
+7. Сервисы будут доступны по следующим адресам:
+   - Авторизационный портал: `http://localhost:8002`
+   - Студенческий портал: `http://localhost:8003`
+   - Преподавательский портал: `http://localhost:8004`
+
+### Конфигурация портов
+
+Для изменения портов отредактируйте файл `docker-compose.yml`, указав нужные значения в секции `ports` для каждого сервиса:
+
+```yaml
+services:
+  authorization:
+    ports:
+      - "8002:8000"
+    # ...
+
+  student_performance:
+    ports:
+      - "8003:8000"
+    # ...
+
+  teacher_portal:
+    ports:
+      - "8004:8000"
+    # ...
+```
 
 ## Особенности разработки
 
