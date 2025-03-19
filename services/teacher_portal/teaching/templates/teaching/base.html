@@ -273,6 +273,31 @@
             box-shadow: none !important;
             padding: 0.5rem 1rem;
         }
+
+        [data-theme="dark"] .form-control {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .form-control:focus {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        [data-theme="dark"] .form-control:disabled {
+            background-color: var(--card-bg);
+            color: var(--text-muted);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] textarea.form-control {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
