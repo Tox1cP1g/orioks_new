@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
-from ..models import HomeworkSubmission, Teacher
-from ..dependencies import get_current_teacher
+from ..models import HomeworkSubmission
+from django.core.exceptions import ObjectDoesNotExist
 
 router = APIRouter(prefix="/api/homework", tags=["homework"])
 
@@ -13,67 +13,64 @@ class HomeworkNotification(BaseModel):
     assignment_name: str
     subject_name: str
 
+class GradeSubmission(BaseModel):
+    grade: float
+    feedback: Optional[str] = None
+
 @router.post("/notify")
-async def notify_homework_submission(
-    notification: HomeworkNotification,
-    teacher: Teacher = Depends(get_current_teacher)
-):
+async def receive_homework(notification: HomeworkNotification):
     try:
-        # Создаем запись о новом домашнем задании
-        submission = HomeworkSubmission(
+        # Создаем или обновляем запись о домашнем задании
+        submission, created = HomeworkSubmission.objects.get_or_create(
             submission_id=notification.submission_id,
-            student_name=notification.student_name,
-            assignment_name=notification.assignment_name,
-            subject_name=notification.subject_name,
-            received_at=datetime.now(),
-            status="RECEIVED"
+            defaults={
+                'student_name': notification.student_name,
+                'assignment_name': notification.assignment_name,
+                'subject_name': notification.subject_name,
+                'status': 'SUBMITTED'
+            }
         )
         
-        # Сохраняем в базу данных
-        await submission.save()
-
-        # В будущем здесь можно добавить отправку уведомления преподавателю
-        # через WebSocket или другой механизм
-
-        return {"status": "success", "message": "Notification received"}
+        if not created:
+            # Если запись уже существует, обновляем её
+            submission.student_name = notification.student_name
+            submission.assignment_name = notification.assignment_name
+            submission.subject_name = notification.subject_name
+            submission.save()
+        
+        return {"status": "ok", "message": "Homework notification received"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/submissions")
-async def get_homework_submissions(
-    teacher: Teacher = Depends(get_current_teacher),
-    status: Optional[str] = None
-):
+async def list_submissions():
     try:
-        query = HomeworkSubmission.objects
-        if status:
-            query = query.filter(status=status)
-        
-        submissions = await query.order_by("-received_at").all()
-        return submissions
+        submissions = HomeworkSubmission.objects.all().order_by('-received_at')
+        return [{
+            'id': sub.id,
+            'submission_id': sub.submission_id,
+            'student_name': sub.student_name,
+            'assignment_name': sub.assignment_name,
+            'subject_name': sub.subject_name,
+            'received_at': sub.received_at.isoformat(),
+            'status': sub.status,
+            'grade': float(sub.grade) if sub.grade else None,
+            'feedback': sub.feedback,
+            'graded_at': sub.graded_at.isoformat() if sub.graded_at else None
+        } for sub in submissions]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/grade/{submission_id}")
-async def grade_homework(
-    submission_id: int,
-    grade: float,
-    feedback: Optional[str] = None,
-    teacher: Teacher = Depends(get_current_teacher)
-):
+@router.post("/submissions/{submission_id}/grade")
+async def grade_submission(submission_id: int, grade_data: GradeSubmission):
     try:
-        submission = await HomeworkSubmission.objects.get(submission_id=submission_id)
-        submission.grade = grade
-        submission.feedback = feedback
-        submission.status = "GRADED"
-        submission.graded_at = datetime.now()
-        await submission.save()
-
-        # Отправляем оценку обратно в сервис студента
-        # Здесь должен быть код для отправки оценки через API
-
-        return {"status": "success", "message": "Homework graded successfully"}
-    except HomeworkSubmission.DoesNotExist:
+        submission = HomeworkSubmission.objects.get(submission_id=submission_id)
+        submission.grade = grade_data.grade
+        submission.feedback = grade_data.feedback
+        submission.status = 'GRADED'
+        submission.save()
+        return {"status": "ok", "message": "Submission graded successfully"}
+    except ObjectDoesNotExist:
         raise HTTPException(status_code=404, detail="Submission not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 
