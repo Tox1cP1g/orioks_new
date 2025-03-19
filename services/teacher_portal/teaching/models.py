@@ -224,3 +224,20 @@ class Attendance(models.Model):
 
     def __str__(self):
         return f"{self.student.get_full_name()} - {self.schedule_item} ({self.date})"
+
+class HomeworkSubmission(models.Model):
+    submission_id = models.IntegerField(unique=True)
+    student_name = models.CharField(max_length=200)
+    assignment_name = models.CharField(max_length=200)
+    subject_name = models.CharField(max_length=200)
+    received_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, default="RECEIVED")
+    grade = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    feedback = models.TextField(blank=True)
+    graded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-received_at']
+
+    def __str__(self):
+        return f"{self.student_name} - {self.assignment_name}"

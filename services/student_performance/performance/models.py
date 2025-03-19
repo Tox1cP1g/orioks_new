@@ -55,6 +55,7 @@ class StudentAssignment(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='NOT_SUBMITTED')
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     submission_text = models.TextField(blank=True, verbose_name="Текст ответа")
+    submission_file = models.FileField(upload_to='submissions/', null=True, blank=True, verbose_name="Файл с решением")
     feedback = models.TextField(blank=True, verbose_name="Комментарий преподавателя")
     submitted_at = models.DateTimeField(null=True, blank=True)
     graded_at = models.DateTimeField(null=True, blank=True)
@@ -186,7 +187,7 @@ class Attendance(models.Model):
         return f"{self.student_id} - {self.schedule_item} - {self.date}"
 
 class Student(models.Model):
-    user_id = models.IntegerField(unique=True)  # ID from Auth Service
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', null=True)
     student_number = models.CharField(max_length=50, unique=True)
     group = models.CharField(max_length=50)
     faculty = models.CharField(max_length=100)
@@ -210,4 +211,42 @@ class Performance(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.student} - {self.course} ({self.semester}/{self.year}): {self.final_grade}" 
+        return f"{self.student} - {self.course} ({self.semester}/{self.year}): {self.final_grade}"
+
+class HomeworkAssignment(models.Model):
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='assignments')
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    deadline = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-deadline']
+
+    def __str__(self):
+        return f"{self.subject.name} - {self.name}"
+
+class HomeworkSubmission(models.Model):
+    STATUS_CHOICES = [
+        ('SUBMITTED', 'Отправлено'),
+        ('CHECKING', 'На проверке'),
+        ('GRADED', 'Оценено'),
+        ('REJECTED', 'Отклонено')
+    ]
+
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='homework_submissions')
+    assignment = models.ForeignKey(HomeworkAssignment, on_delete=models.CASCADE, related_name='submissions')
+    description = models.TextField(blank=True)
+    file = models.FileField(upload_to='homework_submissions/')
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='SUBMITTED')
+    grade = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    feedback = models.TextField(blank=True)
+    checked_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.student.user.get_full_name()} - {self.assignment.name}"
+
+    class Meta:
+        ordering = ['-submitted_at'] 

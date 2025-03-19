@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Semester, Subject, Grade, Schedule, Attendance
+from .models import (
+    Student, Subject, Grade, Schedule,
+    Attendance, Semester, HomeworkAssignment,
+    HomeworkSubmission
+)
 
 @admin.register(Semester)
 class SemesterAdmin(admin.ModelAdmin):
@@ -31,4 +35,11 @@ class AttendanceAdmin(admin.ModelAdmin):
     list_display = ('student_id', 'schedule_item', 'date', 'is_present')
     list_filter = ('is_present', 'date', 'schedule_item__subject')
     search_fields = ('student_id', 'schedule_item__subject__name')
-    date_hierarchy = 'date' 
+    date_hierarchy = 'date'
+
+@admin.register(HomeworkAssignment)
+class HomeworkAssignmentAdmin(admin.ModelAdmin):
+    list_display = ('subject', 'name', 'deadline')
+    list_filter = ('subject', 'deadline')
+    search_fields = ('name', 'description', 'subject__name')
+    ordering = ('-deadline',) 

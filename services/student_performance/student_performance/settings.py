@@ -105,16 +105,43 @@ REST_FRAMEWORK = {
     ),
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8002",
-    "http://127.0.0.1:8002",
-    "http://localhost:8003",
-    "http://127.0.0.1:8003",
-    "http://localhost:8004",
-    "http://127.0.0.1:8004",
+# CSRF settings
+CSRF_COOKIE_SECURE = False  # Изменяем на False для работы с http
+CSRF_COOKIE_SAMESITE = 'Lax'  # Меняем на Lax для работы в пределах одного домена
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8003',
+    'http://localhost:8002',
+    'http://localhost:8004'
 ]
+CSRF_USE_SESSIONS = False  # Отключаем хранение в сессии
+CSRF_COOKIE_NAME = 'csrftoken'  # Устанавливаем стандартное имя куки
 
+# CORS settings
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8003',
+    'http://localhost:8002',
+    'http://localhost:8004'
+]
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # Настройки JWT
 SIMPLE_JWT = {

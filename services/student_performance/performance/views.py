@@ -3,7 +3,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Sum, Count, F, Avg
 from django.shortcuts import get_object_or_404
-from .models import Semester, Subject, Grade, Schedule, Attendance, Student
+from .models import (
+    Semester, Subject, Grade, Schedule, Attendance, Student,
+    StudentAssignment, Assignment, HomeworkAssignment, HomeworkSubmission
+)
 from .serializers import (
     SemesterSerializer,
     SubjectSerializer,
@@ -22,7 +25,11 @@ from django.urls import reverse
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 from django.db import models
-from datetime import datetime
+from datetime import datetime, timezone
+from django.utils import timezone
+from django.http import JsonResponse
+import requests
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 
 class TeacherPermission(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -151,6 +158,40 @@ class StudentViewSet(viewsets.ReadOnlyModelViewSet):
         return Student.objects.filter(
             grade__subject__in=teacher_subjects
         ).distinct()
+
+@login_required
+def submit_assignment(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    
+    if request.method == 'POST':
+        try:
+            # Получаем или создаем запись о задании студента
+            student_assignment, created = StudentAssignment.objects.get_or_create(
+                student=request.user,
+                assignment=assignment,
+                defaults={'status': 'SUBMITTED'}
+            )
+            
+            # Обновляем данные
+            student_assignment.submission_text = request.POST.get('submission_text', '')
+            student_assignment.submitted_at = timezone.now()
+            student_assignment.status = 'SUBMITTED'
+            
+            # Обрабатываем загруженный файл
+            if 'file' in request.FILES:
+                student_assignment.submission_file = request.FILES['file']
+            
+            student_assignment.save()
+            
+            messages.success(request, 'Задание успешно отправлено!')
+            return redirect('dashboard')
+            
+        except Exception as e:
+            messages.error(request, f'Ошибка при отправке задания: {str(e)}')
+    
+    return render(request, 'student_performance/send_homework.html', {
+        'assignment': assignment
+    })
 
 @login_required
 def index(request):
@@ -428,4 +469,118 @@ def logout_view(request):
     logout(request)
     response = redirect('http://localhost:8002/login/')
     response.delete_cookie('token')
-    return response 
+    return response
+
+@login_required
+@ensure_csrf_cookie
+@csrf_protect
+def send_homework_view(request):
+    # Получаем или создаем объект Student для текущего пользователя
+    student, created = Student.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'student_number': f"ST{request.user.id}",  # Временный номер студента
+            'group': 'Default Group',  # Временная группа
+            'faculty': 'Default Faculty'  # Временный факультет
+        }
+    )
+
+    # Получаем текущий семестр
+    current_semester = Semester.objects.filter(is_current=True).first()
+    
+    # Получаем предметы текущего семестра
+    subjects = Subject.objects.filter(semester=current_semester) if current_semester else []
+    
+    # Получаем последние отправленные задания
+    submissions = HomeworkSubmission.objects.filter(student=student).order_by('-submitted_at')[:5]
+
+    if request.method == 'POST':
+        subject_id = request.POST.get('subject')
+        assignment_id = request.POST.get('assignment')
+        description = request.POST.get('description')
+        file = request.FILES.get('file')
+
+        if not all([subject_id, assignment_id, file]):
+            messages.error(request, 'Пожалуйста, заполните все обязательные поля')
+            return redirect('send_homework')
+
+        try:
+            # Получаем предмет
+            subject = Subject.objects.get(id=subject_id)
+            
+            # Создаем или получаем задание
+            assignment, created = HomeworkAssignment.objects.get_or_create(
+                id=assignment_id,
+                defaults={
+                    'subject': subject,
+                    'name': dict(
+                        [(1, 'БДЗ'),
+                         (2, 'Лабораторная работа'),
+                         (3, 'Курсовая работа'),
+                         (4, 'Отработка')]
+                    ).get(int(assignment_id), 'Неизвестное задание'),
+                    'description': 'Автоматически созданное задание',
+                    'deadline': timezone.now() + timezone.timedelta(days=14)
+                }
+            )
+
+            # Создаем новую отправку
+            submission = HomeworkSubmission.objects.create(
+                student=student,
+                assignment=assignment,
+                description=description,
+                file=file,
+                status='SUBMITTED'
+            )
+
+            messages.success(request, 'Задание успешно отправлено')
+            return redirect('send_homework')
+
+        except Subject.DoesNotExist:
+            messages.error(request, 'Выбранный предмет не найден')
+            return redirect('send_homework')
+        except Exception as e:
+            messages.error(request, f'Произошла ошибка: {str(e)}')
+            return redirect('send_homework')
+
+    return render(request, 'student_performance/send_homework.html', {
+        'subjects': subjects,
+        'submissions': submissions
+    })
+
+@login_required
+@ensure_csrf_cookie
+@csrf_protect
+def get_assignments_api(request, subject_id):
+    try:
+        # Статический список заданий
+        static_assignments = [
+            {
+                'id': 1,
+                'name': 'БДЗ',
+                'description': 'Большое домашнее задание',
+                'deadline': (timezone.now() + timezone.timedelta(days=14)).isoformat()
+            },
+            {
+                'id': 2,
+                'name': 'Лабораторная работа',
+                'description': 'Лабораторная работа по предмету',
+                'deadline': (timezone.now() + timezone.timedelta(days=7)).isoformat()
+            },
+            {
+                'id': 3,
+                'name': 'Курсовая работа',
+                'description': 'Курсовая работа по предмету',
+                'deadline': (timezone.now() + timezone.timedelta(days=30)).isoformat()
+            },
+            {
+                'id': 4,
+                'name': 'Отработка',
+                'description': 'Отработка пропущенных занятий',
+                'deadline': (timezone.now() + timezone.timedelta(days=5)).isoformat()
+            }
+        ]
+        
+        return JsonResponse(static_assignments, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500) 
