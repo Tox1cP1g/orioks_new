@@ -1,0 +1,36 @@
+{% extends 'teaching/base.html' %}
+
+{% block title %}Сданные задания - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Список сданных заданий</h4>
+            </div>
+            <div class="card-body">
+                {% if submissions %}
+                    <div class="list-group">
+                        {% for submission in submissions %}
+                            <div class="list-group-item">
+                                <h5>{{ submission.assignment.title }}</h5>
+                                <p><strong>Студент:</strong> {{ submission.student_id }}</p>
+                                <p><strong>Статус:</strong> {{ submission.get_status_display }}</p>
+                                <p><strong>Дата сдачи:</strong> {{ submission.submitted_at|date:"d M Y, H:i" }}</p>
+                                <p><strong>Текст ответа:</strong> {{ submission.submission_text|truncatewords:20 }}</p>
+                                {% if submission.files %}
+                                    <p><strong>Файл:</strong> <a href="{{ submission.files.url }}" target="_blank">Скачать файл</a></p>
+                                {% endif %}
+                                <a href="{% url 'grade_submission' submission.id %}" class="btn btn-primary">Оценить задание</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>На данный момент нет сданных заданий для ваших курсов.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

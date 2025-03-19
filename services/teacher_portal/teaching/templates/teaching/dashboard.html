@@ -9,9 +9,9 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-6 mb-4">
-        <div class="card">
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div class="col">
+        <div class="card h-100">
             <div class="card-header">
                 <h5 class="card-title mb-0">Мои курсы</h5>
             </div>
@@ -20,7 +20,7 @@
                 <ul class="list-group">
                     {% for subject in subjects %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="/courses/{{ subject.id }}/" class="text-decoration-none text-dark">
+                        <a href="/courses/{{ subject.id }}/" class="text-decoration-none">
                             {{ subject.name }}
                         </a>
                         <span class="badge bg-primary rounded-pill">{{ subject.students_count }} студентов</span>
@@ -34,8 +34,8 @@
         </div>
     </div>
 
-    <div class="col-md-6 mb-4">
-        <div class="card">
+    <div class="col">
+        <div class="card h-100">
             <div class="card-header">
                 <h5 class="card-title mb-0">Последние задания</h5>
             </div>
@@ -45,8 +45,8 @@
                     {% for assignment in recent_assignments %}
                     <li class="list-group-item">
                         <h6 class="mb-1">{{ assignment.title }}</h6>
-                        <p class="mb-1 text-muted">{{ assignment.subject.name }}</p>
-                        <small class="text-muted">Срок сдачи: {{ assignment.due_date|date:"d.m.Y" }}</small>
+                        <p class="mb-1">{{ assignment.subject.name }}</p>
+                        <small>Срок сдачи: {{ assignment.due_date|date:"d.m.Y" }}</small>
                     </li>
                     {% endfor %}
                 </ul>
@@ -56,11 +56,9 @@
             </div>
         </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="card">
+    <div class="col">
+        <div class="card h-100">
             <div class="card-header">
                 <h5 class="card-title mb-0">Работы на проверку</h5>
             </div>
@@ -99,4 +97,64 @@
         </div>
     </div>
 </div>
+
+<style>
+    .card {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+    }
+
+    .card-header {
+        background-color: var(--card-bg);
+        border-bottom-color: var(--border-color);
+    }
+
+    .card-title {
+        color: var(--text-color);
+    }
+
+    .list-group-item {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    .list-group-item a {
+        color: var(--text-color);
+    }
+
+    .list-group-item h6 {
+        color: var(--text-color);
+    }
+
+    .list-group-item p {
+        color: var(--text-color);
+        opacity: 0.9;
+    }
+
+    .list-group-item small {
+        color: var(--text-color);
+        opacity: 0.7;
+    }
+
+    .table {
+        color: var(--text-color);
+    }
+
+    .table thead th {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    .table td {
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    .text-muted {
+        color: var(--text-color) !important;
+        opacity: 0.7;
+    }
+</style>
 {% endblock %} 

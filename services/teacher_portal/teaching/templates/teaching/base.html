@@ -15,29 +15,58 @@
             --text-color: #2c3e50;
             --bg-color: #f8f9fa;
             --card-bg: #ffffff;
+            --card-shadow: rgba(0, 0, 0, 0.1);
             --border-color: #dee2e6;
             --navbar-bg: #2c3e50;
             --navbar-text: #ffffff;
+            --navbar-hover: #3498db;
             --dropdown-bg: #ffffff;
             --dropdown-hover: #f8f9fa;
             --footer-bg: #f8f9fa;
             --table-header-bg: #f8f9fa;
+            --stats-card-bg: #ffffff;
+            --stats-text-color: #2c3e50;
+            --chart-grid-color: #e9ecef;
+            --select-bg: #ffffff;
+            --select-text: #2c3e50;
+            --filter-button-bg: #3498db;
+            --filter-button-text: #ffffff;
         }
 
         :root[data-theme="dark"] {
-            --primary-color: #1a252f;
-            --secondary-color: #2980b9;
-            --accent-color: #c0392b;
-            --text-color: #f8f9fa;
-            --bg-color: #212529;
-            --card-bg: #343a40;
-            --border-color: #495057;
-            --navbar-bg: #1a252f;
-            --navbar-text: #f8f9fa;
-            --dropdown-bg: #343a40;
-            --dropdown-hover: #495057;
-            --footer-bg: #343a40;
-            --table-header-bg: #343a40;
+            --primary-color: #1a1d21;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --text-color: #ffffff;
+            --bg-color: #1a1d21;
+            --card-bg: #2d3239;
+            --card-shadow: rgba(255, 255, 255, 0.1);
+            --border-color: #3d434c;
+            --navbar-bg: #242830;
+            --navbar-text: #ffffff;
+            --navbar-hover: #3498db;
+            --dropdown-bg: #2d3239;
+            --dropdown-hover: #3d434c;
+            --footer-bg: #242830;
+            --table-header-bg: #2d3239;
+            --stats-card-bg: #2d3239;
+            --stats-text-color: #ffffff;
+            --chart-grid-color: #3d434c;
+            --select-bg: #2d3239;
+            --select-text: #ffffff;
+            --filter-button-bg: #3498db;
+            --filter-button-text: #ffffff;
+            --subject-card-bg: #2d3239;
+            --grade-card-blue: rgba(52, 152, 219, 0.15);
+            --grade-card-green: rgba(46, 204, 113, 0.15);
+            --grade-card-yellow: rgba(241, 196, 15, 0.15);
+            --grade-card-red: rgba(231, 76, 60, 0.15);
+            --link-color: #3498db;
+            --link-hover-color: #2980b9;
+            --btn-outline-color: #3498db;
+            --btn-outline-hover-bg: #3498db;
+            --btn-outline-hover-text: #ffffff;
+            --card-hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
         }
 
         body {
@@ -47,43 +76,82 @@
         }
 
         .navbar {
-            background-color: var(--navbar-bg) !important;
+            background-color: #2c3e50 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        .navbar-brand, .nav-link {
-            color: var(--navbar-text) !important;
+        
+        .navbar-brand {
+            color: #ffffff !important;
+            font-weight: bold;
+            font-size: 1.5rem;
         }
-
+        
         .nav-link {
+            color: #ffffff !important;
             opacity: 0.9;
             transition: opacity 0.3s ease;
         }
-
+        
         .nav-link:hover {
             opacity: 1;
+        }
+        
+        .nav-link.active {
+            opacity: 1;
+            font-weight: 500;
+        }
+
+        .container {
+            background-color: var(--bg-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px var(--card-shadow);
         }
 
         .card {
             background-color: var(--card-bg);
+            color: var(--text-color);
             border: 1px solid var(--border-color);
-            transition: background-color 0.3s, border-color 0.3s;
+            box-shadow: 0 4px 6px var(--card-shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px var(--card-shadow);
+        }
+
+        .card-header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
         }
 
         .alert {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             color: var(--text-color);
+            border-radius: 8px;
         }
 
         .table {
             background-color: var(--card-bg);
             color: var(--text-color);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         .table thead th {
             background-color: var(--table-header-bg);
             border-color: var(--border-color);
             color: var(--text-color);
+            font-weight: 600;
         }
 
         .table td {
@@ -91,13 +159,15 @@
         }
 
         .form-control {
-            background-color: var(--bg-color);
+            background-color: var(--card-bg);
             color: var(--text-color);
             border-color: var(--border-color);
+            border-radius: 6px;
+            padding: 0.75rem;
         }
 
         .form-control:focus {
-            background-color: var(--bg-color);
+            background-color: var(--card-bg);
             color: var(--text-color);
             border-color: var(--secondary-color);
             box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
@@ -105,18 +175,37 @@
 
         .form-label {
             color: var(--text-color);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
         }
 
         .theme-switch {
             cursor: pointer;
             padding: 0.5rem;
             margin-left: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            color: var(--navbar-text);
+        }
+
+        .theme-switch:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--navbar-hover);
         }
 
         .theme-switch i {
-            font-size: 1.2rem;
-            color: var(--navbar-text);
-            opacity: 0.9;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
 
         .btn-primary {
@@ -127,30 +216,98 @@
         .btn-primary:hover {
             background-color: var(--accent-color);
             border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .messages {
+            margin-bottom: 2rem;
+        }
+
+        .alert {
+            margin-bottom: 1rem;
+            border-radius: 8px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        .card-title {
+            color: var(--text-color) !important;
+        }
+
+        .card-text {
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+
+        .list-group-item {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .list-group-item strong {
+            color: var(--text-color);
+        }
+
+        .list-group-item .text-muted {
+            color: var(--text-color) !important;
+            opacity: 0.7;
+        }
+
+        .navbar .container {
+            background-color: #1a1d21 !important;
+            box-shadow: none !important;
+            padding: 0.5rem 1rem;
         }
     </style>
+
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
+     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">Портал преподавателя</a>
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-mortarboard-fill me-2"></i>
+                Портал преподавателя
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/courses/">Мои курсы</a>
+                        <a class="nav-link" href="/courses/">
+                            <i class="bi bi-book me-1"></i> Мои курсы
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/assignments/">Задания</a>
+                        <a class="nav-link" href="/assignments/">
+                            <i class="bi bi-journal-text me-1"></i> Задания
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/submissions/">Работы студентов</a>
+                        <a class="nav-link" href="/submissions/">
+                            <i class="bi bi-file-earmark-text me-1"></i> Работы студентов
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/profile/">Профиль</a>
+                        <a class="nav-link" href="/profile/">
+                            <i class="bi bi-person-circle me-1"></i> Профиль
+                        </a>
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
@@ -161,14 +318,21 @@
                     </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <span class="nav-link">{{ user.get_full_name }}</span>
+                        <span class="nav-link">
+                            <i class="bi bi-person-circle me-1"></i>
+                            {{ user.get_full_name }}
+                        </span>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/logout/">Выйти</a>
+                        <a class="nav-link" href="/logout/">
+                            <i class="bi bi-box-arrow-right me-1"></i> Выйти
+                        </a>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/login/">Войти</a>
+                        <a class="nav-link" href="/login/">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Войти
+                        </a>
                     </li>
                     {% endif %}
                 </ul>
@@ -191,32 +355,28 @@
         {% endblock %}
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Функция для переключения темы
         function toggleTheme() {
             const html = document.documentElement;
             const currentTheme = html.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
+
             html.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
-            
-            // Обновляем иконку
+
             const themeIcon = document.querySelector('.theme-switch i');
             themeIcon.className = newTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
         }
 
-        // Проверяем сохраненную тему при загрузке
         document.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
-            
-            // Устанавливаем правильную иконку
+
             const themeIcon = document.querySelector('.theme-switch i');
             themeIcon.className = savedTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
         });
     </script>
+
     {% block extra_js %}{% endblock %}
 </body>
-</html> 
+</html>

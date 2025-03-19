@@ -6,6 +6,7 @@ from django.contrib import messages
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from decimal import Decimal, InvalidOperation
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from .models import (
@@ -85,9 +86,41 @@ def profile(request):
 
 @login_required
 def courses(request):
-    teacher = get_object_or_404(Teacher, user=request.user)
-    courses = Course.objects.filter(teachers=teacher).order_by('-semester', 'name')
+    courses = Course.objects.all().order_by('-semester', 'name')  # Показывать все курсы
     return render(request, 'teaching/courses.html', {'courses': courses})
+
+
+@login_required
+def create_course(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        semester = request.POST.get('semester')
+        teachers = request.POST.getlist('teachers')  # Получаем список преподавателей
+
+        # Создаем новый курс
+        if name and description and semester and teachers:
+            course = Course.objects.create(
+                name=name,
+                description=description,
+                semester=semester
+            )
+            # Добавляем преподавателей в курс
+            for teacher_id in teachers:
+                teacher = Teacher.objects.get(id=teacher_id)
+                course.teachers.add(teacher)
+
+            course.save()
+            messages.success(request, 'Курс успешно создан!')
+            return redirect('courses')  # Перенаправление на страницу курсов
+        else:
+            messages.error(request, 'Пожалуйста, заполните все обязательные поля.')
+
+    # Получаем список всех преподавателей для отображения в форме
+    teachers = Teacher.objects.all()
+    return render(request, 'teaching/create_course.html', {'teachers': teachers})
+
+
 
 @login_required
 def assignments(request):
@@ -96,6 +129,62 @@ def assignments(request):
         course__teachers=teacher
     ).order_by('deadline')
     return render(request, 'teaching/assignments.html', {'assignments': assignments})
+
+@login_required
+def create_assignment(request):
+    """Создание нового задания"""
+    teacher = get_object_or_404(Teacher, user=request.user)
+    courses = Course.objects.filter(teachers=teacher)
+    assignment_types = Assignment.ASSIGNMENT_TYPES
+
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        course_id = request.POST.get("course")
+        assignment_type = request.POST.get("type")
+        max_score = request.POST.get("max_score")
+        deadline = request.POST.get("deadline")
+
+        # Проверяем, существует ли курс
+        course = get_object_or_404(Course, id=course_id)
+
+
+        if max_score:
+            try:
+                max_score = Decimal(max_score)
+            except (InvalidOperation, ValueError, TypeError):
+                messages.error(request, "Ошибка: Максимальный балл должен быть числом.")
+                return render(request, "teaching/assignment_form.html", {
+                    "courses": courses,
+                    "assignment_types": assignment_types,
+                    "title": title,
+                    "description": description,
+                    "selected_course": course_id,
+                    "selected_type": assignment_type,
+                    "max_score": max_score,
+                    "deadline": deadline
+                })
+        else:
+            max_score = None
+
+
+        Assignment.objects.create(
+            course=course,
+            created_by=teacher,
+            title=title,
+            description=description,
+            type=assignment_type,
+            max_score=max_score,
+            deadline=deadline
+        )
+
+        messages.success(request, "Задание успешно создано!")
+        return redirect("assignments_list")
+
+    return render(request, "teaching/assignment_form.html", {
+        "courses": courses,
+        "assignment_types": assignment_types
+    })
 
 @login_required
 def submissions(request):
