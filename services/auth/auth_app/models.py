@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
+from .utils import binary_to_string, string_to_binary
 
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -31,8 +32,8 @@ class WebAuthnCredential(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='webauthn_credentials')
     
     # Данные учетных данных WebAuthn
-    credential_id = models.BinaryField(unique=True, verbose_name="ID учетных данных")
-    credential_public_key = models.BinaryField(verbose_name="Публичный ключ")
+    credential_id = models.CharField(max_length=1024, unique=True, verbose_name="ID учетных данных")
+    credential_public_key = models.TextField(verbose_name="Публичный ключ")
     credential_name = models.CharField(max_length=100, verbose_name="Название ключа безопасности")
     
     # Метаданные
@@ -46,4 +47,21 @@ class WebAuthnCredential(models.Model):
         verbose_name_plural = "Ключи WebAuthn"
         
     def __str__(self):
-        return f"{self.credential_name} ({self.user.get_full_name()})" 
+        return f"{self.credential_name} ({self.user.get_full_name()})"
+    
+    # Методы для работы с бинарными данными через base64
+    def get_credential_id_binary(self):
+        """Получить credential_id в бинарном виде для WebAuthn библиотеки"""
+        return string_to_binary(self.credential_id)
+    
+    def set_credential_id_binary(self, binary_data):
+        """Установить credential_id из бинарных данных, конвертируя в base64"""
+        self.credential_id = binary_to_string(binary_data)
+    
+    def get_public_key_binary(self):
+        """Получить credential_public_key в бинарном виде для WebAuthn библиотеки"""
+        return string_to_binary(self.credential_public_key)
+    
+    def set_public_key_binary(self, binary_data):
+        """Установить credential_public_key из бинарных данных, конвертируя в base64"""
+        self.credential_public_key = binary_to_string(binary_data) 

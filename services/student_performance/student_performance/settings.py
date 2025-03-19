@@ -60,23 +60,16 @@ WSGI_APPLICATION = 'student_performance.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    } if os.getenv('USE_SQLITE', 'False') == 'True' else {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'NAME': 'student_portal',
+        'USER': 'vkltd',
+        'PASSWORD': 'piskogryz',
+        'HOST': '144.91.72.208',
+        'PORT': '3306',
         'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             'charset': 'utf8mb4',
-            'use_unicode': True,
-            'connect_timeout': 10,
-            'ssl': False,
-            'auth_plugin': 'mysql_native_password'
-        }
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 

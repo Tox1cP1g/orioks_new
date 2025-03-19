@@ -45,4 +45,5 @@ urlpatterns = [
     path('profile/', profile_view, name='profile'),
     path('logout/', logout_view, name='logout'),
     path('api/', include(router.urls)),
+    path('', include('performance.urls')),  # Включаем URL из приложения performance
 ]

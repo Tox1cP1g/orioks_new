@@ -1,41 +1,58 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponse
+import json
+import logging
+import re
+import uuid
+import copy
+import base64
+import binascii
+from datetime import datetime
+from types import SimpleNamespace
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render, get_object_or_404
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_protect
+from django.utils.html import escape
 from django.utils import timezone
-from django.conf import settings
 from django.apps import apps
 from django.db.models import Count
-from django.contrib import messages
-import logging
-import binascii
-import json
-import base64
+
+# Импорты для WebAuthn
 import webauthn
-from webauthn.helpers.structs import (
-    AuthenticatorSelectionCriteria,
-    ResidentKeyRequirement,
-    UserVerificationRequirement,
-    AttestationConveyancePreference,
-)
 from webauthn import (
     generate_registration_options,
     verify_registration_response,
     generate_authentication_options,
-    verify_authentication_response
+    verify_authentication_response,
 )
-from auth_app.models import WebAuthnCredential
-from auth_app.utils import binary_to_string, string_to_binary
-from .utils import create_student_profile_with_retry
+from webauthn.helpers.options_to_json import options_to_json
+from webauthn.helpers.structs import (
+    AuthenticatorSelectionCriteria,
+    ResidentKeyRequirement,
+    UserVerificationRequirement,
+    PublicKeyCredentialDescriptor,
+    COSEAlgorithmIdentifier,
+    AttestationConveyancePreference,
+    AuthenticatorAttachment,
+    PublicKeyCredentialType,
+    PublicKeyCredentialParameters,
+    AuthenticatorAssertionResponse,
+)
+from webauthn.helpers.exceptions import InvalidRegistrationResponse, InvalidAuthenticationResponse
 
-# Настройка логирования
-logger = logging.getLogger(__name__)
+from auth_app.models import WebAuthnCredential
 
 # Получаем модель пользователя
 User = get_user_model()
 
 # Настройки логирования
+logger = logging.getLogger('api.webauthn_views')
+
+# Настройка уровня логирования для отладки
 logger.setLevel(logging.DEBUG)
 
 # Гибкий выбор RP_ID
@@ -208,7 +225,7 @@ def webauthn_register_begin(request):
     exclude_credentials = []
     for cred in existing_credentials:
         exclude_credentials.append({
-            "id": string_to_binary(cred.credential_id),  # Конвертируем строку в бинарные данные
+            "id": cred.credential_id,
             "type": "public-key"
         })
     
@@ -461,14 +478,13 @@ def webauthn_register_complete(request):
         
         # Проверяем, есть ли уже ключ с таким ID
         credential_id = verification.credential_id
-        credential_id_str = binary_to_string(credential_id)  # Конвертируем в строку для поиска
         existing_key = WebAuthnCredential.objects.filter(
-            credential_id=credential_id_str, 
+            credential_id=credential_id, 
             user=request.user
         ).first()
         
         if existing_key:
-            logger.warning(f"Ключ с ID {credential_id_str} уже зарегистрирован для пользователя {request.user.username}")
+            logger.warning(f"Ключ с ID {credential_id} уже зарегистрирован для пользователя {request.user.username}")
             return JsonResponse({
                 'status': 'error',
                 'message': 'Этот ключ уже зарегистрирован'
@@ -477,8 +493,8 @@ def webauthn_register_complete(request):
         # Создаем новую запись о ключе
         new_key = WebAuthnCredential(
             user=request.user,
-            credential_id=binary_to_string(credential_id),  # Конвертируем в строку перед сохранением
-            credential_public_key=binary_to_string(verification.credential_public_key),  # Конвертируем в строку
+            credential_id=credential_id,
+            credential_public_key=verification.credential_public_key,
             sign_count=verification.sign_count,
             credential_name=key_name,
             rp_id=get_rp_id(request)  # Добавляем RP_ID из запроса
@@ -604,9 +620,11 @@ def webauthn_authenticate_begin(request):
             'message': f'Ошибка при создании опций аутентификации: {str(e)}'
         }, status=500)
 
-@csrf_exempt  # Для AJAX-запросов
+@csrf_protect
 def webauthn_authenticate_complete(request):
-    """Завершение аутентификации WebAuthn"""
+    """
+    Завершение процесса аутентификации через WebAuthn.
+    """
     try:
         # Получаем данные из запроса
         try:
@@ -644,11 +662,10 @@ def webauthn_authenticate_complete(request):
 
         # Декодируем credential_id
         raw_id = _base64url_decode(credential['rawId'])
-        raw_id_str = binary_to_string(raw_id)  # Конвертируем в строку для поиска
         
         # Находим учетные данные в базе данных
         try:
-            stored_credential = WebAuthnCredential.objects.get(credential_id=raw_id_str)
+            stored_credential = WebAuthnCredential.objects.get(credential_id=raw_id)
             logger.debug(f"Найден ключ в базе данных: {stored_credential.credential_name}")
         except WebAuthnCredential.DoesNotExist:
             logger.warning(f"Ключ с ID {binascii.hexlify(raw_id).decode()} не найден в базе данных")
@@ -659,8 +676,8 @@ def webauthn_authenticate_complete(request):
 
         user = stored_credential.user
         
-        # Получаем публичный ключ и конвертируем его обратно в бинарные данные
-        credential_public_key = string_to_binary(stored_credential.credential_public_key)
+        # Получаем публичный ключ
+        credential_public_key = stored_credential.credential_public_key
         if credential_public_key is None:
             logger.error(f"Публичный ключ для credential_id {binascii.hexlify(raw_id).decode()} не найден")
             return JsonResponse({
@@ -669,7 +686,7 @@ def webauthn_authenticate_complete(request):
             }, status=400)
 
         # Проверяем webauthn учетные данные
-        authentication_verification = verify_authentication_response(
+        authentication_verification = webauthn.verify_authentication_response(
             credential=webauthn.helpers.structs.AuthenticationCredential(
                 id=credential['id'],
                 raw_id=raw_id,
@@ -714,10 +731,6 @@ def webauthn_authenticate_complete(request):
         # Аутентифицируем пользователя
         login(request, user)
         
-        # Создаем профиль пользователя в студенческом портале, если это студент
-        if user.role in ['STUDENT', 'student']:
-            create_student_profile_with_retry(user)
-
         # Очищаем challenge
         if 'webauthn_authentication_challenge' in request.session:
             del request.session['webauthn_authentication_challenge']

@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
 from rest_framework_simplejwt.views import TokenVerifyView
 import logging
+from .utils import create_student_profile_with_retry  # Добавляем импорт
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,10 @@ def login_view(request):
             if user is not None:
                 # Выполняем вход пользователя
                 login(request, user)
+                
+                # Создаем профиль пользователя в студенческом портале
+                if user.role in ['STUDENT', 'student']:
+                    create_student_profile_with_retry(user)
                 
                 # Проверяем cookie на предложение регистрации WebAuthn
                 suggest_register = request.COOKIES.get('suggest_webauthn_register', '')
@@ -97,6 +102,12 @@ def student_login_view(request):
         user = authenticate(username=username, password=password)
         
         if user is not None and user.role == 'STUDENT':
+            # Выполняем вход пользователя
+            login(request, user)
+            
+            # Создаем профиль пользователя в студенческом портале
+            create_student_profile_with_retry(user)
+            
             refresh = RefreshToken.for_user(user)
             refresh['first_name'] = user.first_name
             refresh['last_name'] = user.last_name
