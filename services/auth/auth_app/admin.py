@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import User
+from .models import User, WebAuthnCredential
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
@@ -42,4 +42,12 @@ class UserAdmin(BaseUserAdmin):
                 'student_id', 'department', 'position'
             ),
         }),
-    ) 
+    )
+
+class WebAuthnCredentialAdmin(admin.ModelAdmin):
+    list_display = ('credential_name', 'user', 'created_at', 'last_used_at')
+    list_filter = ('user', 'created_at', 'last_used_at')
+    search_fields = ('credential_name', 'user__username', 'user__first_name', 'user__last_name')
+    readonly_fields = ('id', 'credential_id', 'credential_public_key', 'sign_count', 'created_at', 'last_used_at')
+
+admin.site.register(WebAuthnCredential, WebAuthnCredentialAdmin) 

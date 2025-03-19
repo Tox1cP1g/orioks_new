@@ -30,6 +30,16 @@ def login_view(request):
                 # Выполняем вход пользователя
                 login(request, user)
                 
+                # Проверяем cookie на предложение регистрации WebAuthn
+                suggest_register = request.COOKIES.get('suggest_webauthn_register', '')
+                if suggest_register and suggest_register == username:
+                    # Если cookie содержит имя текущего пользователя, перенаправляем на страницу ключей
+                    logger.info(f"Redirecting user {username} to WebAuthn keys page to register a key")
+                    messages.info(request, 'Для повышения безопасности рекомендуем зарегистрировать ключ безопасности WebAuthn')
+                    response = redirect('webauthn_keys_list')
+                    response.delete_cookie('suggest_webauthn_register')
+                    return response
+                
                 # Генерируем JWT токен
                 refresh = RefreshToken.for_user(user)
                 refresh['first_name'] = user.first_name
@@ -187,7 +197,16 @@ def token_verify(request):
 
 @csrf_protect
 def logout_view(request):
-    logout(request)
+    logger.info("Logout view called")
+    # Сначала создаем response
     response = redirect('login')
+    # Удаляем cookie с токеном
+    logger.info("Deleting token cookie")
     response.delete_cookie('token')
+    
+    # Затем выполняем logout после создания response
+    logger.info("Performing user logout")
+    logout(request)
+    
+    logger.info("Logout completed successfully")
     return response

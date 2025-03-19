@@ -1,65 +1,607 @@
 {% extends 'auth/base.html' %}
-{% block title %}Вход в систему{% endblock %}
+
+{% block title %}Вход - ОРИОКС{% endblock %}
 
 {% block content %}
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-    <div class="card shadow p-4" style="width: 100%; max-width: 400px; background-color: var(--card-bg); border-color: var(--border-color);">
-        <h2 class="text-center mb-4" style="color: var(--text-color);">Вход в систему</h2>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card" style="background-color: var(--card-bg); border-color: var(--border-color);">
+                <div class="card-header d-flex justify-content-between align-items-center" style="background-color: var(--card-bg); border-color: var(--border-color);">
+                    <h3 class="mb-0" style="color: var(--text-color);">Вход в систему</h3>
+                    <div class="theme-switch-wrapper">
+                        <button id="theme-toggle" class="btn btn-sm btn-outline-secondary">
+                            <i id="theme-icon" class="fas fa-moon"></i>
+                            <span id="theme-text">Темная тема</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body" style="color: var(--text-color);">
+                    <!-- Блок для отладочной информации -->
+                    <div id="debug-info" class="alert alert-info mb-4" style="display: none;">
+                        <h5>Отладочная информация:</h5>
+                        <p id="debug-webauthn-support"></p>
+                        <p id="debug-https-status"></p>
+                        <p id="debug-origin"></p>
+                        <p id="debug-user-agent"></p>
+                        <p id="debug-platform-info"></p>
+                        <div id="debug-events"></div>
+                    </div>
 
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}" role="alert">
-                {{ message }}
+                    <!-- Отображение ошибок из Django -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <!-- Кнопка для прямого входа с WebAuthn -->
+                    <div class="d-grid gap-2 mb-4">
+                        <button type="button" id="webauthn-direct-button" class="btn btn-lg btn-primary">
+                            <i class="fas fa-fingerprint me-2"></i>Войти только по ключу безопасности
+                        </button>
+                        <div id="webauthn-users-container" style="display: none;">
+                            <p class="text-center" style="color: var(--text-color);">Выберите пользователя для входа:</p>
+                            <div id="webauthn-users-list" class="list-group mb-3">
+                                <!-- Здесь будет список пользователей -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center my-3">
+                        <p style="color: var(--text-color);">или используйте стандартный вход</p>
+                        <hr style="border-color: var(--border-color);">
+                    </div>
+                    
+                    <!-- Форма входа -->
+                    <form method="post" id="login-form">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="username" class="form-label" style="color: var(--text-color);">Имя пользователя</label>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                   required autofocus style="background-color: var(--input-bg); color: var(--input-text); border-color: var(--border-color);">
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label" style="color: var(--text-color);">Пароль</label>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   style="background-color: var(--input-bg); color: var(--input-text); border-color: var(--border-color);">
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Войти с паролем</button>
+                            <div class="text-center my-2" style="color: var(--text-color);">или</div>
+                            <button type="button" id="webauthn-button" class="btn btn-success">
+                                <i class="fas fa-key me-2"></i>Войти с ключом безопасности
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="webauthn-status" class="alert mt-3" style="display: none;"></div>
+                    
+                    <div class="mt-3 text-center">
+                        <p class="small" style="color: var(--text-color);">
+                            Нет ключа безопасности? Сначала войдите с паролем и затем
+                            <a href="{% url 'webauthn_keys_list' %}" style="color: var(--link-color);">зарегистрируйте ключ безопасности</a>.
+                        </p>
+                    </div>
+                </div>
             </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        {% if error %}
-        <div class="alert alert-danger" role="alert">
-            {{ error }}
-        </div>
-        {% endif %}
-
-        <form method="post" action="{% url 'login' %}" novalidate>
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="username" class="form-label" style="color: var(--text-color);">Имя пользователя</label>
-                <input type="text" class="form-control" id="username" name="username" required 
-                       style="background-color: var(--bg-color); color: var(--text-color); border-color: var(--border-color);">
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label" style="color: var(--text-color);">Пароль</label>
-                <input type="password" class="form-control" id="password" name="password" required
-                       style="background-color: var(--bg-color); color: var(--text-color); border-color: var(--border-color);">
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100">Войти</button>
-        </form>
-
-        <div class="mt-3 text-center">
-            <a href="#" style="color: var(--text-color); opacity: 0.7;">Забыли пароль?</a>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<style>
-    .form-control:focus {
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        border-color: var(--border-color);
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+{% block extra_js %}
+<script>
+    // Функционал переключения тем
+    function initThemeToggle() {
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const themeText = document.getElementById('theme-text');
+        
+        // Проверяем текущую тему
+        function getCurrentTheme() {
+            return localStorage.getItem('theme') || 'auto';
+        }
+        
+        // Применяем тему
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            // Обновляем внешний вид кнопки
+            if (theme === 'dark') {
+                themeIcon.className = 'fas fa-sun';
+                themeText.textContent = 'Светлая тема';
+                document.documentElement.style.setProperty('--bg-color', '#212529');
+                document.documentElement.style.setProperty('--text-color', '#f8f9fa');
+                document.documentElement.style.setProperty('--card-bg', '#343a40');
+                document.documentElement.style.setProperty('--border-color', '#495057');
+                document.documentElement.style.setProperty('--link-color', '#6ea8fe');
+                document.documentElement.style.setProperty('--input-bg', '#2c3034');
+                document.documentElement.style.setProperty('--input-text', '#fff');
+            } else {
+                themeIcon.className = 'fas fa-moon';
+                themeText.textContent = 'Темная тема';
+                document.documentElement.style.setProperty('--bg-color', '#f8f9fa');
+                document.documentElement.style.setProperty('--text-color', '#212529');
+                document.documentElement.style.setProperty('--card-bg', '#ffffff');
+                document.documentElement.style.setProperty('--border-color', '#dee2e6');
+                document.documentElement.style.setProperty('--link-color', '#0d6efd');
+                document.documentElement.style.setProperty('--input-bg', '#ffffff');
+                document.documentElement.style.setProperty('--input-text', '#212529');
+            }
+        }
+        
+        // Определяем системную тему
+        function getSystemTheme() {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        
+        // Инициализируем тему при загрузке
+        const currentTheme = getCurrentTheme();
+        if (currentTheme === 'auto') {
+            applyTheme(getSystemTheme());
+        } else {
+            applyTheme(currentTheme);
+        }
+        
+        // Обрабатываем клик по кнопке
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = getCurrentTheme();
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+        });
+        
+        // Слушаем изменения системной темы
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (getCurrentTheme() === 'auto') {
+                applyTheme(e.matches ? 'dark' : 'light');
+            }
+        });
     }
 
-    .alert {
-        background-color: var(--card-bg);
-        border-color: var(--border-color);
-        color: var(--text-color);
+    // Вспомогательные функции для base64url
+    function base64UrlDecode(base64Url) {
+        try {
+            let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            // Добавляем padding если необходимо
+            while (base64.length % 4) {
+                base64 += '=';
+            }
+            return JSON.parse(atob(base64));
+        } catch (e) {
+            console.error('Error decoding base64url:', e);
+            logDebugEvent(`Ошибка декодирования base64url: ${e.message}`);
+            return null;
+        }
     }
 
-    .card {
-        transition: background-color 0.3s, border-color 0.3s;
+    function base64UrlEncode(arrayBuffer) {
+        try {
+            return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=/g, '');
+        } catch (e) {
+            console.error('Error encoding to base64url:', e);
+            logDebugEvent(`Ошибка кодирования в base64url: ${e.message}`);
+            return '';
+        }
     }
-</style>
-{% endblock %} 
+
+    // Преобразование base64url строки в ArrayBuffer
+    function base64UrlToArrayBuffer(base64url) {
+        try {
+            // Заменяем символы `-` и `_` на `+` и `/` соответственно
+            // Это преобразует base64url в стандартный base64
+            const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+            
+            // Добавляем padding если необходимо
+            const padding = '='.repeat((4 - base64.length % 4) % 4);
+            const base64Padded = base64 + padding;
+            
+            // Декодируем base64 в бинарную строку
+            const rawData = atob(base64Padded);
+            
+            // Преобразуем бинарную строку в ArrayBuffer
+            const buffer = new ArrayBuffer(rawData.length);
+            const array = new Uint8Array(buffer);
+            
+            for (let i = 0; i < rawData.length; i++) {
+                array[i] = rawData.charCodeAt(i);
+            }
+            
+            return buffer;
+        } catch (e) {
+            console.error('Error converting base64url to ArrayBuffer:', e);
+            logDebugEvent(`Ошибка преобразования base64url в ArrayBuffer: ${e.message}`);
+            return new ArrayBuffer(0);
+        }
+    }
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    // Инициализация отладочной информации
+    function initDebugInfo() {
+        document.getElementById('debug-webauthn-support').textContent = 
+            `WebAuthn поддерживается: ${typeof PublicKeyCredential !== 'undefined'}`;
+        
+        document.getElementById('debug-https-status').textContent = 
+            `HTTPS: ${window.location.protocol === 'https:'}`;
+        
+        document.getElementById('debug-origin').textContent = 
+            `Origin: ${window.location.origin}`;
+        
+        document.getElementById('debug-user-agent').textContent = 
+            `User Agent: ${navigator.userAgent}`;
+        
+        document.getElementById('debug-platform-info').textContent = 
+            `Платформа: ${navigator.platform}`;
+        
+        logDebugEvent('Страница входа загружена');
+    }
+
+    function logDebugEvent(message) {
+        const eventsDiv = document.getElementById('debug-events');
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        logEntry.textContent = `[${timestamp}] ${message}`;
+        eventsDiv.appendChild(logEntry);
+        console.log(`[DEBUG] ${message}`);
+    }
+
+    // Функция для отображения статуса аутентификации
+    function showStatus(message, type = 'info') {
+        const statusElement = document.getElementById('webauthn-status');
+        statusElement.textContent = message;
+        statusElement.className = `alert alert-${type} mt-3`;
+        statusElement.style.display = 'block';
+    }
+
+    // Новая функция для прямого входа по WebAuthn (без ввода логина)
+    async function handleDirectWebAuthnAuth() {
+        showStatus('Проверка пользователей с зарегистрированными ключами...', 'info');
+        logDebugEvent('Начинаем прямую аутентификацию WebAuthn без указания пользователя');
+        
+        try {
+            // Запрашиваем список пользователей с WebAuthn ключами
+            const response = await fetch('/webauthn/api/users-with-keys/');
+            const data = await response.json();
+            
+            if (data.status !== 'ok' || !data.users || data.users.length === 0) {
+                logDebugEvent('Нет пользователей с зарегистрированными ключами');
+                showStatus('Нет пользователей с зарегистрированными ключами безопасности', 'warning');
+                return;
+            }
+            
+            if (data.users.length === 1) {
+                // Если только один пользователь, сразу начинаем аутентификацию
+                logDebugEvent(`Найден только один пользователь с ключом: ${data.users[0].username}`);
+                startAuthentication(data.users[0].username);
+            } else {
+                // Если несколько пользователей, показываем список для выбора
+                logDebugEvent(`Найдено ${data.users.length} пользователей с ключами`);
+                
+                const usersList = document.getElementById('webauthn-users-list');
+                usersList.innerHTML = '';
+                
+                data.users.forEach(user => {
+                    const userBtn = document.createElement('button');
+                    userBtn.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                    userBtn.style.backgroundColor = 'var(--card-bg)';
+                    userBtn.style.color = 'var(--text-color)';
+                    userBtn.style.borderColor = 'var(--border-color)';
+                    userBtn.innerHTML = `
+                        <span>${user.full_name || user.username}</span>
+                        <span class="badge bg-primary rounded-pill">${user.keys_count} ключ(ей)</span>
+                    `;
+                    userBtn.addEventListener('click', () => {
+                        logDebugEvent(`Выбран пользователь: ${user.username}`);
+                        document.getElementById('webauthn-users-container').style.display = 'none';
+                        startAuthentication(user.username);
+                    });
+                    usersList.appendChild(userBtn);
+                });
+                
+                document.getElementById('webauthn-users-container').style.display = 'block';
+                showStatus('Выберите пользователя для входа', 'info');
+            }
+        } catch (error) {
+            logDebugEvent(`Ошибка при получении списка пользователей: ${error.message}`);
+            showStatus(`Ошибка: ${error.message}`, 'danger');
+        }
+    }
+
+    // Обработчик для входа с ключом безопасности
+    async function handleWebAuthnAuthentication() {
+        const username = document.getElementById('username').value.trim();
+        
+        if (!username) {
+            showStatus('Пожалуйста, введите имя пользователя', 'warning');
+            logDebugEvent('Ошибка: имя пользователя не указано');
+            return;
+        }
+
+        logDebugEvent(`Начало WebAuthn аутентификации для пользователя: ${username}`);
+        showStatus('Запрос аутентификации...', 'info');
+
+        try {
+            await startAuthentication(username);
+        } catch (error) {
+            logDebugEvent(`Ошибка аутентификации: ${error.message}`);
+            showStatus(`Ошибка аутентификации: ${error.message}`, 'danger');
+        }
+    }
+
+    // Функция для запуска аутентификации WebAuthn
+    async function startAuthentication(username) {
+        try {
+            // Запрашиваем опции аутентификации с сервера
+            logDebugEvent('Запрос параметров аутентификации');
+            const response = await fetch(`/webauthn/api/authenticate/begin/?username=${encodeURIComponent(username)}`);
+
+            if (!response.ok) {
+                const responseData = await response.json();
+                logDebugEvent(`Ошибка HTTP: ${response.status} - ${responseData.message || 'Неизвестная ошибка'}`);
+                
+                // Проверяем, не связана ли ошибка с отсутствием ключей
+                if (response.status === 404 && responseData.message && responseData.message.includes('нет зарегистрированных ключей')) {
+                    logDebugEvent('У пользователя нет зарегистрированных ключей безопасности');
+                    
+                    // Спрашиваем пользователя, хочет ли он войти с паролем и зарегистрировать ключ
+                    if (confirm(`У пользователя ${username} нет зарегистрированных ключей безопасности.\n\nНажмите OK, чтобы войти с паролем и затем зарегистрировать ключ безопасности.\nНажмите Отмена, чтобы остаться на странице входа.`)) {
+                        logDebugEvent('Пользователь согласился войти с паролем');
+                        // Фокус на поле пароля и изменение цвета кнопки входа для привлечения внимания
+                        document.getElementById('password').focus();
+                        document.querySelector('button[type="submit"]').classList.add('btn-lg');
+                        
+                        // Устанавливаем cookie для предложения регистрации ключа после входа
+                        document.cookie = `suggest_webauthn_register=${username}; path=/`;
+                        
+                        showStatus('Введите пароль и нажмите "Войти с паролем", затем зарегистрируйте ключ безопасности', 'warning');
+                    } else {
+                        showStatus(`У пользователя ${username} нет зарегистрированных ключей безопасности. Войдите с паролем и затем зарегистрируйте ключ безопасности.`, 'warning');
+                    }
+                    return;
+                }
+                
+                throw new Error(responseData.message || `Ошибка HTTP: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.status !== 'ok') {
+                throw new Error(data.message || 'Ошибка при получении параметров аутентификации');
+            }
+
+            logDebugEvent('Получены параметры аутентификации');
+            showStatus('Подтвердите вход на вашем устройстве...', 'info');
+
+            // Получаем JSON с опциями
+            const optionsJSON = data.options;
+            console.log('Сырые параметры аутентификации:', optionsJSON);
+            logDebugEvent(`Challenge: ${optionsJSON.challenge ? optionsJSON.challenge.substring(0, 20) + '...' : 'отсутствует'}`);
+            
+            // Создаем правильный объект PublicKeyCredentialRequestOptions
+            const publicKeyCredentialRequestOptions = {
+                challenge: new Uint8Array(base64UrlToArrayBuffer(optionsJSON.challenge || '')),
+                timeout: optionsJSON.timeout || 60000, // 60 секунд по умолчанию
+                rpId: optionsJSON.rpId || 'localhost',
+                allowCredentials: Array.isArray(optionsJSON.allowCredentials) ?
+                    optionsJSON.allowCredentials.map(cred => ({
+                        id: cred && cred.id ? new Uint8Array(base64UrlToArrayBuffer(cred.id)) : new Uint8Array(0),
+                        type: cred && cred.type ? cred.type : "public-key",
+                        transports: cred && Array.isArray(cred.transports) ? cred.transports : undefined
+                    })) : [],
+                userVerification: optionsJSON.userVerification || "preferred"
+            };
+            
+            logDebugEvent('Преобразованы параметры для navigator.credentials.get()');
+            console.log('Параметры аутентификации:', publicKeyCredentialRequestOptions);
+
+            // Запрашиваем учетные данные
+            logDebugEvent('Вызов navigator.credentials.get()');
+            try {
+                const credential = await navigator.credentials.get({
+                    publicKey: publicKeyCredentialRequestOptions
+                });
+                
+                if (!credential) {
+                    throw new Error("Ключ не был получен - navigator.credentials.get() вернул null или undefined");
+                }
+
+                logDebugEvent('Получен ответ от устройства, отправка на сервер');
+                await completeAuthentication(credential);
+            } catch (error) {
+                logDebugEvent(`Ошибка при получении ключа: ${error.message}`);
+                throw new Error(`Ошибка при получении ключа: ${error.message}`);
+            }
+            
+        } catch (error) {
+            logDebugEvent(`Ошибка в startAuthentication: ${error.message}`);
+            throw error;
+        }
+    }
+
+    // Завершение процесса аутентификации
+    async function completeAuthentication(credential) {
+        try {
+            showStatus('Проверка учетных данных...', 'info');
+            logDebugEvent('Отправка учетных данных аутентификации на сервер');
+
+            // Подготовка данных для отправки на сервер
+            const body = JSON.stringify({
+                credential: {
+                    id: credential.id,
+                    rawId: arrayBufferToBase64Url(credential.rawId),
+                    type: credential.type,
+                    response: {
+                        authenticatorData: arrayBufferToBase64Url(credential.response.authenticatorData),
+                        clientDataJSON: arrayBufferToBase64Url(credential.response.clientDataJSON),
+                        signature: arrayBufferToBase64Url(credential.response.signature)
+                    }
+                }
+            });
+
+            // Отправка данных на сервер
+            const response = await fetch('/webauthn/api/authenticate/complete/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: body
+            });
+
+            // Получение и обработка ответа
+            const result = await response.json();
+            logDebugEvent(`Получен ответ от сервера: ${JSON.stringify(result)}`);
+
+            if (result.status === 'ok' || result.status === 'success') {
+                logDebugEvent(`Аутентификация успешна! Результат: ${JSON.stringify(result)}`);
+                
+                // Проверяем наличие URL для перенаправления
+                if (result.redirect_url) {
+                    logDebugEvent(`Выполняем перенаправление на: ${result.redirect_url}`);
+                    showStatus('Аутентификация успешна! Перенаправление...', 'success');
+                    
+                    // Создаем элемент для отображения пользователю
+                    const redirectDiv = document.createElement('div');
+                    redirectDiv.className = 'alert alert-success mt-3';
+                    redirectDiv.innerHTML = `
+                        <h4>Аутентификация успешна!</h4>
+                        <p>Выполняется перенаправление на: ${result.redirect_url}</p>
+                        <p>Если перенаправление не происходит автоматически, <a href="${result.redirect_url}" target="_blank">нажмите здесь</a>.</p>
+                    `;
+                    document.querySelector('.card-body').appendChild(redirectDiv);
+                    
+                    // Создаем форму для перенаправления (более надежный способ)
+                    const form = document.createElement('form');
+                    form.method = 'GET';
+                    form.action = result.redirect_url;
+                    form.style.display = 'none';
+                    document.body.appendChild(form);
+                    
+                    logDebugEvent('Перенаправление через форму...');
+                    form.submit();
+                    
+                    // Запасной метод - прямое перенаправление
+                    setTimeout(() => {
+                        logDebugEvent('Запасной метод перенаправления - прямая ссылка');
+                        window.location = result.redirect_url;
+                    }, 1000);
+                } else {
+                    logDebugEvent('URL для перенаправления не указан в ответе сервера');
+                    showStatus('Аутентификация успешна, но URL для перенаправления не указан', 'warning');
+                }
+            } else {
+                logDebugEvent(`Ошибка аутентификации: ${result.message}`);
+                showStatus(`Ошибка при аутентификации: ${result.message}`, 'danger');
+            }
+
+        } catch (error) {
+            logDebugEvent(`Ошибка в completeAuthentication: ${error.message}`);
+            showStatus(`Ошибка при аутентификации: ${error.message}`, 'danger');
+        }
+    }
+
+    // Преобразование ArrayBuffer в строку Base64Url
+    function arrayBufferToBase64Url(buffer) {
+        // Если параметр не передан или null
+        if (!buffer) {
+            return null;
+        }
+
+        // Преобразуем ArrayBuffer в массив байтов
+        const bytes = new Uint8Array(buffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+
+        // Кодируем в Base64 и затем в Base64Url
+        const base64 = window.btoa(binary);
+        return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
+
+    // Получение CSRF-токена
+    function getCsrfToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        logDebugEvent('Инициализация страницы входа');
+        
+        // Инициализация переключателя темы
+        initThemeToggle();
+        
+        // Проверяем поддержку WebAuthn
+        const webauthnButton = document.getElementById('webauthn-button');
+        const webauthnDirectButton = document.getElementById('webauthn-direct-button');
+        
+        if (typeof PublicKeyCredential === 'undefined') {
+            logDebugEvent('WebAuthn не поддерживается этим браузером');
+            webauthnButton.disabled = true;
+            webauthnButton.textContent = 'WebAuthn не поддерживается';
+            webauthnButton.classList.remove('btn-success');
+            webauthnButton.classList.add('btn-secondary');
+            
+            webauthnDirectButton.disabled = true;
+            webauthnDirectButton.textContent = 'WebAuthn не поддерживается';
+            webauthnDirectButton.classList.remove('btn-primary');
+            webauthnDirectButton.classList.add('btn-secondary');
+        } else {
+            // Добавляем обработчик клика для кнопки WebAuthn
+            webauthnButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                logDebugEvent('Нажата кнопка WebAuthn');
+                handleWebAuthnAuthentication();
+            });
+            
+            // Добавляем обработчик для кнопки прямого входа
+            webauthnDirectButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                logDebugEvent('Нажата кнопка прямого входа по WebAuthn');
+                handleDirectWebAuthnAuth();
+            });
+        }
+
+        // Обработка подтверждений на форме
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            const webauthnStatus = document.getElementById('webauthn-status');
+            if (webauthnStatus.style.display === 'block' && 
+                webauthnStatus.textContent.includes('зарегистрируйте ключ безопасности')) {
+                const username = document.getElementById('username').value.trim();
+                // Устанавливаем cookie для индикации того, что нужно предложить регистрацию ключа
+                document.cookie = `suggest_webauthn_register=${username}; path=/`;
+                logDebugEvent('Установлен флаг для предложения регистрации ключа после входа');
+            }
+        });
+
+        // Инициализация отладочной информации
+        initDebugInfo();
+        
+        // Кнопка для показа/скрытия отладочной информации
+        const debugBtn = document.createElement('button');
+        debugBtn.className = 'btn btn-sm btn-outline-info mt-3';
+        debugBtn.textContent = 'Показать отладочную информацию';
+        debugBtn.addEventListener('click', function() {
+            const debugInfo = document.getElementById('debug-info');
+            if (debugInfo.style.display === 'none') {
+                debugInfo.style.display = 'block';
+                this.textContent = 'Скрыть отладочную информацию';
+            } else {
+                debugInfo.style.display = 'none';
+                this.textContent = 'Показать отладочную информацию';
+            }
+        });
+        document.querySelector('.card-body').appendChild(debugBtn);
+    });
+</script>
+{% endblock %}

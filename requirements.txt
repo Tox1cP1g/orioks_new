@@ -5,3 +5,4 @@ django-import-export==4.2.0
 sqlparse==0.5.1
 tablib==3.7.0
 PyMySQL~=1.1.1
+py-webauthn==1.0.1

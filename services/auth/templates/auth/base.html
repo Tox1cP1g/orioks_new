@@ -1,142 +1,110 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="light">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Система аутентификации ОРИОКС{% endblock %}</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <title>{% block title %}ОРИОКС{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
     <style>
-        :root[data-theme="light"] {
+        :root {
             --bg-color: #f8f9fa;
             --text-color: #212529;
-            --card-bg: #fff;
+            --card-bg: #ffffff;
             --border-color: #dee2e6;
-            --navbar-bg: #f8f9fa;
-            --navbar-text: #212529;
-            --welcome-bg: #007bff;
-            --welcome-text: #fff;
+            --link-color: #0d6efd;
         }
-
-        :root[data-theme="dark"] {
-            --bg-color: #212529;
-            --text-color: #f8f9fa;
-            --card-bg: #343a40;
-            --border-color: #495057;
-            --navbar-bg: #343a40;
-            --navbar-text: #f8f9fa;
-            --welcome-bg: #0056b3;
-            --welcome-text: #fff;
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #212529;
+                --text-color: #f8f9fa;
+                --card-bg: #343a40;
+                --border-color: #495057;
+                --link-color: #6ea8fe;
+            }
         }
-
+        
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
             transition: background-color 0.3s, color 0.3s;
         }
-
-        .welcome-section {
-            text-align: center;
-            padding: 50px 0;
-            background-color: var(--welcome-bg);
-            color: var(--welcome-text);
+        
+        a {
+            color: var(--link-color);
+            text-decoration: none;
         }
-
-        .service-list {
-            margin-top: 30px;
-        }
-
-        .service-item {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            transition: background-color 0.3s, border-color 0.3s;
-        }
-
-        .navbar {
-            background-color: var(--navbar-bg) !important;
-        }
-
-        .navbar-light .navbar-brand,
-        .navbar-light .nav-link {
-            color: var(--navbar-text) !important;
-        }
-
-        .theme-switch {
-            cursor: pointer;
-            padding: 0.5rem;
-            margin-left: 1rem;
-        }
-
-        .theme-switch i {
-            font-size: 1.2rem;
-            color: var(--navbar-text);
+        
+        a:hover {
+            text-decoration: underline;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <a class="navbar-brand" href="/">ОРИОКС</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <div class="theme-switch" onclick="toggleTheme()">
-                        <i class="fas fa-moon"></i>
-                    </div>
-                </li>
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <span class="nav-link">{{ user.username }}</span>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Войти</a>
-                    </li>
-                {% endif %}
-            </ul>
+    <nav class="navbar navbar-expand-lg" style="background-color: var(--card-bg); border-bottom: 1px solid var(--border-color);">
+        <div class="container">
+            <a class="navbar-brand" href="/" style="color: var(--text-color);">
+                <i class="fas fa-graduation-cap me-2"></i>ОРИОКС
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" 
+                               data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--text-color);">
+                                {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown" 
+                                style="background-color: var(--card-bg); border-color: var(--border-color);">
+                                <li><a class="dropdown-item" href="{% url 'webauthn_keys_list' %}" 
+                                       style="color: var(--text-color);">Ключи безопасности</a></li>
+                                <li><hr class="dropdown-divider" style="border-color: var(--border-color);"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}" 
+                                       style="color: var(--text-color);">Выход</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}" style="color: var(--text-color);">Вход</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
     </nav>
 
-    <div class="container mt-4">
+    <main>
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
+    <!-- Скрипты -->
+    <!-- Bootstrap JS с Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        // Функция для переключения темы
-        function toggleTheme() {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            
-            // Обновляем иконку
-            const themeIcon = document.querySelector('.theme-switch i');
-            themeIcon.className = newTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
-        }
-
-        // Проверяем сохраненную тему при загрузке
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            
-            // Устанавливаем правильную иконку
-            const themeIcon = document.querySelector('.theme-switch i');
-            themeIcon.className = savedTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        // Проверка, загружен ли Bootstrap
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof bootstrap === 'undefined') {
+                alert('ВНИМАНИЕ: Bootstrap JavaScript не загружен! Модальные окна и другие компоненты не будут работать.');
+                console.error('Bootstrap JavaScript не загружен!');
+            } else {
+                console.log('Bootstrap JavaScript успешно загружен. Версия:', bootstrap.Tooltip.VERSION);
+            }
         });
     </script>
+    
+    {% block extra_js %}{% endblock %}
 </body>
 </html> 
