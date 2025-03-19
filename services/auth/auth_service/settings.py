@@ -117,10 +117,10 @@ SIMPLE_JWT = {
     'AUTH_HTTPONLY': True,
     'AUTH_COOKIE': 'token',
     'AUTH_COOKIE_DOMAIN': None,
-    'AUTH_COOKIE_SECURE': False,
+    'AUTH_COOKIE_SECURE': True,
     'AUTH_COOKIE_HTTP_ONLY': True,
     'AUTH_COOKIE_PATH': '/',
-    'AUTH_COOKIE_SAMESITE': 'Lax',
+    'AUTH_COOKIE_SAMESITE': 'None',
 }
 
 # Добавляем дополнительные поля в JWT-токен
@@ -135,6 +135,8 @@ SIMPLE_JWT.update({
     }
 })
 
+# CORS settings
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8002",
     "http://127.0.0.1:8002",
@@ -144,7 +146,42 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8004",
 ]
 
-CORS_ALLOW_CREDENTIALS = True
+# Cookie settings
+SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8002",
+    "http://127.0.0.1:8002",
+    "http://localhost:8003",
+    "http://127.0.0.1:8003",
+    "http://localhost:8004",
+    "http://127.0.0.1:8004",
+]
+
+# Добавляем разрешенные методы
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Добавляем разрешенные заголовки
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 LOGIN_URL = 'http://localhost:8002/login/'
 LOGIN_REDIRECT_URL = 'http://localhost:8002/'

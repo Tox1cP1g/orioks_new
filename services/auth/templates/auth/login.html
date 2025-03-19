@@ -462,51 +462,18 @@
             const result = await response.json();
             logDebugEvent(`Получен ответ от сервера: ${JSON.stringify(result)}`);
 
-            if (result.status === 'ok' || result.status === 'success') {
-                logDebugEvent(`Аутентификация успешна! Результат: ${JSON.stringify(result)}`);
-                
-                // Проверяем наличие URL для перенаправления
-                if (result.redirect_url) {
-                    logDebugEvent(`Выполняем перенаправление на: ${result.redirect_url}`);
-                    showStatus('Аутентификация успешна! Перенаправление...', 'success');
-                    
-                    // Создаем элемент для отображения пользователю
-                    const redirectDiv = document.createElement('div');
-                    redirectDiv.className = 'alert alert-success mt-3';
-                    redirectDiv.innerHTML = `
-                        <h4>Аутентификация успешна!</h4>
-                        <p>Выполняется перенаправление на: ${result.redirect_url}</p>
-                        <p>Если перенаправление не происходит автоматически, <a href="${result.redirect_url}" target="_blank">нажмите здесь</a>.</p>
-                    `;
-                    document.querySelector('.card-body').appendChild(redirectDiv);
-                    
-                    // Создаем форму для перенаправления (более надежный способ)
-                    const form = document.createElement('form');
-                    form.method = 'GET';
-                    form.action = result.redirect_url;
-                    form.style.display = 'none';
-                    document.body.appendChild(form);
-                    
-                    logDebugEvent('Перенаправление через форму...');
-                    form.submit();
-                    
-                    // Запасной метод - прямое перенаправление
-                    setTimeout(() => {
-                        logDebugEvent('Запасной метод перенаправления - прямая ссылка');
-                        window.location = result.redirect_url;
-                    }, 1000);
-                } else {
-                    logDebugEvent('URL для перенаправления не указан в ответе сервера');
-                    showStatus('Аутентификация успешна, но URL для перенаправления не указан', 'warning');
-                }
+            if (result.status === 'ok') {
+                showStatus('Аутентификация успешна!', 'success');
+                // Сохраняем токен в cookie
+                document.cookie = `token=${result.token}; path=/; SameSite=None; Secure`;
+                // Перенаправляем на указанный URL
+                window.location.href = result.redirect_url;
             } else {
-                logDebugEvent(`Ошибка аутентификации: ${result.message}`);
-                showStatus(`Ошибка при аутентификации: ${result.message}`, 'danger');
+                showStatus(`Ошибка: ${result.message}`, 'error');
             }
-
         } catch (error) {
-            logDebugEvent(`Ошибка в completeAuthentication: ${error.message}`);
-            showStatus(`Ошибка при аутентификации: ${error.message}`, 'danger');
+            console.error('Ошибка при аутентификации:', error);
+            showStatus('Произошла ошибка при аутентификации', 'error');
         }
     }
 

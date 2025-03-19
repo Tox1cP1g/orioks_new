@@ -22,7 +22,8 @@ from performance.views import (
     SemesterViewSet, SubjectViewSet, GradeViewSet,
     ScheduleViewSet, AttendanceViewSet, StudentViewSet,
     index, grades, schedule, help, dashboard, grades_view,
-    schedule_view, attendance_view, profile_view, logout_view
+    schedule_view, attendance_view, profile_view, logout_view,
+
 )
 
 router = DefaultRouter()
