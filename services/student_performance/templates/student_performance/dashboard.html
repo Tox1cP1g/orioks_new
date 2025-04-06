@@ -71,14 +71,25 @@
                 <i class="fas fa-calendar-alt me-2 text-info"></i>
                 <h5 class="card-title mb-0">Расписание на сегодня</h5>
             </div>
-            <div class="card-body d-flex align-items-center justify-content-center">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center">
                 {% if today_schedule %}
                     <div class="schedule-list w-100">
                         {% for lesson in today_schedule %}
-                            <div class="schedule-item mb-2">
-                                <div class="time-badge mb-1">{{ lesson.time }}</div>
-                                <h6 class="mb-1">{{ lesson.subject }}</h6>
-                                <p class="small mb-0">{{ lesson.room }}</p>
+                            <div class="schedule-item">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="schedule-time-badge me-2">
+                                        <div class="lesson-number">{{ lesson.time|slice:":1" }}</div>
+                                        <div class="lesson-time">{{ lesson.time|slice:"3:" }}</div>
+                                    </div>
+                                    <div class="schedule-info">
+                                        <h6 class="schedule-title mb-1">{{ lesson.subject }}</h6>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-map-marker-alt text-secondary me-1"></i>
+                                            <span class="schedule-room">{{ lesson.room }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="schedule-divider"></div>
                             </div>
                         {% endfor %}
                     </div>
@@ -254,6 +265,60 @@
     .attendance-label {
         color: var(--subtitle-color);
         margin-right: 0.5rem;
+    }
+
+    .schedule-list {
+        width: 100%;
+        padding: 0.5rem 0;
+    }
+
+    .schedule-item {
+        padding: 0.75rem 1rem;
+    }
+
+    .schedule-time-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 50px;
+        height: 50px;
+        background-color: var(--primary-dark);
+        border-radius: 8px;
+        color: white;
+        text-align: center;
+    }
+
+    .lesson-number {
+        font-weight: bold;
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+
+    .lesson-time {
+        font-size: 0.7rem;
+        opacity: 0.9;
+    }
+
+    .schedule-title {
+        font-weight: 500;
+        margin-bottom: 0.2rem;
+        color: var(--text-color);
+    }
+
+    .schedule-room {
+        font-size: 0.85rem;
+        color: var(--subtitle-color);
+    }
+
+    .schedule-divider {
+        height: 1px;
+        background: var(--border-color);
+        margin-top: 0.5rem;
+    }
+
+    .schedule-item:last-child .schedule-divider {
+        display: none;
     }
 </style>
 {% endblock %} 
