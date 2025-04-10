@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Sum, Count, F, Avg
 from django.shortcuts import get_object_or_404
-from .models import Semester, Subject, Grade, Schedule, Attendance, Student
+from .models import Semester, Subject, Grade, Schedule, Attendance, Student, Group
 from .serializers import (
     SemesterSerializer,
     SubjectSerializer,
@@ -22,7 +22,8 @@ from django.urls import reverse
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 from django.db import models
-from datetime import datetime
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 class TeacherPermission(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -90,7 +91,21 @@ class ScheduleViewSet(viewsets.ModelViewSet):
     permission_classes = [TeacherPermission]
 
     def get_queryset(self):
-        return Schedule.objects.filter(teacher=self.request.user.get_full_name())
+        # Получаем текущий семестр
+        current_semester = Semester.objects.filter(is_current=True).first()
+        if not current_semester:
+            return Schedule.objects.none()
+
+        # Получаем группу студента
+        student = Student.objects.filter(user_id=self.request.user.id).first()
+        if not student or not student.group:
+            return Schedule.objects.none()
+
+        # Возвращаем расписание для группы студента в текущем семестре
+        return Schedule.objects.filter(
+            semester=current_semester,
+            group=student.group
+        ).select_related('subject', 'group', 'semester')
 
 class AttendanceViewSet(viewsets.ModelViewSet):
     serializer_class = AttendanceSerializer
@@ -239,7 +254,9 @@ def dashboard(request):
         'today_schedule': [{
             'time': schedule.get_lesson_number_display(),
             'subject': schedule.subject.name,
-            'room': schedule.room
+            'room': schedule.room,
+            'teacher': schedule.teacher,
+            'is_lecture': schedule.is_lecture
         } for schedule in today_schedule],
         'attendance_stats': attendance_stats,
         'grades_stats': grades_stats,
@@ -307,15 +324,84 @@ def grades_view(request):
 
 @login_required
 def schedule_view(request):
+    # Получаем текущий семестр
     current_semester = Semester.objects.filter(is_current=True).first()
+    if not current_semester:
+        return render(request, 'student_performance/schedule.html', {
+            'error': 'Текущий семестр не найден'
+        })
+
+    # Получаем студента и его группу
+    student = Student.objects.filter(user_id=request.user.id).first()
+    if not student:
+        return render(request, 'student_performance/schedule.html', {
+            'error': 'Профиль студента не найден'
+        })
+
+    # Получаем все группы для выбора
+    groups = Group.objects.all().order_by('name')
+
+    # Определяем выбранную группу (по умолчанию - группа студента)
+    selected_group_id = request.GET.get('group')
+    if selected_group_id:
+        selected_group = Group.objects.filter(id=selected_group_id).first()
+    else:
+        selected_group = student.group
+
+    # Определяем текущую неделю
+    week_param = request.GET.get('week')
+    if week_param:
+        current_week = datetime.strptime(week_param, '%Y-%m-%d').date()
+    else:
+        current_week = timezone.now().date()
+
+    # Вычисляем начало и конец недели
+    week_start = current_week - timedelta(days=current_week.weekday())
+    week_end = week_start + timedelta(days=6)
+    prev_week = week_start - timedelta(days=7)
+    next_week = week_start + timedelta(days=7)
+
+    # Получаем дни недели
+    days = [week_start + timedelta(days=i) for i in range(7)]
+
+    # Определяем временные слоты
+    time_slots = [
+        {'id': 1, 'start_time': '09:00', 'end_time': '10:30'},
+        {'id': 2, 'start_time': '10:45', 'end_time': '12:15'},
+        {'id': 3, 'start_time': '13:00', 'end_time': '14:30'},
+        {'id': 4, 'start_time': '14:45', 'end_time': '16:15'},
+        {'id': 5, 'start_time': '16:30', 'end_time': '18:00'},
+        {'id': 6, 'start_time': '18:15', 'end_time': '19:45'},
+    ]
+
+    # Получаем расписание для выбранной группы
     schedule = Schedule.objects.filter(
-        subject__semester=current_semester
-    ).order_by('day_of_week', 'lesson_number') if current_semester else []
-    
+        semester=current_semester,
+        group=selected_group
+    ).select_related('subject', 'group', 'semester').order_by('day_of_week', 'lesson_number')
+
+    # Создаем словарь с расписанием по дням и временным слотам
+    schedule_data = {}
+    for day in days:
+        schedule_data[day] = {}
+        day_schedule = schedule.filter(day_of_week=day.weekday() + 1)
+        for slot in time_slots:
+            schedule_data[day][slot['id']] = day_schedule.filter(lesson_number=slot['id']).first()
+
     context = {
-        'schedule': schedule,
         'current_semester': current_semester,
+        'groups': groups,
+        'selected_group': selected_group,
+        'current_week': current_week,
+        'week_start': week_start,
+        'week_end': week_end,
+        'prev_week': prev_week,
+        'next_week': next_week,
+        'days': days,
+        'time_slots': time_slots,
+        'schedule_data': schedule_data,
     }
+
     return render(request, 'student_performance/schedule.html', context)
 
 @login_required
@@ -428,4 +514,64 @@ def logout_view(request):
     logout(request)
     response = redirect('http://localhost:8002/login/')
     response.delete_cookie('token')
-    return response 
+    return response
+
+@login_required
+def add_grade_view(request):
+    # Проверяем, что пользователь является преподавателем
+    if not hasattr(request.user, 'role') or request.user.role != 'TEACHER':
+        messages.error(request, 'Только преподаватели могут добавлять оценки')
+        return redirect('grades')
+
+    # Получаем текущий семестр
+    current_semester = Semester.objects.filter(is_current=True).first()
+    if not current_semester:
+        messages.error(request, 'Текущий семестр не найден')
+        return redirect('grades')
+
+    # Получаем предметы, которые ведет преподаватель
+    teacher_subjects = Subject.objects.filter(
+        schedule_items__teacher=request.user.get_full_name(),
+        semester=current_semester
+    ).distinct()
+
+    # Получаем студентов, которые учатся у преподавателя
+    students = Student.objects.filter(
+        group__subjects__in=teacher_subjects
+    ).select_related('user', 'group').distinct()
+
+    if request.method == 'POST':
+        try:
+            student = Student.objects.get(id=request.POST.get('student'))
+            subject = Subject.objects.get(id=request.POST.get('subject'))
+            
+            # Проверяем, что преподаватель может ставить оценки по этому предмету
+            if not subject.schedule_items.filter(teacher=request.user.get_full_name()).exists():
+                messages.error(request, 'У вас нет прав для выставления оценок по этому предмету')
+                return redirect('add_grade')
+
+            grade = Grade.objects.create(
+                student=student,
+                subject=subject,
+                grade_type=request.POST.get('grade_type'),
+                score=float(request.POST.get('score')),
+                max_score=float(request.POST.get('max_score')),
+                date=request.POST.get('date'),
+                comment=request.POST.get('comment')
+            )
+            messages.success(request, 'Оценка успешно добавлена')
+            return redirect('grades')
+        except (Student.DoesNotExist, Subject.DoesNotExist) as e:
+            messages.error(request, 'Ошибка при добавлении оценки: ' + str(e))
+        except Exception as e:
+            messages.error(request, 'Произошла ошибка при добавлении оценки')
+
+    # Получаем типы оценок из модели Grade
+    grade_types = Grade.GRADE_TYPE_CHOICES
+
+    context = {
+        'students': students,
+        'subjects': teacher_subjects,
+        'grade_types': grade_types,
+    }
+    return render(request, 'student_performance/add_grade.html', context) 
