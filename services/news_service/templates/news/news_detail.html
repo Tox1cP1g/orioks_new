@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ news_item.title }} - ОРИОКС{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">{{ news_item.title }}</h3>
+                    <a href="{% url 'news_list' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>Назад
+                    </a>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="news-meta mb-4">
+                    <p class="text-muted small">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        Опубликовано: {{ news_item.created_at|date:"d.m.Y H:i" }}
+                        {% if news_item.updated_at != news_item.created_at %}
+                            <br>
+                            <i class="fas fa-edit me-1"></i>
+                            Обновлено: {{ news_item.updated_at|date:"d.m.Y H:i" }}
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="news-content">
+                    {{ news_item.content|linebreaks }}
+                </div>
+
+                <!-- Дополнительные элементы -->
+                <div class="mt-4 border-top pt-3">
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-share"></i> Поделиться
+                        </a>
+                        <a href="#" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-print"></i> Печать
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

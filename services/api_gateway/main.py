@@ -21,6 +21,7 @@ app.add_middleware(
 # Конфигурация сервисов
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://localhost:8002")
 PERFORMANCE_SERVICE_URL = os.getenv("PERFORMANCE_SERVICE_URL", "http://localhost:8003")
+NEWS_SERVICE_URL = os.getenv("NEWS_SERVICE_URL", "http://localhost:8007")
 
 async def get_token_header(authorization: Optional[str] = Header(None)) -> str:
     if not authorization:
@@ -112,6 +113,33 @@ async def get_grades(
         response = await client.get(
             f"{PERFORMANCE_SERVICE_URL}/api/grades/",
             params=params,
+            headers={"Authorization": token}
+        )
+        return response.json()
+
+# Маршруты новостей
+@app.get("/api/news")
+async def get_news(
+    page: int = 1,
+    limit: int = 10,
+    token: str = Depends(get_token_header)
+):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{NEWS_SERVICE_URL}/api/news/",
+            params={"page": page, "limit": limit},
+            headers={"Authorization": token}
+        )
+        return response.json()
+
+@app.get("/api/news/{news_id}")
+async def get_single_news(
+    news_id: int,
+    token: str = Depends(get_token_header)
+):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{NEWS_SERVICE_URL}/api/news/{news_id}/",
             headers={"Authorization": token}
         )
         return response.json()

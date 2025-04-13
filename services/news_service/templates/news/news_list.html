@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Новости - ОРИОКС{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <!-- Заголовок и кнопка -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mb-0">
+                <i class="fas fa-newspaper me-2"></i>Новости
+            </h1>
+            <a href="{% url 'add_news' %}" class="btn btn-success">
+                <i class="fas fa-plus-circle me-2"></i>Добавить новость
+            </a>
+        </div>
+
+        <!-- Список новостей -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-bullhorn me-2"></i>Последние новости
+                </h3>
+            </div>
+
+            <div class="card-body">
+                {% for news_item in news %}
+                <div class="news-card mb-4 p-3 rounded-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="text-primary">{{ news_item.title }}</h4>
+                            <p class="text-muted small mb-0">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                {{ news_item.created_at|date:"d.m.Y H:i" }}
+                            </p>
+                        </div>
+                        <a href="{% url 'news_detail' news_item.id %}"
+                           class="btn btn-outline-primary btn-sm">
+                            Подробнее
+                        </a>
+                    </div>
+                    <p class="mt-3 text-muted">{{ news_item.content|truncatechars:200 }}</p>
+                </div>
+                {% empty %}
+                <div class="alert alert-dark">
+                    <i class="fas fa-info-circle me-2"></i>
+                    На данный момент новостей нет.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

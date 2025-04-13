@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ form_title }} - ОРИОКС{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-edit me-2"></i>{{ form_title }}
+                </h3>
+            </div>
+
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="id_title" class="form-label">Заголовок</label>
+                        <input type="text"
+                               class="form-control"
+                               id="id_title"
+                               name="title"
+                               required
+                               placeholder="Введите заголовок новости">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="id_content" class="form-label">Содержание</label>
+                        <textarea class="form-control"
+                                  id="id_content"
+                                  name="content"
+                                  rows="8"
+                                  required
+                                  placeholder="Напишите содержание новости"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Сохранить новость
+                        </button>
+                        <a href="{% url 'news_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Отмена
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
