@@ -22,11 +22,21 @@ def create_student_profile(user):
         }
         
         logger.debug(f"Отправка запроса на создание профиля для пользователя {user.username}")
+        logger.debug(f"Данные отправляемые в запросе: {user_data}")
         
-        # Вызываем API студенческого портала
+        # Используем имя сервиса в Docker-сети, но запрос делаем без порта в URL
+        # и устанавливаем отдельный заголовок Host
+        headers = {
+            'Host': 'student_portal:8003',
+            'User-Agent': 'auth-service/1.0',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }
+        
         response = requests.post(
-            'http://localhost:8003/api/create-profile/',
+            'http://student_portal:8003/api/create-profile/',
             json=user_data,
+            headers=headers,
             timeout=5
         )
         
@@ -39,6 +49,13 @@ def create_student_profile(user):
             else:
                 logger.warning(f"Ошибка при создании профиля: {result.get('message')}")
                 return False
+        elif response.status_code == 400:
+            try:
+                error_data = response.json()
+                logger.error(f"Ошибка 400 Bad Request: {error_data}")
+            except:
+                logger.error(f"Ошибка 400 Bad Request, не удалось прочитать JSON ответа: {response.text}")
+            return False
         else:
             logger.error(f"Ошибка API студенческого портала: HTTP {response.status_code}")
             return False

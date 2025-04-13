@@ -21,6 +21,7 @@ app.add_middleware(
 # Конфигурация сервисов
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://localhost:8002")
 PERFORMANCE_SERVICE_URL = os.getenv("PERFORMANCE_SERVICE_URL", "http://localhost:8003")
+TEACHER_SERVICE_URL = os.getenv("TEACHER_SERVICE_URL", "http://localhost:8004")
 
 async def get_token_header(authorization: Optional[str] = Header(None)) -> str:
     if not authorization:
@@ -112,6 +113,34 @@ async def get_grades(
         response = await client.get(
             f"{PERFORMANCE_SERVICE_URL}/api/grades/",
             params=params,
+            headers={"Authorization": token}
+        )
+        return response.json()
+
+# Маршруты портала преподавателя
+@app.get("/api/teacher/subjects")
+async def get_teacher_subjects(token: str = Depends(get_token_header)):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{TEACHER_SERVICE_URL}/api/subjects/",
+            headers={"Authorization": token}
+        )
+        return response.json()
+
+@app.get("/api/teacher/schedule")
+async def get_teacher_schedule(token: str = Depends(get_token_header)):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{TEACHER_SERVICE_URL}/api/schedule/",
+            headers={"Authorization": token}
+        )
+        return response.json()
+
+@app.get("/api/teacher/attendance")
+async def get_teacher_attendance(token: str = Depends(get_token_header)):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{TEACHER_SERVICE_URL}/api/attendance/",
             headers={"Authorization": token}
         )
         return response.json()
