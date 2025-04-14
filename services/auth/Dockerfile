@@ -1,13 +1,6 @@
-FROM python:3.11-slim
+FROM python:3.11
 
 WORKDIR /app
-
-# Установка системных зависимостей
-RUN apt-get update && apt-get install -y \
-    default-libmysqlclient-dev \
-    pkg-config \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
 
 # Установка зависимостей Python
 COPY requirements.txt .

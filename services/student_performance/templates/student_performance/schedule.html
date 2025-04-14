@@ -4,80 +4,269 @@
 
 {% block title %}Расписание - ОРИОКС{% endblock %}
 
-{% block content %}
-<div class="row mb-4">
-    <div class="col">
-        <h1 class="mb-2">Расписание занятий</h1>
-        <p class="dashboard-subtitle">Неделя с {{ week_start|date:"d.m.Y" }} по {{ week_end|date:"d.m.Y" }}</p>
-    </div>
-</div>
+{% block extra_css %}
+<style>
+    .schedule-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-<!-- Фильтры -->
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-4">
-                <label for="week" class="form-label">Неделя</label>
-                <input type="date" class="form-control" id="week" name="week" value="{{ current_week|date:'Y-m-d' }}">
+    .schedule-table th {
+        background: #2c3e50;
+        color: #ffffff;
+        font-weight: 600;
+        text-align: center;
+        padding: 12px;
+        font-size: 1rem;
+        border-bottom: 2px solid #34495e;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+    }
+
+    .schedule-table td {
+        padding: 12px;
+        border: 1px solid #dee2e6;
+        vertical-align: top;
+        min-height: 100px;
+        background: #ffffff;
+    }
+
+    .time-column {
+        background: #f8f9fa;
+        font-weight: 600;
+        text-align: center;
+        width: 100px;
+        color: #2c3e50;
+    }
+
+    .lesson-card {
+        background: #ffffff;
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 4px;
+        border-left: 4px solid #3498db;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .lesson-card.lecture {
+        border-left-color: #e74c3c;
+        background: #fff5f5;
+    }
+
+    .lesson-card.practice {
+        border-left-color: #2ecc71;
+        background: #f0fff4;
+    }
+
+    .lesson-card.lab {
+        border-left-color: #f1c40f;
+        background: #fffff0;
+    }
+
+    .lesson-title {
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 1rem;
+        color: #2c3e50;
+    }
+
+    .lesson-info {
+        font-size: 0.9rem;
+        color: #4a5568;
+    }
+
+    .lesson-room {
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 4px;
+    }
+
+    .lesson-teacher {
+        font-style: italic;
+        color: #4a5568;
+    }
+
+    .schedule-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        background: #f8f9fa;
+        padding: 16px;
+        border-radius: 8px;
+    }
+
+    .week-navigation {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #2c3e50;
+
+    }
+
+    .current-week {
+        font-weight: 600;
+        padding: 8px 16px;
+        background: #ffffff;
+        border-radius: 4px;
+        color: #2c3e50;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-btn {
+        padding: 8px 16px;
+        border: none;
+        background: #3498db;
+        color: #ffffff;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .nav-btn:hover {
+        background: #2980b9;
+        text-decoration: none;
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    .group-select {
+        min-width: 200px;
+        border: 1px solid #cbd5e0;
+        border-radius: 4px;
+        padding: 8px;
+        font-size: 0.9rem;
+        color: #2c3e50;
+    }
+
+    .today {
+        background-color: #ebf8ff !important;
+    }
+
+    .empty-lesson {
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #718096;
+        font-style: italic;
+        font-size: 0.9rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    /* Иконки */
+    .fas {
+        width: 16px;
+        text-align: center;
+        margin-right: 4px;
+        color: #4a5568;
+    }
+
+    /* Адаптивность для маленьких экранов */
+    @media (max-width: 768px) {
+        .schedule-controls {
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .week-navigation {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .group-select {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-3">Расписание</h1>
+{#            <p class="dashboard-subtitle">на текущую неделю</p>#}
+        </div>
+    </div>
+
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% else %}
+        <div class="schedule-controls">
+            <div class="week-navigation">
+                <a href="?week={{ prev_week|date:'Y-m-d' }}{% if selected_group %}&group={{ selected_group.id }}{% endif %}" class="nav-btn">
+                    <i class="fas fa-chevron-left"></i> Предыдущая неделя
+                </a>
+                <div class="current-week">
+                    {{ week_start|date:"d.m.Y" }} - {{ week_end|date:"d.m.Y" }}
+                </div>
+                <a href="?week={{ next_week|date:'Y-m-d' }}{% if selected_group %}&group={{ selected_group.id }}{% endif %}" class="nav-btn">
+                    Следующая неделя <i class="fas fa-chevron-right"></i>
+                </a>
             </div>
-            <div class="col-md-4">
-                <label for="group" class="form-label">Группа</label>
-                <select class="form-select" id="group" name="group">
+            
+            <form class="d-flex align-items-center gap-2">
+                <select name="group" class="form-select group-select" onchange="this.form.submit()">
                     {% for group in groups %}
-                        <option value="{{ group.id }}" {% if group.id == selected_group.id %}selected{% endif %}>
+                        <option value="{{ group.id }}" {% if group == selected_group %}selected{% endif %}>
                             {{ group.name }}
                         </option>
                     {% endfor %}
                 </select>
-            </div>
-            <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-filter me-1"></i>Применить фильтры
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+                {% if week_param %}
+                    <input type="hidden" name="week" value="{{ current_week|date:'Y-m-d' }}">
+                {% endif %}
+            </form>
+        </div>
 
-<!-- Навигация по неделям -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <a href="?week={{ prev_week|date:'Y-m-d' }}&group={{ selected_group.id }}" class="btn btn-outline-primary">
-        <i class="fas fa-chevron-left me-1"></i>Предыдущая неделя
-    </a>
-    <h5 class="mb-0">{{ week_start|date:"d.m.Y" }} - {{ week_end|date:"d.m.Y" }}</h5>
-    <a href="?week={{ next_week|date:'Y-m-d' }}&group={{ selected_group.id }}" class="btn btn-outline-primary">
-        Следующая неделя<i class="fas fa-chevron-right ms-1"></i>
-    </a>
-</div>
-
-<!-- Расписание -->
-<div class="card">
-    <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="schedule-table">
                 <thead>
                     <tr>
                         <th>Время</th>
                         {% for day in days %}
-                            <th>{{ day|date:"l" }}</th>
+                            <th {% if day == today %}class="today"{% endif %}>
+                                {{ day|date:"l"|capfirst }}<br>
+                                {{ day|date:"d.m.Y" }}
+                            </th>
                         {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
-                    {% for time_slot in time_slots %}
+                    {% for slot in time_slots %}
                         <tr>
-                            <td>{{ time_slot.start_time|time:"H:i" }} - {{ time_slot.end_time|time:"H:i" }}</td>
+                            <td class="time-column">
+                                {{ slot.start_time }}<br>
+                                {{ slot.end_time }}
+                            </td>
                             {% for day in days %}
-                                <td>
-                                    {% with schedule=schedule_data|get_item:day|get_item:time_slot.id %}
-                                        {% if schedule %}
-                                            <div class="schedule-item {% if schedule.is_current %}current-lesson{% endif %}">
-                                                <div class="subject">{{ schedule.subject.name }}</div>
-                                                <div class="teacher">{{ schedule.teacher.get_full_name }}</div>
-                                                <div class="room">{{ schedule.room }}</div>
+                                <td {% if day == today %}class="today"{% endif %}>
+                                    {% with lesson=schedule_data|get_item:day|get_item:slot.id %}
+                                        {% if lesson %}
+                                            <div class="lesson-card {% if lesson.is_lecture %}lecture{% elif lesson.is_practice %}practice{% else %}lab{% endif %}">
+                                                <div class="lesson-title">{{ lesson.subject.name }}</div>
+                                                <div class="lesson-info">
+                                                    <div class="lesson-room">
+                                                        <i class="fas fa-door-open"></i> {{ lesson.room }}
+                                                    </div>
+                                                    <div class="lesson-teacher">
+                                                        <i class="fas fa-user"></i> {{ lesson.teacher }}
+                                                    </div>
+                                                </div>
                                             </div>
                                         {% else %}
-                                            <div class="text-secondary text-center">-</div>
+                                            <div class="empty-lesson">Нет занятия</div>
                                         {% endif %}
                                     {% endwith %}
                                 </td>
@@ -87,127 +276,36 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- Легенда -->
-        <div class="mt-4">
-            <h6 class="mb-3">Легенда:</h6>
-            <div class="d-flex gap-3">
-                <div class="d-flex align-items-center">
-                    <div class="current-lesson-indicator me-2"></div>
-                    <span>Текущее занятие</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <div class="text-secondary">-</div>
-                    <span class="ms-2">Нет занятий</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% endif %}
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-    .schedule-item {
-        padding: 0.75rem;
-        border-radius: 8px;
-        background-color: var(--card-bg);
-        border: 1px solid var(--border-color);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .schedule-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .schedule-item.current-lesson {
-        background-color: var(--secondary-color);
-        border-color: var(--secondary-color);
-        color: #ffffff;
-    }
-
-    .current-lesson-indicator {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background-color: var(--secondary-color);
-    }
-
-    .subject {
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-    }
-
-    .teacher {
-        font-size: 0.875rem;
-        opacity: 0.8;
-    }
-
-    .room {
-        font-size: 0.875rem;
-        opacity: 0.8;
-    }
-
-    .table {
-        border-collapse: separate;
-        border-spacing: 0;
-    }
-
-    .table th {
-        background-color: var(--card-bg);
-        border-bottom: 2px solid var(--border-color);
-        padding: 1rem;
-        font-weight: 600;
-    }
-
-    .table td {
-        padding: 0.75rem;
-        border-bottom: 1px solid var(--border-color);
-        vertical-align: middle;
-    }
-
-    .table tbody tr:hover {
-        background-color: var(--card-bg);
-    }
-
-    .card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    }
-</style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    function updateCurrentLesson() {
-        const now = new Date();
-        const currentTime = now.getHours() * 60 + now.getMinutes();
+document.addEventListener('DOMContentLoaded', function() {
+    // Подсветка текущего времени
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    
+    const timeSlots = document.querySelectorAll('.time-column');
+    timeSlots.forEach(slot => {
+        const times = slot.textContent.split('\n');
+        const startTime = times[0].split(':');
+        const endTime = times[1].split(':');
         
-        document.querySelectorAll('.schedule-item').forEach(item => {
-            const timeText = item.closest('tr').querySelector('td').textContent;
-            const [startTime, endTime] = timeText.split(' - ');
-            
-            const [startHours, startMinutes] = startTime.split(':').map(Number);
-            const [endHours, endMinutes] = endTime.split(':').map(Number);
-            
-            const lessonStart = startHours * 60 + startMinutes;
-            const lessonEnd = endHours * 60 + endMinutes;
-            
-            if (currentTime >= lessonStart && currentTime <= lessonEnd) {
-                item.classList.add('current-lesson');
-            } else {
-                item.classList.remove('current-lesson');
-            }
-        });
-    }
-
-    // Обновляем текущее занятие каждую минуту
-    updateCurrentLesson();
-    setInterval(updateCurrentLesson, 60000);
+        const startHour = parseInt(startTime[0]);
+        const startMinute = parseInt(startTime[1]);
+        const endHour = parseInt(endTime[0]);
+        const endMinute = parseInt(endTime[1]);
+        
+        if (currentHour > startHour && currentHour < endHour ||
+            (currentHour === startHour && currentMinute >= startMinute) ||
+            (currentHour === endHour && currentMinute <= endMinute)) {
+            slot.style.backgroundColor = 'rgba(52, 152, 219, 0.2)';
+            slot.style.fontWeight = 'bold';
+        }
+    });
+});
 </script>
 {% endblock %} 

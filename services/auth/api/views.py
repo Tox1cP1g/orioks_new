@@ -39,9 +39,18 @@ def login_view(request):
                 suggest_register = request.COOKIES.get('suggest_webauthn_register', '')
                 if suggest_register and suggest_register == username:
                     # Если cookie содержит имя текущего пользователя, перенаправляем на страницу ключей
-                    logger.info(f"Redirecting user {username} to WebAuthn keys page to register a key")
-                    messages.info(request, 'Для повышения безопасности рекомендуем зарегистрировать ключ безопасности WebAuthn')
-                    response = redirect('webauthn_keys_list')
+                    logger.info(f"WebAuthn registration is currently disabled")
+                    messages.info(request, 'Регистрация ключей безопасности WebAuthn временно отключена')
+                    
+                    # Перенаправляем на страницу в зависимости от роли пользователя
+                    if user.role == 'TEACHER':
+                        redirect_url = 'http://localhost:8004/'
+                    elif user.role == 'ADMIN':
+                        redirect_url = 'http://localhost:8002/admin/'
+                    else:
+                        redirect_url = 'http://localhost:8003/'
+                    
+                    response = redirect(redirect_url)
                     response.delete_cookie('suggest_webauthn_register')
                     return response
                 
