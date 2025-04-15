@@ -45,6 +45,7 @@ urlpatterns = [
     path('profile/', profile_view, name='profile'),
     path('logout/', logout_view, name='logout'),
     path('send_homework/', send_homework_view, name='send_homework'),
+    path('send_homework/<int:assignment_id>/', send_homework_view, name='send_homework'),
     path('get_assignments/<int:subject_id>/', get_assignments_api, name='get_assignments'),
     path('api/', include(router.urls)),
     path('', include('performance.urls')),  # Включаем URL из приложения performance

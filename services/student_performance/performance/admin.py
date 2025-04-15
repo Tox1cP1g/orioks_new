@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Student, Subject, Grade, Schedule,
     Attendance, Semester, HomeworkAssignment,
-    HomeworkSubmission
+    HomeworkSubmission, Group
 )
 
 @admin.register(Semester)
@@ -42,4 +42,24 @@ class HomeworkAssignmentAdmin(admin.ModelAdmin):
     list_display = ('subject', 'name', 'deadline')
     list_filter = ('subject', 'deadline')
     search_fields = ('name', 'description', 'subject__name')
-    ordering = ('-deadline',) 
+    ordering = ('-deadline',)
+
+@admin.register(HomeworkSubmission)
+class HomeworkSubmissionAdmin(admin.ModelAdmin):
+    list_display = ('student', 'assignment', 'status', 'submitted_at', 'grade')
+    list_filter = ('status', 'submitted_at', 'assignment__subject')
+    search_fields = ('student__user_id', 'assignment__name')
+    date_hierarchy = 'submitted_at'
+
+@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+    list_display = ('user_id', 'student_number', 'group', 'faculty')
+    list_filter = ('group', 'faculty')
+    search_fields = ('user_id', 'student_number', 'group__name')
+
+@admin.register(Group)
+class GroupAdmin(admin.ModelAdmin):
+    list_display = ('name', 'faculty', 'course')
+    list_filter = ('faculty', 'course')
+    search_fields = ('name', 'faculty')
+    ordering = ('course', 'name') 

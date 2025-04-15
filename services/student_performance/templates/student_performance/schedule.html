@@ -14,6 +14,8 @@
         border-radius: 8px;
         overflow: hidden;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        table-layout: fixed;
+        max-width: 100%;
     }
 
     .schedule-table th {
@@ -21,35 +23,41 @@
         color: #ffffff;
         font-weight: 600;
         text-align: center;
-        padding: 12px;
-        font-size: 1rem;
+        padding: 8px;
+        font-size: 0.9rem;
         border-bottom: 2px solid #34495e;
         text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .schedule-table td {
-        padding: 12px;
+        padding: 8px;
         border: 1px solid #dee2e6;
         vertical-align: top;
-        min-height: 100px;
+        min-height: 80px;
         background: #ffffff;
+        font-size: 0.9rem;
+        word-break: break-word;
     }
 
     .time-column {
         background: #f8f9fa;
         font-weight: 600;
         text-align: center;
-        width: 100px;
+        width: 80px;
         color: #2c3e50;
+        white-space: nowrap;
     }
 
     .lesson-card {
         background: #ffffff;
-        border-radius: 6px;
-        padding: 12px;
+        border-radius: 4px;
+        padding: 8px;
         margin-bottom: 4px;
-        border-left: 4px solid #3498db;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border-left: 3px solid #3498db;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
 
     .lesson-card.lecture {
@@ -69,20 +77,20 @@
 
     .lesson-title {
         font-weight: 600;
-        margin-bottom: 8px;
-        font-size: 1rem;
+        margin-bottom: 4px;
+        font-size: 0.9rem;
         color: #2c3e50;
     }
 
     .lesson-info {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         color: #4a5568;
     }
 
     .lesson-room {
         font-weight: 500;
         color: #2c3e50;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
     }
 
     .lesson-teacher {
@@ -94,23 +102,22 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         background: #f8f9fa;
-        padding: 16px;
+        padding: 12px;
         border-radius: 8px;
     }
 
     .week-navigation {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         color: #2c3e50;
-
     }
 
     .current-week {
         font-weight: 600;
-        padding: 8px 16px;
+        padding: 6px 12px;
         background: #ffffff;
         border-radius: 4px;
         color: #2c3e50;
@@ -118,7 +125,7 @@
     }
 
     .nav-btn {
-        padding: 8px 16px;
+        padding: 6px 12px;
         border: none;
         background: #3498db;
         color: #ffffff;
@@ -129,7 +136,8 @@
         text-decoration: none;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
+        font-size: 0.9rem;
     }
 
     .nav-btn:hover {
@@ -140,10 +148,10 @@
     }
 
     .group-select {
-        min-width: 200px;
+        min-width: 150px;
         border: 1px solid #cbd5e0;
         border-radius: 4px;
-        padding: 8px;
+        padding: 6px;
         font-size: 0.9rem;
         color: #2c3e50;
     }
@@ -153,22 +161,22 @@
     }
 
     .empty-lesson {
-        height: 100px;
+        height: 60px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #718096;
         font-style: italic;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         background: #f8f9fa;
         border-radius: 4px;
     }
 
     /* Иконки */
     .fas {
-        width: 16px;
+        width: 14px;
         text-align: center;
-        margin-right: 4px;
+        margin-right: 3px;
         color: #4a5568;
     }
 
@@ -176,7 +184,7 @@
     @media (max-width: 768px) {
         .schedule-controls {
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
 
         .week-navigation {
@@ -196,12 +204,20 @@
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="mb-3">Расписание</h1>
-{#            <p class="dashboard-subtitle">на текущую неделю</p>#}
+            <p class="dashboard-subtitle">на неделю: {{ week_start|date:"d.m.Y" }} - {{ week_end|date:"d.m.Y" }}</p>
         </div>
     </div>
 
-    {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
+    {% if not current_semester %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Текущий семестр не настроен. Пожалуйста, обратитесь к администратору.
+        </div>
+    {% elif not groups %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Не настроены группы. Пожалуйста, обратитесь к администратору.
+        </div>
     {% else %}
         <div class="schedule-controls">
             <div class="week-navigation">
@@ -244,31 +260,41 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for slot in time_slots %}
+                    {% for slot in schedule_data %}
                         <tr>
                             <td class="time-column">
-                                {{ slot.start_time }}<br>
-                                {{ slot.end_time }}
+                                {{ slot.time }}
                             </td>
-                            {% for day in days %}
-                                <td {% if day == today %}class="today"{% endif %}>
-                                    {% with lesson=schedule_data|get_item:day|get_item:slot.id %}
-                                        {% if lesson %}
-                                            <div class="lesson-card {% if lesson.is_lecture %}lecture{% elif lesson.is_practice %}practice{% else %}lab{% endif %}">
-                                                <div class="lesson-title">{{ lesson.subject.name }}</div>
+                            {% for day_data in slot.days %}
+                                <td {% if day_data.date == today %}class="today"{% endif %}>
+                                    {% if day_data.lessons %}
+                                        {% for lesson in day_data.lessons %}
+                                            <div class="lesson-card {% if lesson.is_lecture %}lecture{% else %}practice{% endif %}">
+                                                <div class="lesson-title">
+                                                    {% if lesson.is_lecture %}
+                                                        <i class="fas fa-book me-2"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-flask me-2"></i>
+                                                    {% endif %}
+                                                    {{ lesson.subject }}
+                                                </div>
                                                 <div class="lesson-info">
                                                     <div class="lesson-room">
-                                                        <i class="fas fa-door-open"></i> {{ lesson.room }}
+                                                        <i class="fas fa-map-marker-alt"></i>
+                                                        Аудитория: {{ lesson.room }}
                                                     </div>
                                                     <div class="lesson-teacher">
-                                                        <i class="fas fa-user"></i> {{ lesson.teacher }}
+                                                        <i class="fas fa-user"></i>
+                                                        {{ lesson.teacher }}
                                                     </div>
                                                 </div>
                                             </div>
-                                        {% else %}
-                                            <div class="empty-lesson">Нет занятия</div>
-                                        {% endif %}
-                                    {% endwith %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="empty-lesson">
+                                            Занятий нет
+                                        </div>
+                                    {% endif %}
                                 </td>
                             {% endfor %}
                         </tr>

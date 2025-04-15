@@ -16,13 +16,13 @@ router.register(r'attendance', AttendanceViewSet, basename='attendance')
 router.register(r'students', StudentViewSet, basename='student')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('subjects/', subjects, name='subjects'),
+    path('assignments/', assignments, name='assignments'),
+    path('news/', news, name='news'),
+    path('add-grade/', add_grade_view, name='add_grade'),
     path('api/create-profile/', create_user_profile, name='create_profile'),
     path('api/groups/', get_groups, name='get_groups'),
     path('api/students/<int:user_id>/', get_student_info, name='get_student_info'),
     path('api/students/<int:user_id>/update-group/', update_student_group, name='update_student_group'),
-    path('add-grade/', add_grade_view, name='add_grade'),
-    path('subjects/', subjects, name='subjects'),
-    path('assignments/', assignments, name='assignments'),
-    path('news/', news, name='news'),
+    path('', include(router.urls)),
 ]

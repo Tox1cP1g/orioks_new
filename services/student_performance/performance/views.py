@@ -5,7 +5,7 @@ from django.db.models import Sum, Count, F, Avg
 from django.shortcuts import get_object_or_404
 from .models import (
     Semester, Subject, Grade, Schedule, Attendance, Student,
-    StudentAssignment, Assignment, HomeworkAssignment, HomeworkSubmission
+    StudentAssignment, Assignment, HomeworkAssignment, HomeworkSubmission, Group
 )
 from .serializers import (
     SemesterSerializer,
@@ -25,7 +25,7 @@ from django.urls import reverse
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 from django.db import models
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from django.utils import timezone
 from django.http import JsonResponse
 import requests
@@ -349,15 +349,112 @@ def grades_view(request):
 
 @login_required
 def schedule_view(request):
+    from datetime import datetime, timedelta
+    
+    # Получаем текущий семестр
     current_semester = Semester.objects.filter(is_current=True).first()
-    schedule = Schedule.objects.filter(
-        subject__semester=current_semester
-    ).order_by('day_of_week', 'lesson_number') if current_semester else []
+    
+    # Определяем текущую дату и начало/конец недели
+    current_date = timezone.now().date()
+    
+    # Получаем параметр week из запроса, если он есть
+    week_param = request.GET.get('week')
+    if week_param:
+        try:
+            # Если указана дата, начинаем с нее
+            current_date = datetime.strptime(week_param, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+    
+    # Вычисляем начало недели (понедельник)
+    start_of_week = current_date - timedelta(days=current_date.weekday())
+    # Вычисляем конец недели (воскресенье)
+    end_of_week = start_of_week + timedelta(days=6)
+    
+    # Даты для навигации между неделями
+    prev_week = start_of_week - timedelta(days=7)
+    next_week = start_of_week + timedelta(days=7)
+    
+    # Создаем список дней недели
+    days = [start_of_week + timedelta(days=i) for i in range(7)]
+    
+    # Получаем все группы
+    groups = Group.objects.all()
+    selected_group_id = request.GET.get('group')
+    selected_group = None
+    
+    if selected_group_id:
+        try:
+            selected_group = Group.objects.get(id=selected_group_id)
+        except Group.DoesNotExist:
+            pass
+    else:
+        # Если группа не выбрана, пытаемся определить группу студента
+        student = Student.objects.filter(user_id=request.user.id).first()
+        if student and student.group:
+            selected_group = student.group
+        elif groups.exists():
+            selected_group = groups.first()
+    
+    # Получаем расписание для выбранной группы и семестра
+    schedule_items = []
+    if current_semester and selected_group:
+        schedule_items = Schedule.objects.filter(
+            semester=current_semester,
+            group=selected_group.name
+        ).order_by('day_of_week', 'lesson_number')
+    
+    # Создаем временные слоты для расписания
+    time_slots = [
+        {'slot': 1, 'start_time': '9:00-10:30'},
+        {'slot': 2, 'start_time': '10:45-12:15'},
+        {'slot': 3, 'start_time': '13:00-14:30'},
+        {'slot': 4, 'start_time': '14:45-16:15'},
+        {'slot': 5, 'start_time': '16:30-18:00'},
+        {'slot': 6, 'start_time': '18:15-19:45'}
+    ]
+    
+    # Подготавливаем данные расписания в формате, удобном для шаблона
+    schedule_data = []
+    for slot in time_slots:
+        slot_data = {'time': slot['start_time'], 'days': []}
+        
+        for day_idx, day in enumerate(days, 1):
+            day_lessons = []
+            
+            # Находим занятия для текущего дня и временного слота
+            for item in schedule_items:
+                if item.day_of_week == day_idx and item.lesson_number == slot['slot']:
+                    day_lessons.append({
+                        'subject': item.subject.name,
+                        'room': item.room,
+                        'teacher': item.teacher,
+                        'is_lecture': item.is_lecture
+                    })
+            
+            slot_data['days'].append({
+                'date': day,
+                'lessons': day_lessons
+            })
+        
+        schedule_data.append(slot_data)
     
     context = {
-        'schedule': schedule,
+        'schedule_data': schedule_data,
+        'time_slots': time_slots,
+        'days': days,
+        'today': current_date,
+        'week_start': start_of_week,
+        'week_end': end_of_week,
+        'prev_week': prev_week,
+        'next_week': next_week,
+        'current_week': current_date,
+        'week_param': week_param,
         'current_semester': current_semester,
+        'groups': groups,
+        'selected_group': selected_group,
     }
+    
     return render(request, 'student_performance/schedule.html', context)
 
 @login_required
@@ -475,13 +572,12 @@ def logout_view(request):
 @login_required
 @ensure_csrf_cookie
 @csrf_protect
-def send_homework_view(request):
+def send_homework_view(request, assignment_id=None):
     # Получаем или создаем объект Student для текущего пользователя
     student, created = Student.objects.get_or_create(
-        user=request.user,
+        user_id=request.user.id,
         defaults={
             'student_number': f"ST{request.user.id}",  # Временный номер студента
-            'group': 'Default Group',  # Временная группа
             'faculty': 'Default Faculty'  # Временный факультет
         }
     )
@@ -495,9 +591,14 @@ def send_homework_view(request):
     # Получаем последние отправленные задания
     submissions = HomeworkSubmission.objects.filter(student=student).order_by('-submitted_at')[:5]
 
+    # Если указан ID задания, попробуем его найти
+    selected_assignment = None
+    if assignment_id:
+        selected_assignment = HomeworkAssignment.objects.filter(id=assignment_id).first()
+
     if request.method == 'POST':
         subject_id = request.POST.get('subject')
-        assignment_id = request.POST.get('assignment')
+        assignment_id = request.POST.get('assignment') or assignment_id
         description = request.POST.get('description')
         file = request.FILES.get('file')
 
@@ -546,7 +647,8 @@ def send_homework_view(request):
 
     return render(request, 'student_performance/send_homework.html', {
         'subjects': subjects,
-        'submissions': submissions
+        'submissions': submissions,
+        'selected_assignment': selected_assignment
     })
 
 @login_required
@@ -651,9 +753,9 @@ def subjects(request):
             'subject': subject,
             'average_grade': grades.aggregate(avg=Avg('score'))['avg'] or 0,
             'attendance_percentage': (attendance.filter(is_present=True).count() / attendance.count() * 100) if attendance.exists() else 0,
-            'total_assignments': Assignment.objects.filter(subject=subject).count(),
-            'completed_assignments': StudentAssignment.objects.filter(
-                student=user,
+            'total_assignments': HomeworkAssignment.objects.filter(subject=subject).count(),
+            'completed_assignments': HomeworkSubmission.objects.filter(
+                student__user_id=user.id,
                 assignment__subject=subject,
                 status='SUBMITTED'
             ).count()
@@ -675,13 +777,13 @@ def assignments(request):
     
     # Если выбран конкретный предмет, фильтруем задания
     if subject_id:
-        assignments = Assignment.objects.filter(
+        assignments = HomeworkAssignment.objects.filter(
             subject_id=subject_id,
             subject__semester=current_semester
         ).order_by('-deadline')
         selected_subject = Subject.objects.get(id=subject_id)
     else:
-        assignments = Assignment.objects.filter(
+        assignments = HomeworkAssignment.objects.filter(
             subject__semester=current_semester
         ).order_by('-deadline')
         selected_subject = None
@@ -689,16 +791,18 @@ def assignments(request):
     # Получаем статус выполнения для каждого задания
     assignments_data = []
     for assignment in assignments:
-        student_assignment = StudentAssignment.objects.filter(
-            student=user,
+        # Получаем статус студента через HomeworkSubmission
+        student = Student.objects.filter(user_id=user.id).first()
+        homework_submission = HomeworkSubmission.objects.filter(
+            student=student,
             assignment=assignment
-        ).first()
+        ).first() if student else None
         
         assignments_data.append({
             'assignment': assignment,
-            'status': student_assignment.status if student_assignment else 'NOT_STARTED',
-            'submitted_at': student_assignment.submitted_at if student_assignment else None,
-            'grade': student_assignment.grade if student_assignment else None
+            'status': homework_submission.status if homework_submission else 'NOT_STARTED',
+            'submitted_at': homework_submission.submitted_at if homework_submission else None,
+            'grade': homework_submission.grade if homework_submission else None
         })
     
     return render(request, 'student_performance/assignments.html', {
