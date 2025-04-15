@@ -1455,3 +1455,4 @@ INFO 2025-04-15 19:10:14,413 views 56123 6252457984 Redirecting to teacher porta
 INFO 2025-04-15 19:10:14,413 views 56123 6252457984 Token found, preserving for redirect
 INFO 2025-04-15 19:10:14,413 views 56123 6252457984 Token cookie set for localhost domain
 INFO 2025-04-15 19:10:14,414 basehttp 56123 6252457984 "GET /logout/ HTTP/1.1" 302 0
+INFO 2025-04-15 19:36:46,892 autoreload 58698 8432191552 Watching for file changes with StatReloader
