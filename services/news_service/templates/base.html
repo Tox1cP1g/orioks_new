@@ -7,64 +7,441 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     <style>
         :root {
-            --bg-color: #1a1a1a;
-            --text-color: #e0e0e0;
-            --card-bg: #2d2d2d;
-            --border-color: #404040;
-            --link-color: #6ea8fe;
-            --input-bg: #333333;
+            /* Светлая тема по умолчанию */
+            --bg-color: #ffffff;
+            --text-color: #2c3e50;
+            --card-bg: #ffffff;
+            --border-color: #e9ecef;
+            --link-color: #0d6efd;
+            --input-bg: #ffffff;
+            --input-text: #2c3e50;
+            --navbar-bg: #ffffff;
+            --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --hover-bg: #f8f9fa;
+            --secondary-text: #6c757d;
+            --navbar-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --heading-color: #2c3e50;
+        }
+
+        [data-theme="dark"] {
+            /* Основные цвета */
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --card-bg: #1a1a1a;
+            --border-color: #60a5fa;
+            --link-color: #60a5fa;
+            --input-bg: #1a1a1a;
             --input-text: #ffffff;
+            --navbar-bg: #000000;
+            --card-shadow: 0 4px 6px rgba(96, 165, 250, 0.3);
+            --hover-bg: #2d2d2d;
+            --secondary-text: #ffffff;
+            --navbar-shadow: 0 2px 4px rgba(96, 165, 250, 0.2);
+            --heading-color: #ffffff;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .navbar {
+            background-color: var(--navbar-bg) !important;
             border-bottom: 1px solid var(--border-color) !important;
+            box-shadow: var(--navbar-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand {
+            color: var(--heading-color) !important;
+            font-weight: 700;
+            font-size: 1.5rem;
         }
 
         .card {
+            background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow), 0 6px 12px rgba(0, 0, 0, 0.1);
         }
 
         .form-control, .form-control:focus {
             background-color: var(--input-bg);
             color: var(--input-text);
             border-color: var(--border-color);
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 2px var(--link-color);
+            border-color: var(--link-color);
         }
 
         .btn-outline-primary {
             border-color: var(--link-color);
             color: var(--link-color);
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
         }
 
         .btn-outline-primary:hover {
             background-color: var(--link-color);
             border-color: var(--link-color);
             color: var(--bg-color);
+            transform: translateY(-1px);
+        }
+
+        .table {
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: var(--hover-bg);
+            transition: background-color 0.2s ease;
+        }
+
+        .dropdown-menu {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            box-shadow: var(--card-shadow);
+            border-radius: 8px;
+        }
+
+        .dropdown-item {
+            color: var(--text-color);
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--hover-bg);
+            color: var(--link-color);
+        }
+
+        .theme-toggle {
+            background-color: transparent;
+            border: 1.5px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.6rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--hover-bg);
+            transform: rotate(15deg);
+        }
+
+        .theme-toggle i {
+            font-size: 1.1rem;
+        }
+
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        a:hover {
+            color: var(--link-color);
+            opacity: 0.8;
+            text-decoration: none;
+        }
+
+        /* Общие стили для новостей */
+        .news-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .news-meta,
+        .news-date {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .news-content {
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .news-card {
+            margin-bottom: 1.5rem;
+            padding: 1.75rem;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .news-card {
+            background-color: #1a1a1a;
+            border: 1px solid #333333;
+            margin-bottom: 1.5rem;
+            padding: 1.75rem;
+        }
+
+        [data-theme="dark"] .news-card:hover {
+            background-color: #2d2d2d;
+            border-color: #ffffff;
+            box-shadow: 0 0 30px rgba(96, 165, 250, 0.4);
+        }
+
+        [data-theme="dark"] .news-title {
+            color: #ffffff;
+            font-size: 1.5rem;
+        }
+
+        [data-theme="dark"] .news-meta,
+        [data-theme="dark"] .news-date {
+            color: #ffffff;
+            font-size: 1rem;
+        }
+
+        [data-theme="dark"] .news-content {
+            color: #ffffff;
+            font-size: 1.1rem;
+        }
+
+        [data-theme="dark"] .btn-more {
+            font-size: 1rem;
+        }
+
+        [data-theme="dark"] .latest-news-title {
+            color: #ffffff;
+            font-size: 1.75rem;
+        }
+
+        [data-theme="dark"] .latest-news-title i {
+            color: #60a5fa;
+            text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+        }
+
+        /* Улучшенный контраст для иконок */
+        [data-theme="dark"] .fas {
+            color: #60a5fa;
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+        }
+
+        /* Стили для даты */
+        .news-date {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--secondary-text);
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        [data-theme="dark"] .news-date {
+            background-color: #2d2d2d;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .news-date i {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        [data-theme="dark"] .news-date i {
+            color: #60a5fa;
+            font-size: 1.2rem;
+        }
+
+        /* Улучшенный контраст для кнопок в темной теме */
+        [data-theme="dark"] .btn-outline-primary {
+            border-color: #60a5fa;
+            color: #60a5fa;
+        }
+
+        [data-theme="dark"] .btn-outline-primary:hover {
+            background-color: #60a5fa;
+            color: #000000;
+            border-color: #60a5fa;
+        }
+
+        /* Заголовок раздела */
+        .section-title {
+            color: var(--heading-color);
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            letter-spacing: -0.03em;
+        }
+
+        /* Анимации для карточек */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Улучшенная типография */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--heading-color);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.3;
+        }
+
+        p {
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+        }
+
+        strong {
+            font-weight: 600;
+            color: var(--heading-color);
+        }
+
+        /* Последние новости заголовок */
+        .latest-news-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .latest-news-title i {
+            color: var(--secondary-text);
+            font-size: 1.5rem;
+        }
+
+        /* Кнопка переключения темы в темном режиме */
+        [data-theme="dark"] .theme-toggle {
+            background-color: #1a1a1a;
+            border: 2px solid #60a5fa;
+            color: #ffffff;
+            width: 48px;
+            height: 48px;
+        }
+
+        [data-theme="dark"] .theme-toggle:hover {
+            background-color: #2d2d2d;
+            border-color: #ffffff;
+            transform: rotate(180deg);
+        }
+
+        [data-theme="dark"] .theme-toggle i {
+            font-size: 1.5rem;
+        }
+
+        /* Дополнительные стили для улучшения контраста */
+        [data-theme="dark"] .container {
+            background-color: #000000;
+        }
+
+        [data-theme="dark"] .navbar {
+            background-color: #1a1a1a !important;
+            border-bottom: 1px solid #333333 !important;
+        }
+
+        [data-theme="dark"] .navbar-brand {
+            color: #ffffff !important;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-shadow: 0 0 15px rgba(96, 165, 250, 0.5);
+        }
+
+        /* Дополнительные улучшения контраста */
+        [data-theme="dark"] strong {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        [data-theme="dark"] p {
+            color: #ffffff;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        [data-theme="dark"] h1,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h4,
+        [data-theme="dark"] h5,
+        [data-theme="dark"] h6 {
+            color: #ffffff;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.3;
+            margin-bottom: 1.5rem;
+        }
+
+        [data-theme="dark"] * {
+            color: #ffffff !important;
+        }
+
+        [data-theme="dark"] body {
+            background-color: #000000;
+        }
+
+        [data-theme="dark"] .btn-more {
+            background-color: #1a1a1a;
+            border: 1px solid #333333;
         }
     </style>
 
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--card-bg);">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="/">
                 <i class="fas fa-graduation-cap me-2"></i>ОРИОКС
             </a>
             <div class="d-flex align-items-center">
-                <button id="theme-toggle" class="btn btn-sm btn-outline-secondary">
+                <button id="theme-toggle" class="theme-toggle" title="Переключить тему">
                     <i class="fas fa-sun"></i>
                 </button>
             </div>
@@ -80,23 +457,38 @@
     <script>
         // Переключатель темы
         const themeToggle = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('theme') || 'dark';
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-        if (savedTheme === 'light') {
-            document.documentElement.setAttribute('data-theme', 'light');
+        // Устанавливаем начальную тему
+        if (savedTheme === 'dark' || (savedTheme === 'system' && prefersDark)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
             themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
         }
 
         themeToggle.addEventListener('click', () => {
             const currentTheme = document.documentElement.getAttribute('data-theme');
-            if (currentTheme === 'light') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-            } else {
+            if (currentTheme === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'light');
                 localStorage.setItem('theme', 'light');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
                 themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+        });
+
+        // Следим за системными настройками темы
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (localStorage.getItem('theme') === 'system') {
+                if (e.matches) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                }
             }
         });
     </script>
