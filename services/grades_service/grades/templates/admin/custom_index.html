@@ -1,0 +1,19 @@
+{% extends "admin/index.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="module">
+    <div class="jumbotron">
+        <h2>Управление данными</h2>
+        <p>Здесь вы можете синхронизировать данные между сервисами:</p>
+        <div style="margin-top: 20px; margin-bottom: 20px;">
+            <a href="{% url 'sync_data_from_portals' %}" class="button" style="background-color: #417690; padding: 10px 15px; border-radius: 4px; color: white; text-decoration: none; display: inline-block;">
+                <i class="fas fa-sync-alt"></i> Синхронизировать данные
+            </a>
+        </div>
+        <p><small>Эта операция получит актуальные данные о преподавателях из порта 8004 и данные о студентах из порта 8003.</small></p>
+    </div>
+</div>
+
+{{ block.super }}
+{% endblock %} 

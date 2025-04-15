@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ОРИОКС{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root[data-theme="light"] {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --text-color: #2c3e50;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --navbar-bg: #2c3e50;
+            --navbar-text: #ffffff;
+            --dropdown-bg: #ffffff;
+            --dropdown-hover: #f8f9fa;
+            --footer-bg: #f8f9fa;
+            --table-header-bg: #f8f9fa;
+            --stats-card-bg: #ffffff;
+            --stats-text-color: #2c3e50;
+            --chart-grid-color: #e9ecef;
+            --select-bg: #ffffff;
+            --select-text: #2c3e50;
+            --filter-button-bg: #3498db;
+            --filter-button-text: #ffffff;
+            
+            /* Цвета для бейджей и акцентов */
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --primary-bright: #0d6efd;
+            --list-hover-bg: #f8f9fa;
+            --muted-text: #6c757d;
+            
+            /* Единообразие цветов текста */
+            --heading-color: #2c3e50;
+            --subtitle-color: #495057;
+            --section-title-color: #2c3e50;
+        }
+
+        :root[data-theme="dark"] {
+            --primary-color: #1a1d21;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --text-color: #ffffff;
+            --bg-color: #1a1d21;
+            --card-bg: #2d3239;
+            --border-color: #3d434c;
+            --navbar-bg: #242830;
+            --navbar-text: #ffffff;
+            --dropdown-bg: #2d3239;
+            --dropdown-hover: #3d434c;
+            --footer-bg: #242830;
+            --table-header-bg: #2d3239;
+            --stats-card-bg: #2d3239;
+            --stats-text-color: #ffffff;
+            --chart-grid-color: #3d434c;
+            --select-bg: #2d3239;
+            --select-text: #ffffff;
+            --filter-button-bg: #3498db;
+            --filter-button-text: #ffffff;
+            --subject-card-bg: #2d3239;
+            --grade-card-blue: rgba(52, 152, 219, 0.15);
+            --grade-card-green: rgba(46, 204, 113, 0.15);
+            --grade-card-yellow: rgba(241, 196, 15, 0.15);
+            --grade-card-red: rgba(231, 76, 60, 0.15);
+            --link-color: #3498db;
+            --link-hover-color: #2980b9;
+            --btn-outline-color: #3498db;
+            --btn-outline-hover-bg: #3498db;
+            --btn-outline-hover-text: #ffffff;
+            --card-hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            
+            /* Цвета для бейджей и акцентов */
+            --success-color: #5cb85c;
+            --warning-color: #f0ad4e;
+            --danger-color: #d9534f;
+            --info-color: #5bc0de;
+            --primary-bright: #4e9fff;
+            --list-hover-bg: #3d434c;
+            --muted-text: #adb5bd;
+            
+            /* Единообразие цветов текста */
+            --heading-color: #ffffff;
+            --subtitle-color: #e9ecef;
+            --section-title-color: #e9ecef;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .navbar {
+            background-color: var(--navbar-bg) !important;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--navbar-text) !important;
+        }
+
+        .nav-link {
+            color: var(--navbar-text) !important;
+            opacity: 0.9;
+        }
+
+        .nav-link:hover {
+            opacity: 1;
+        }
+
+        .content {
+            margin-top: 2rem;
+        }
+
+        .footer {
+            margin-top: 3rem;
+            padding: 1rem 0;
+            background-color: var(--footer-bg);
+            color: var(--text-color);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card-header {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            padding: 1rem;
+        }
+
+        .card-title {
+            color: var(--heading-color);
+            margin-bottom: 0;
+        }
+
+        .table {
+            color: var(--text-color);
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .form-select, .form-control {
+            background-color: var(--select-bg);
+            color: var(--select-text);
+            border-color: var(--border-color);
+        }
+
+        .form-select:focus, .form-control:focus {
+            background-color: var(--select-bg);
+            color: var(--select-text);
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        }
+
+        .list-group-item {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+
+        .list-group-item.active {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .list-group-item-action:hover {
+            background-color: var(--list-hover-bg);
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+
+        .theme-switch {
+            cursor: pointer;
+            padding: 0.5rem;
+            margin-left: 1rem;
+        }
+
+        .theme-switch i {
+            font-size: 1.2rem;
+            color: var(--navbar-text);
+            opacity: 0.9;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+
+        .modal-header, .modal-footer {
+            border-color: var(--border-color);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">ОРИОКС</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% block nav_items %}{% endblock %}
+                </ul>
+                <div class="navbar-nav align-items-center">
+                    <div class="theme-switch" onclick="toggleTheme()">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                    {% if user.is_authenticated %}
+                        <span class="nav-item nav-link">{{ user.username }}</span>
+                        <a class="nav-link" href="/logout/">Выйти</a>
+                    {% else %}
+                        <a class="nav-link" href="/login/">Войти</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container content">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p class="text-center text-muted">© 2024 ОРИОКС. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Функция для переключения темы
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Обновляем иконку
+            const themeIcon = document.querySelector('.theme-switch i');
+            themeIcon.className = newTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            
+            // Вызываем событие изменения темы
+            dispatchThemeChangeEvent(newTheme);
+        }
+
+        // Функция для вызова события изменения темы
+        function dispatchThemeChangeEvent(theme) {
+            const event = new CustomEvent('themeChanged', {
+                detail: { theme: theme }
+            });
+            document.dispatchEvent(event);
+        }
+
+        // Инициализация темы при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // Устанавливаем правильную иконку
+            const themeIcon = document.querySelector('.theme-switch i');
+            themeIcon.className = savedTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            
+            // Вызываем событие изменения темы
+            dispatchThemeChangeEvent(savedTheme);
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

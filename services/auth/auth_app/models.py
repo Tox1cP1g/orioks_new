@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
 from .utils import binary_to_string, string_to_binary
+from django.conf import settings
 
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -29,25 +30,21 @@ class User(AbstractUser):
 
 class WebAuthnCredential(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='webauthn_credentials')
-    
-    # Данные учетных данных WebAuthn
-    credential_id = models.CharField(max_length=1024, unique=True, verbose_name="ID учетных данных")
-    credential_public_key = models.TextField(verbose_name="Публичный ключ")
-    credential_name = models.CharField(max_length=100, verbose_name="Название ключа безопасности")
-    
-    # Метаданные
-    sign_count = models.BigIntegerField(default=0, verbose_name="Счетчик подписей")
-    rp_id = models.CharField(max_length=255, verbose_name="ID доверенной стороны")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
-    last_used_at = models.DateTimeField(null=True, blank=True, verbose_name="Последнее использование")
-    
+    credential_id = models.CharField(max_length=255, unique=True, verbose_name='ID учетных данных')
+    credential_public_key = models.TextField(verbose_name='Публичный ключ')
+    credential_name = models.CharField(max_length=100, verbose_name='Название ключа безопасности')
+    sign_count = models.BigIntegerField(default=0, verbose_name='Счетчик подписей')
+    rp_id = models.CharField(max_length=255, verbose_name='ID доверенной стороны')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    last_used_at = models.DateTimeField(blank=True, null=True, verbose_name='Последнее использование')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='webauthn_credentials')
+
     class Meta:
-        verbose_name = "Ключ WebAuthn"
-        verbose_name_plural = "Ключи WebAuthn"
-        
+        verbose_name = 'Ключ WebAuthn'
+        verbose_name_plural = 'Ключи WebAuthn'
+
     def __str__(self):
-        return f"{self.credential_name} ({self.user.get_full_name()})"
+        return f"{self.credential_name} ({self.user.email})"
     
     # Методы для работы с бинарными данными через base64
     def get_credential_id_binary(self):

@@ -6,6 +6,7 @@ from .views import (
 )
 from .api_views import create_user_profile, get_groups, get_student_info, update_student_group
 
+
 router = DefaultRouter()
 router.register(r'semesters', SemesterViewSet)
 router.register(r'subjects', SubjectViewSet, basename='subject')
@@ -21,4 +22,4 @@ urlpatterns = [
     path('api/students/<int:user_id>/', get_student_info, name='get_student_info'),
     path('api/students/<int:user_id>/update-group/', update_student_group, name='update_student_group'),
     path('add-grade/', add_grade_view, name='add_grade'),
-] 
+]

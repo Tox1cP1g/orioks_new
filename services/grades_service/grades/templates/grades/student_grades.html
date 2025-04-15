@@ -1,0 +1,302 @@
+{% extends "grades/base.html" %}
+
+{% block title %}Оценки - Студент{% endblock %}
+
+{% block nav_items %}
+<li class="nav-item">
+    <a class="nav-link active" href="#">Мои оценки</a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4 section-title">Мои оценки</h2>
+        <p class="lead">Просмотр успеваемости по предметам за выбранный семестр</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="card-title">Выбор семестра</h5>
+            </div>
+            <div class="card-body">
+                <select class="form-select" id="semesterSelect">
+                    {% for semester in semesters %}
+                        <option value="{{ semester.id }}">{{ semester.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card shadow-sm student-info-card">
+            <div class="card-header">
+                <h5 class="card-title">Информация о студенте</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="student-info"><i class="fas fa-user me-2 text-primary"></i> <strong>ФИО:</strong> {{ user.get_full_name }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="student-info">
+                            <i class="fas fa-users me-2 text-primary"></i> 
+                            <strong>Группа:</strong>
+                            <span id="currentGroup">{{ student_group }}</span>
+                            <button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#changeGroupModal">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title">Оценки по предметам</h5>
+        <span class="badge bg-primary" id="gradesCount">-</span>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped" id="gradesTable">
+                <thead>
+                    <tr>
+                        <th>Предмет</th>
+                        <th>Преподаватель</th>
+                        <th>Оценка</th>
+                        <th>Дата</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Оценки будут загружены динамически -->
+                    <tr>
+                        <td colspan="4" class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Загрузка...</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно изменения группы -->
+<div class="modal fade" id="changeGroupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Изменение группы</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="changeGroupForm">
+                    <div class="mb-3">
+                        <label for="groupSelect" class="form-label">Выберите группу</label>
+                        <select class="form-select" id="groupSelect" required>
+                            <option value="">-- Выберите группу --</option>
+                            {% for group in groups %}
+                                <option value="{{ group.id }}" {% if group.id == student_group_id %}selected{% endif %}>
+                                    {{ group.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="saveGroupBtn">
+                    <i class="fas fa-save me-1"></i> Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .student-info-card {
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .student-info {
+        font-size: 1.05rem;
+        padding: 0.25rem 0;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+    }
+    
+    [data-theme="dark"] .student-info {
+        color: #fff;
+    }
+    
+    [data-theme="light"] .student-info {
+        color: #333;
+    }
+    
+    .student-info strong {
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const semesterSelect = document.getElementById('semesterSelect');
+    const gradesTable = document.getElementById('gradesTable').getElementsByTagName('tbody')[0];
+    const gradesCount = document.getElementById('gradesCount');
+    const groupSelect = document.getElementById('groupSelect');
+    const saveGroupBtn = document.getElementById('saveGroupBtn');
+    const currentGroup = document.getElementById('currentGroup');
+
+    // Функция для добавления цветовой маркировки оценок
+    function getGradeClass(value) {
+        value = parseFloat(value);
+        if (value >= 85) return 'text-success fw-bold';
+        if (value >= 70) return 'text-primary';
+        if (value >= 50) return 'text-warning';
+        return 'text-danger';
+    }
+
+    // Загрузка оценок при выборе семестра
+    semesterSelect.addEventListener('change', function() {
+        const semesterId = this.value;
+        
+        // Показываем индикатор загрузки
+        gradesTable.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Загрузка...</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+        
+        fetch(`/api/student/grades/${semesterId}/`)
+            .then(response => response.json())
+            .then(grades => {
+                if (grades.length === 0) {
+                    gradesTable.innerHTML = '<tr><td colspan="4" class="text-center">Оценки не найдены</td></tr>';
+                    gradesCount.textContent = '0';
+                    return;
+                }
+                
+                gradesCount.textContent = grades.length;
+                
+                gradesTable.innerHTML = grades.map(grade => `
+                    <tr>
+                        <td><strong>${grade.subject_name}</strong></td>
+                        <td>${grade.teacher_name}</td>
+                        <td class="${getGradeClass(grade.value)}">${grade.value}</td>
+                        <td><small>${grade.date}</small></td>
+                    </tr>
+                `).join('');
+                
+                // Добавляем обработку события изменения темы
+                document.addEventListener('themeChanged', function() {
+                    // Обновляем стили, зависящие от темы, если необходимо
+                });
+            })
+            .catch(error => {
+                console.error('Error loading grades:', error);
+                gradesTable.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Ошибка загрузки оценок</td></tr>';
+                gradesCount.textContent = '-';
+            });
+    });
+
+    // Сохранение выбранной группы
+    saveGroupBtn.addEventListener('click', function() {
+        const groupId = groupSelect.value;
+        if (!groupId) {
+            alert('Пожалуйста, выберите группу');
+            return;
+        }
+
+        // Показываем индикатор загрузки
+        saveGroupBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Сохранение...';
+        saveGroupBtn.disabled = true;
+
+        fetch('/api/student/set-group/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ group_id: groupId })
+        })
+        .then(response => response.json())
+        .then(result => {
+            saveGroupBtn.innerHTML = '<i class="fas fa-save me-1"></i> Сохранить';
+            saveGroupBtn.disabled = false;
+            
+            if (result.success) {
+                // Закрываем модальное окно
+                bootstrap.Modal.getInstance(document.getElementById('changeGroupModal')).hide();
+                
+                // Обновляем текущую группу
+                currentGroup.textContent = result.group_name;
+                
+                // Показываем уведомление об успехе
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+                alertDiv.innerHTML = `
+                    Группа успешно изменена
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.querySelector('.container.content').prepend(alertDiv);
+                
+                // Автоматически скрываем уведомление через 3 секунды
+                setTimeout(() => {
+                    alertDiv.classList.remove('show');
+                    setTimeout(() => alertDiv.remove(), 150);
+                }, 3000);
+                
+                // Обновляем оценки
+                semesterSelect.dispatchEvent(new Event('change'));
+            } else {
+                alert('Ошибка при сохранении группы: ' + (result.error || 'Неизвестная ошибка'));
+            }
+        })
+        .catch(error => {
+            console.error('Error saving group:', error);
+            saveGroupBtn.innerHTML = '<i class="fas fa-save me-1"></i> Сохранить';
+            saveGroupBtn.disabled = false;
+            alert('Ошибка при сохранении группы: ' + error);
+        });
+    });
+
+    // Получение CSRF токена из cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Загрузить оценки для первого семестра при загрузке страницы
+    if (semesterSelect.value) {
+        semesterSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
+{% endblock %} 

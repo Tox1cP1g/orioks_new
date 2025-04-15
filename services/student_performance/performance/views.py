@@ -3,7 +3,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Sum, Count, F, Avg
 from django.shortcuts import get_object_or_404
-from .models import Semester, Subject, Grade, Schedule, Attendance, Student, Group
+from .models import (
+    Semester, Subject, Grade, Schedule, Attendance, Student,
+    StudentAssignment, Assignment, HomeworkAssignment, HomeworkSubmission
+)
 from .serializers import (
     SemesterSerializer,
     SubjectSerializer,
@@ -22,8 +25,11 @@ from django.urls import reverse
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 from django.db import models
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 from django.utils import timezone
+from django.http import JsonResponse
+import requests
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 
 class TeacherPermission(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -91,21 +97,7 @@ class ScheduleViewSet(viewsets.ModelViewSet):
     permission_classes = [TeacherPermission]
 
     def get_queryset(self):
-        # Получаем текущий семестр
-        current_semester = Semester.objects.filter(is_current=True).first()
-        if not current_semester:
-            return Schedule.objects.none()
-
-        # Получаем группу студента
-        student = Student.objects.filter(user_id=self.request.user.id).first()
-        if not student or not student.group:
-            return Schedule.objects.none()
-
-        # Возвращаем расписание для группы студента в текущем семестре
-        return Schedule.objects.filter(
-            semester=current_semester,
-            group=student.group
-        ).select_related('subject', 'group', 'semester')
+        return Schedule.objects.filter(teacher=self.request.user.get_full_name())
 
 class AttendanceViewSet(viewsets.ModelViewSet):
     serializer_class = AttendanceSerializer
@@ -166,6 +158,40 @@ class StudentViewSet(viewsets.ReadOnlyModelViewSet):
         return Student.objects.filter(
             grade__subject__in=teacher_subjects
         ).distinct()
+
+@login_required
+def submit_assignment(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    
+    if request.method == 'POST':
+        try:
+            # Получаем или создаем запись о задании студента
+            student_assignment, created = StudentAssignment.objects.get_or_create(
+                student=request.user,
+                assignment=assignment,
+                defaults={'status': 'SUBMITTED'}
+            )
+            
+            # Обновляем данные
+            student_assignment.submission_text = request.POST.get('submission_text', '')
+            student_assignment.submitted_at = timezone.now()
+            student_assignment.status = 'SUBMITTED'
+            
+            # Обрабатываем загруженный файл
+            if 'file' in request.FILES:
+                student_assignment.submission_file = request.FILES['file']
+            
+            student_assignment.save()
+            
+            messages.success(request, 'Задание успешно отправлено!')
+            return redirect('dashboard')
+            
+        except Exception as e:
+            messages.error(request, f'Ошибка при отправке задания: {str(e)}')
+    
+    return render(request, 'student_performance/send_homework.html', {
+        'assignment': assignment
+    })
 
 @login_required
 def index(request):
@@ -254,9 +280,7 @@ def dashboard(request):
         'today_schedule': [{
             'time': schedule.get_lesson_number_display(),
             'subject': schedule.subject.name,
-            'room': schedule.room,
-            'teacher': schedule.teacher,
-            'is_lecture': schedule.is_lecture
+            'room': schedule.room
         } for schedule in today_schedule],
         'attendance_stats': attendance_stats,
         'grades_stats': grades_stats,
@@ -324,84 +348,15 @@ def grades_view(request):
 
 @login_required
 def schedule_view(request):
-    # Получаем текущий семестр
     current_semester = Semester.objects.filter(is_current=True).first()
-    if not current_semester:
-        return render(request, 'student_performance/schedule.html', {
-            'error': 'Текущий семестр не найден'
-        })
-
-    # Получаем студента и его группу
-    student = Student.objects.filter(user_id=request.user.id).first()
-    if not student:
-        return render(request, 'student_performance/schedule.html', {
-            'error': 'Профиль студента не найден'
-        })
-
-    # Получаем все группы для выбора
-    groups = Group.objects.all().order_by('name')
-
-    # Определяем выбранную группу (по умолчанию - группа студента)
-    selected_group_id = request.GET.get('group')
-    if selected_group_id:
-        selected_group = Group.objects.filter(id=selected_group_id).first()
-    else:
-        selected_group = student.group
-
-    # Определяем текущую неделю
-    week_param = request.GET.get('week')
-    if week_param:
-        current_week = datetime.strptime(week_param, '%Y-%m-%d').date()
-    else:
-        current_week = timezone.now().date()
-
-    # Вычисляем начало и конец недели
-    week_start = current_week - timedelta(days=current_week.weekday())
-    week_end = week_start + timedelta(days=6)
-    prev_week = week_start - timedelta(days=7)
-    next_week = week_start + timedelta(days=7)
-
-    # Получаем дни недели
-    days = [week_start + timedelta(days=i) for i in range(7)]
-
-    # Определяем временные слоты
-    time_slots = [
-        {'id': 1, 'start_time': '09:00', 'end_time': '10:30'},
-        {'id': 2, 'start_time': '10:45', 'end_time': '12:15'},
-        {'id': 3, 'start_time': '13:00', 'end_time': '14:30'},
-        {'id': 4, 'start_time': '14:45', 'end_time': '16:15'},
-        {'id': 5, 'start_time': '16:30', 'end_time': '18:00'},
-        {'id': 6, 'start_time': '18:15', 'end_time': '19:45'},
-    ]
-
-    # Получаем расписание для выбранной группы
     schedule = Schedule.objects.filter(
-        semester=current_semester,
-        group=selected_group
-    ).select_related('subject', 'group', 'semester').order_by('day_of_week', 'lesson_number')
-
-    # Создаем словарь с расписанием по дням и временным слотам
-    schedule_data = {}
-    for day in days:
-        schedule_data[day] = {}
-        day_schedule = schedule.filter(day_of_week=day.weekday() + 1)
-        for slot in time_slots:
-            schedule_data[day][slot['id']] = day_schedule.filter(lesson_number=slot['id']).first()
-
+        subject__semester=current_semester
+    ).order_by('day_of_week', 'lesson_number') if current_semester else []
+    
     context = {
+        'schedule': schedule,
         'current_semester': current_semester,
-        'groups': groups,
-        'selected_group': selected_group,
-        'current_week': current_week,
-        'week_start': week_start,
-        'week_end': week_end,
-        'prev_week': prev_week,
-        'next_week': next_week,
-        'days': days,
-        'time_slots': time_slots,
-        'schedule_data': schedule_data,
     }
-
     return render(request, 'student_performance/schedule.html', context)
 
 @login_required
@@ -517,61 +472,115 @@ def logout_view(request):
     return response
 
 @login_required
-def add_grade_view(request):
-    # Проверяем, что пользователь является преподавателем
-    if not hasattr(request.user, 'role') or request.user.role != 'TEACHER':
-        messages.error(request, 'Только преподаватели могут добавлять оценки')
-        return redirect('grades')
+@ensure_csrf_cookie
+@csrf_protect
+def send_homework_view(request):
+    # Получаем или создаем объект Student для текущего пользователя
+    student, created = Student.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'student_number': f"ST{request.user.id}",  # Временный номер студента
+            'group': 'Default Group',  # Временная группа
+            'faculty': 'Default Faculty'  # Временный факультет
+        }
+    )
 
     # Получаем текущий семестр
     current_semester = Semester.objects.filter(is_current=True).first()
-    if not current_semester:
-        messages.error(request, 'Текущий семестр не найден')
-        return redirect('grades')
-
-    # Получаем предметы, которые ведет преподаватель
-    teacher_subjects = Subject.objects.filter(
-        schedule_items__teacher=request.user.get_full_name(),
-        semester=current_semester
-    ).distinct()
-
-    # Получаем студентов, которые учатся у преподавателя
-    students = Student.objects.filter(
-        group__subjects__in=teacher_subjects
-    ).select_related('user', 'group').distinct()
+    
+    # Получаем предметы текущего семестра
+    subjects = Subject.objects.filter(semester=current_semester) if current_semester else []
+    
+    # Получаем последние отправленные задания
+    submissions = HomeworkSubmission.objects.filter(student=student).order_by('-submitted_at')[:5]
 
     if request.method == 'POST':
+        subject_id = request.POST.get('subject')
+        assignment_id = request.POST.get('assignment')
+        description = request.POST.get('description')
+        file = request.FILES.get('file')
+
+        if not all([subject_id, assignment_id, file]):
+            messages.error(request, 'Пожалуйста, заполните все обязательные поля')
+            return redirect('send_homework')
+
         try:
-            student = Student.objects.get(id=request.POST.get('student'))
-            subject = Subject.objects.get(id=request.POST.get('subject'))
+            # Получаем предмет
+            subject = Subject.objects.get(id=subject_id)
             
-            # Проверяем, что преподаватель может ставить оценки по этому предмету
-            if not subject.schedule_items.filter(teacher=request.user.get_full_name()).exists():
-                messages.error(request, 'У вас нет прав для выставления оценок по этому предмету')
-                return redirect('add_grade')
-
-            grade = Grade.objects.create(
-                student=student,
-                subject=subject,
-                grade_type=request.POST.get('grade_type'),
-                score=float(request.POST.get('score')),
-                max_score=float(request.POST.get('max_score')),
-                date=request.POST.get('date'),
-                comment=request.POST.get('comment')
+            # Создаем или получаем задание
+            assignment, created = HomeworkAssignment.objects.get_or_create(
+                id=assignment_id,
+                defaults={
+                    'subject': subject,
+                    'name': dict(
+                        [(1, 'БДЗ'),
+                         (2, 'Лабораторная работа'),
+                         (3, 'Курсовая работа'),
+                         (4, 'Отработка')]
+                    ).get(int(assignment_id), 'Неизвестное задание'),
+                    'description': 'Автоматически созданное задание',
+                    'deadline': timezone.now() + timezone.timedelta(days=14)
+                }
             )
-            messages.success(request, 'Оценка успешно добавлена')
-            return redirect('grades')
-        except (Student.DoesNotExist, Subject.DoesNotExist) as e:
-            messages.error(request, 'Ошибка при добавлении оценки: ' + str(e))
+
+            # Создаем новую отправку
+            submission = HomeworkSubmission.objects.create(
+                student=student,
+                assignment=assignment,
+                description=description,
+                file=file,
+                status='SUBMITTED'
+            )
+
+            messages.success(request, 'Задание успешно отправлено')
+            return redirect('send_homework')
+
+        except Subject.DoesNotExist:
+            messages.error(request, 'Выбранный предмет не найден')
+            return redirect('send_homework')
         except Exception as e:
-            messages.error(request, 'Произошла ошибка при добавлении оценки')
+            messages.error(request, f'Произошла ошибка: {str(e)}')
+            return redirect('send_homework')
 
-    # Получаем типы оценок из модели Grade
-    grade_types = Grade.GRADE_TYPE_CHOICES
+    return render(request, 'student_performance/send_homework.html', {
+        'subjects': subjects,
+        'submissions': submissions
+    })
 
-    context = {
-        'students': students,
-        'subjects': teacher_subjects,
-        'grade_types': grade_types,
-    }
-    return render(request, 'student_performance/add_grade.html', context) 
+@login_required
+@ensure_csrf_cookie
+@csrf_protect
+def get_assignments_api(request, subject_id):
+    try:
+        # Статический список заданий
+        static_assignments = [
+            {
+                'id': 1,
+                'name': 'БДЗ',
+                'description': 'Большое домашнее задание',
+                'deadline': (timezone.now() + timezone.timedelta(days=14)).isoformat()
+            },
+            {
+                'id': 2,
+                'name': 'Лабораторная работа',
+                'description': 'Лабораторная работа по предмету',
+                'deadline': (timezone.now() + timezone.timedelta(days=7)).isoformat()
+            },
+            {
+                'id': 3,
+                'name': 'Курсовая работа',
+                'description': 'Курсовая работа по предмету',
+                'deadline': (timezone.now() + timezone.timedelta(days=30)).isoformat()
+            },
+            {
+                'id': 4,
+                'name': 'Отработка',
+                'description': 'Отработка пропущенных занятий',
+                'deadline': (timezone.now() + timezone.timedelta(days=5)).isoformat()
+            }
+        ]
+        
+        return JsonResponse(static_assignments, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500) 
