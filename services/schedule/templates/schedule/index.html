@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Расписание</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .schedule-container {
+            max-width: 800px;
+            margin: 30px auto;
+        }
+        .day-schedule {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container schedule-container">
+        <h2 class="text-center mb-4">Расписание занятий</h2>
+
+        <div class="mb-4">
+            <select id="groupSelect" class="form-select">
+                <option value="">Выберите группу</option>
+                {% for group in groups %}
+                <option value="{{ group.id }}">{{ group.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="scheduleContent"></div>
+    </div>
+
+    <script>
+        document.getElementById('groupSelect').addEventListener('change', function() {
+            const groupId = this.value;
+            if (groupId) {
+                fetch(`/api/v1/schedule/?group=${groupId}`)
+                    .then(response => response.json())
+                    .then(data => renderSchedule(data));
+            }
+        });
+
+        function renderSchedule(schedule) {
+            const container = document.getElementById('scheduleContent');
+            container.innerHTML = '';
+
+            // Группируем по дням недели
+            const days = {};
+            schedule.forEach(item => {
+                if (!days[item.day]) {
+                    days[item.day] = [];
+                }
+                days[item.day].push(item);
+            });
+
+            // Создаем элементы расписания
+            for (const [day, lessons] of Object.entries(days)) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day-schedule card mb-3';
+
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'card-header bg-primary text-white';
+                dayHeader.textContent = lessons[0].day_name;
+                dayDiv.appendChild(dayHeader);
+
+                const listGroup = document.createElement('div');
+                listGroup.className = 'list-group list-group-flush';
+
+                lessons.forEach(lesson => {
+                    const lessonItem = document.createElement('div');
+                    lessonItem.className = 'list-group-item';
+                    lessonItem.innerHTML = `
+                        <div class="d-flex justify-content-between">
+                            <strong>${lesson.subject}</strong>
+                            <span>${lesson.start_time} - ${lesson.end_time}</span>
+                        </div>
+                        <div>${lesson.teacher}, ${lesson.classroom}</div>
+                    `;
+                    listGroup.appendChild(lessonItem);
+                });
+
+                dayDiv.appendChild(listGroup);
+                container.appendChild(dayDiv);
+            }
+        }
+    </script>
+</body>
+</html>

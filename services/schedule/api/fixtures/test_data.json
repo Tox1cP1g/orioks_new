@@ -1,0 +1,22 @@
+[
+    {
+        "model": "api.group",
+        "pk": 1,
+        "fields": {
+            "name": "ПИН-34"
+        }
+    },
+    {
+        "model": "api.schedule",
+        "pk": 1,
+        "fields": {
+            "group": 1,
+            "day": 1,
+            "subject": "Базы данных",
+            "teacher": "Иванов И.И.",
+            "classroom": "А-101",
+            "start_time": "09:00:00",
+            "end_time": "10:30:00"
+        }
+    }
+]
