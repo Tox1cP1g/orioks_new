@@ -1,0 +1,102 @@
+{% extends 'student_performance/base.html' %}
+
+{% block title %}Задания - ОРИОКС{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-tasks me-2"></i>Задания
+            </h1>
+            
+            {% if current_semester %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Текущий семестр: {{ current_semester.name }}
+            </div>
+            {% endif %}
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Фильтр по предметам</h5>
+                            <div class="list-group">
+                                <a href="{% url 'assignments' %}" 
+                                   class="list-group-item list-group-item-action {% if not selected_subject %}active{% endif %}">
+                                    Все предметы
+                                </a>
+                                {% for subject in subjects %}
+                                <a href="{% url 'assignments' %}?subject={{ subject.id }}" 
+                                   class="list-group-item list-group-item-action {% if selected_subject and selected_subject.id == subject.id %}active{% endif %}">
+                                    {{ subject.name }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                {% for assignment_data in assignments_data %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ assignment_data.assignment.name }}</h5>
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-book me-1"></i>
+                                    {{ assignment_data.assignment.subject.name }}
+                                </small>
+                            </div>
+                            
+                            <p class="card-text">{{ assignment_data.assignment.description }}</p>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Срок сдачи: {{ assignment_data.assignment.deadline|date:"d.m.Y" }}
+                                </small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <span class="badge {% if assignment_data.status == 'SUBMITTED' %}bg-success
+                                                  {% elif assignment_data.status == 'IN_PROGRESS' %}bg-warning
+                                                  {% else %}bg-secondary{% endif %}">
+                                    {% if assignment_data.status == 'SUBMITTED' %}Сдано
+                                    {% elif assignment_data.status == 'IN_PROGRESS' %}В процессе
+                                    {% else %}Не начато{% endif %}
+                                </span>
+                                
+                                {% if assignment_data.grade %}
+                                <span class="badge bg-primary ms-2">
+                                    Оценка: {{ assignment_data.grade }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            {% if assignment_data.status != 'SUBMITTED' %}
+                            <a href="{% url 'send_homework' assignment_data.assignment.id %}" 
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-paper-plane me-1"></i>Отправить
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Нет доступных заданий.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

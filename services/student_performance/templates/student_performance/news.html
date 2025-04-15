@@ -1,0 +1,74 @@
+{% extends 'student_performance/base.html' %}
+
+{% block title %}Новости - ОРИОКС{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-newspaper me-2"></i>Новости
+            </h1>
+            
+            {% if current_semester %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Текущий семестр: {{ current_semester.name }}
+            </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Произошла ошибка при загрузке новостей: {{ error }}
+            </div>
+            {% endif %}
+
+            <div class="row">
+                {% for news in news_items %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 hover-lift">
+                        <div class="card-header {% if news.type == 'info' %}bg-info
+                                              {% elif news.type == 'warning' %}bg-warning
+                                              {% elif news.type == 'success' %}bg-success
+                                              {% elif news.type == 'danger' %}bg-danger{% endif %}">
+                            <h5 class="card-title mb-0 text-white">{{ news.title }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">{{ news.content }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    {{ news.date }}
+                                </small>
+                                {% if news.author %}
+                                <small class="text-muted">
+                                    <i class="fas fa-user me-1"></i>
+                                    {{ news.author }}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if news.attachments %}
+                        <div class="card-footer bg-transparent">
+                            <small class="text-muted">
+                                <i class="fas fa-paperclip me-1"></i>
+                                Прикрепленные файлы: {{ news.attachments|length }}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Нет доступных новостей.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

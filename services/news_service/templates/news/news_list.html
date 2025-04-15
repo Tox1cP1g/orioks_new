@@ -10,9 +10,11 @@
             <h1 class="mb-0">
                 <i class="fas fa-newspaper me-2"></i>Новости
             </h1>
-            <a href="{% url 'add_news' %}" class="btn btn-success">
+            {% if is_teacher %}
+            <a href="{% url 'add_news' %}?source={{ source }}&role={{ role }}" class="btn btn-success">
                 <i class="fas fa-plus-circle me-2"></i>Добавить новость
             </a>
+            {% endif %}
         </div>
 
         <!-- Список новостей -->
@@ -34,7 +36,7 @@
                                 {{ news_item.created_at|date:"d.m.Y H:i" }}
                             </p>
                         </div>
-                        <a href="{% url 'news_detail' news_item.id %}"
+                        <a href="{% url 'news_detail' news_item.id %}?source={{ source }}&role={{ role }}"
                            class="btn btn-outline-primary btn-sm">
                             Подробнее
                         </a>

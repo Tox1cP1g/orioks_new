@@ -839,10 +839,19 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard' %}">Главная</a>
+                        <a class="nav-link" href="{% url 'dashboard' %}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Дашборд
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'grades' %}">Оценки</a>
+                        <a class="nav-link" href="{% url 'subjects' %}">
+                            <i class="fas fa-book me-2"></i>Предметы
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'assignments' %}">
+                            <i class="fas fa-tasks me-2"></i>Задания
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'schedule' %}">Расписание</a>
@@ -851,10 +860,10 @@
                         <a class="nav-link" href="{% url 'attendance' %}">Посещаемость</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'send_homework' %}">Домашнее задание</a>
+                        <a class="nav-link" href="{% url 'news' %}">Новости</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'help' %}">Помощь</a>
+                        <a class="nav-link" href="{% url 'send_homework' %}">Домашнее задание</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">

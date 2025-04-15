@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     SemesterViewSet, SubjectViewSet, GradeViewSet, ScheduleViewSet,
-    AttendanceViewSet, StudentViewSet, add_grade_view
+    AttendanceViewSet, StudentViewSet, add_grade_view, subjects, assignments, news
 )
 from .api_views import create_user_profile, get_groups, get_student_info, update_student_group
 
@@ -22,4 +22,7 @@ urlpatterns = [
     path('api/students/<int:user_id>/', get_student_info, name='get_student_info'),
     path('api/students/<int:user_id>/update-group/', update_student_group, name='update_student_group'),
     path('add-grade/', add_grade_view, name='add_grade'),
+    path('subjects/', subjects, name='subjects'),
+    path('assignments/', assignments, name='assignments'),
+    path('news/', news, name='news'),
 ]

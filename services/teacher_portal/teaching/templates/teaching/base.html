@@ -313,25 +313,25 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/courses/">
-                            <i class="bi bi-book me-1"></i> Мои курсы
+                        <a class="nav-link" href="{% url 'dashboard' %}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Дашборд
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/assignments/">
-                            <i class="bi bi-journal-text me-1"></i> Задания
+                        <a class="nav-link" href="{% url 'courses' %}">
+                            <i class="fas fa-book me-2"></i>Курсы
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/submissions/">
-                            <i class="bi bi-file-earmark-text me-1"></i> Работы студентов
+                        <a class="nav-link" href="{% url 'assignments' %}">
+                            <i class="fas fa-tasks me-2"></i>Задания
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/profile/">
-                            <i class="bi bi-person-circle me-1"></i> Профиль
+                        <a class="nav-link" href="http://localhost:8003/news/?source=teacher" target="_blank">
+                            <i class="fas fa-newspaper me-2"></i>Новости
                         </a>
                     </li>
                 </ul>

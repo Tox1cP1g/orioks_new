@@ -30,6 +30,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 import requests
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
+from django.conf import settings
 
 class TeacherPermission(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -624,4 +625,112 @@ def add_grade_view(request):
         'students': students,
         'subjects': subjects,
         'semesters': semesters
-    }) 
+    })
+
+@login_required
+def subjects(request):
+    user = request.user
+    current_semester = Semester.objects.filter(is_current=True).first()
+    
+    # Получаем предметы текущего семестра
+    subjects = Subject.objects.filter(semester=current_semester) if current_semester else []
+    
+    # Получаем статистику по каждому предмету
+    subjects_data = []
+    for subject in subjects:
+        grades = Grade.objects.filter(
+            student_id=str(user.id),
+            subject=subject
+        )
+        attendance = Attendance.objects.filter(
+            student_id=str(user.id),
+            schedule_item__subject=subject
+        )
+        
+        subjects_data.append({
+            'subject': subject,
+            'average_grade': grades.aggregate(avg=Avg('score'))['avg'] or 0,
+            'attendance_percentage': (attendance.filter(is_present=True).count() / attendance.count() * 100) if attendance.exists() else 0,
+            'total_assignments': Assignment.objects.filter(subject=subject).count(),
+            'completed_assignments': StudentAssignment.objects.filter(
+                student=user,
+                assignment__subject=subject,
+                status='SUBMITTED'
+            ).count()
+        })
+    
+    return render(request, 'student_performance/subjects.html', {
+        'subjects_data': subjects_data,
+        'current_semester': current_semester
+    })
+
+@login_required
+def assignments(request):
+    user = request.user
+    current_semester = Semester.objects.filter(is_current=True).first()
+    subject_id = request.GET.get('subject')
+    
+    # Получаем предметы текущего семестра
+    subjects = Subject.objects.filter(semester=current_semester) if current_semester else []
+    
+    # Если выбран конкретный предмет, фильтруем задания
+    if subject_id:
+        assignments = Assignment.objects.filter(
+            subject_id=subject_id,
+            subject__semester=current_semester
+        ).order_by('-deadline')
+        selected_subject = Subject.objects.get(id=subject_id)
+    else:
+        assignments = Assignment.objects.filter(
+            subject__semester=current_semester
+        ).order_by('-deadline')
+        selected_subject = None
+    
+    # Получаем статус выполнения для каждого задания
+    assignments_data = []
+    for assignment in assignments:
+        student_assignment = StudentAssignment.objects.filter(
+            student=user,
+            assignment=assignment
+        ).first()
+        
+        assignments_data.append({
+            'assignment': assignment,
+            'status': student_assignment.status if student_assignment else 'NOT_STARTED',
+            'submitted_at': student_assignment.submitted_at if student_assignment else None,
+            'grade': student_assignment.grade if student_assignment else None
+        })
+    
+    return render(request, 'student_performance/assignments.html', {
+        'assignments_data': assignments_data,
+        'subjects': subjects,
+        'selected_subject': selected_subject,
+        'current_semester': current_semester
+    })
+
+@login_required
+def news(request):
+    # Получаем полный URL запроса
+    full_url = request.build_absolute_uri()
+    print(f"Full URL: {full_url}")  # Логируем полный URL
+    
+    # Получаем параметр source из URL
+    source = request.GET.get('source', '')
+    print(f"Source parameter: {source}")  # Логируем параметр source
+    
+    # Определяем порт и роль на основе параметра source
+    if source == 'teacher':
+        source_port = '8004'
+        role = 'TEACHER'
+    else:
+        source_port = '8003'
+        role = 'STUDENT'
+    
+    print(f"Source port: {source_port}")  # Логируем определенный порт
+    print(f"Role: {role}")  # Логируем роль
+    
+    # Формируем URL для перенаправления на сервис новостей (8007)
+    redirect_url = f'http://localhost:8007/?source_port={source_port}&role={role}'
+    print(f"Redirect URL: {redirect_url}")  # Логируем URL для перенаправления
+    
+    return redirect(redirect_url) 

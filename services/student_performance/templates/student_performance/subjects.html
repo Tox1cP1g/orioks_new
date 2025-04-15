@@ -1,0 +1,74 @@
+{% extends 'student_performance/base.html' %}
+
+{% block title %}Предметы - ОРИОКС{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-book me-2"></i>Предметы
+            </h1>
+            
+            {% if current_semester %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Текущий семестр: {{ current_semester.name }}
+            </div>
+            {% endif %}
+
+            <div class="row">
+                {% for subject_data in subjects_data %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ subject_data.subject.name }}</h5>
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-chalkboard-teacher me-1"></i>
+                                    Преподаватель: {{ subject_data.subject.teacher }}
+                                </small>
+                            </div>
+                            
+                            <div class="progress mb-2" style="height: 20px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: {{ subject_data.attendance_percentage }}%">
+                                    {{ subject_data.attendance_percentage|floatformat:1 }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">Посещаемость</small>
+                            
+                            <div class="mt-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Средняя оценка:</span>
+                                    <span class="badge bg-primary">{{ subject_data.average_grade|floatformat:1 }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Задания:</span>
+                                    <span class="badge bg-info">
+                                        {{ subject_data.completed_assignments }}/{{ subject_data.total_assignments }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{% url 'assignments' %}?subject={{ subject_data.subject.id }}" 
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-tasks me-1"></i>Задания
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Нет доступных предметов в текущем семестре.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
