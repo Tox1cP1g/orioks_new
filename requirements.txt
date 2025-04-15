@@ -6,3 +6,9 @@ sqlparse==0.5.1
 tablib==3.7.0
 PyMySQL~=1.1.1
 py-webauthn==1.0.1
+django-cors-headers
+pip~=22.3.1
+wheel~=0.38.4
+setuptools~=65.5.1
+djangorestframework~=3.16.0
+PyJWT~=2.10.1
