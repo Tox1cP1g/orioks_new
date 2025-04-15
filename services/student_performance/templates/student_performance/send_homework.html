@@ -1,0 +1,120 @@
+{% extends 'student_performance/base.html' %}
+{% load static %}
+
+{% block title %}Отправка домашнего задания - ОРИОКС{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Отправка домашнего задания</h2>
+    
+    <form method="post" enctype="multipart/form-data" class="mt-4">
+        {% csrf_token %}
+        
+        <div class="form-group mb-3">
+            <label for="subject">Предмет:</label>
+            <select class="form-control" id="subject" name="subject" required>
+                <option value="">Выберите предмет</option>
+                {% for subject in subjects %}
+                <option value="{{ subject.id }}">{{ subject.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group mb-3">
+            <label for="assignment">Задание:</label>
+            <select class="form-control" id="assignment" name="assignment" required disabled>
+                <option value="">Сначала выберите предмет</option>
+            </select>
+        </div>
+        
+        <div class="form-group mb-3">
+            <label for="description">Комментарий к работе:</label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        </div>
+        
+        <div class="form-group mb-3">
+            <label for="file">Файл с решением:</label>
+            <input type="file" class="form-control" id="file" name="file" required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Отправить</button>
+    </form>
+
+    {% if submissions %}
+    <div class="mt-5">
+        <h3>Последние отправленные задания</h3>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Предмет</th>
+                        <th>Задание</th>
+                        <th>Дата отправки</th>
+                        <th>Статус</th>
+                        <th>Оценка</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for submission in submissions %}
+                    <tr>
+                        <td>{{ submission.assignment.subject.name }}</td>
+                        <td>{{ submission.assignment.name }}</td>
+                        <td>{{ submission.submitted_at|date:"d.m.Y H:i" }}</td>
+                        <td>{{ submission.get_status_display }}</td>
+                        <td>{{ submission.grade|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const subjectSelect = document.getElementById('subject');
+    const assignmentSelect = document.getElementById('assignment');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    subjectSelect.addEventListener('change', function() {
+        const subjectId = this.value;
+        assignmentSelect.disabled = true;
+        assignmentSelect.innerHTML = '<option value="">Загрузка заданий...</option>';
+
+        if (subjectId) {
+            fetch(`/get_assignments/${subjectId}/`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+                .then(response => response.json())
+                .then(assignments => {
+                    assignmentSelect.innerHTML = '<option value="">Выберите задание</option>';
+                    assignments.forEach(assignment => {
+                        const deadline = new Date(assignment.deadline);
+                        const option = document.createElement('option');
+                        option.value = assignment.id;
+                        option.textContent = `${assignment.name} (до ${deadline.toLocaleString()})`;
+                        assignmentSelect.appendChild(option);
+                    });
+                    assignmentSelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Ошибка загрузки заданий:', error);
+                    assignmentSelect.innerHTML = '<option value="">Ошибка загрузки заданий</option>';
+                });
+        } else {
+            assignmentSelect.innerHTML = '<option value="">Сначала выберите предмет</option>';
+            assignmentSelect.disabled = true;
+        }
+    });
+});
+</script>
+{% endblock %}

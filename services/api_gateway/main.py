@@ -21,7 +21,7 @@ app.add_middleware(
 # Конфигурация сервисов
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://localhost:8002")
 PERFORMANCE_SERVICE_URL = os.getenv("PERFORMANCE_SERVICE_URL", "http://localhost:8003")
-NEWS_SERVICE_URL = os.getenv("NEWS_SERVICE_URL", "http://localhost:8007")
+TEACHER_SERVICE_URL = os.getenv("TEACHER_SERVICE_URL", "http://localhost:8004")
 
 async def get_token_header(authorization: Optional[str] = Header(None)) -> str:
     if not authorization:
@@ -117,6 +117,7 @@ async def get_grades(
         )
         return response.json()
 
+<<<<<<< HEAD
 # Маршруты новостей
 @app.get("/api/news")
 async def get_news(
@@ -128,10 +129,19 @@ async def get_news(
         response = await client.get(
             f"{NEWS_SERVICE_URL}/api/news/",
             params={"page": page, "limit": limit},
+=======
+# Маршруты портала преподавателя
+@app.get("/api/teacher/subjects")
+async def get_teacher_subjects(token: str = Depends(get_token_header)):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{TEACHER_SERVICE_URL}/api/subjects/",
+>>>>>>> kobelev
             headers={"Authorization": token}
         )
         return response.json()
 
+<<<<<<< HEAD
 @app.get("/api/news/{news_id}")
 async def get_single_news(
     news_id: int,
@@ -140,6 +150,22 @@ async def get_single_news(
     async with httpx.AsyncClient() as client:
         response = await client.get(
             f"{NEWS_SERVICE_URL}/api/news/{news_id}/",
+=======
+@app.get("/api/teacher/schedule")
+async def get_teacher_schedule(token: str = Depends(get_token_header)):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{TEACHER_SERVICE_URL}/api/schedule/",
+            headers={"Authorization": token}
+        )
+        return response.json()
+
+@app.get("/api/teacher/attendance")
+async def get_teacher_attendance(token: str = Depends(get_token_header)):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{TEACHER_SERVICE_URL}/api/attendance/",
+>>>>>>> kobelev
             headers={"Authorization": token}
         )
         return response.json()

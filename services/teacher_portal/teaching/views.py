@@ -447,3 +447,7 @@ def logout_view(request):
     response = redirect('http://localhost:8002/login/')
     response.delete_cookie('token')
     return response
+
+@login_required
+def homework(request):
+    return render(request, 'teaching/homework.html')

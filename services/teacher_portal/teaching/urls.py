@@ -7,6 +7,7 @@ from .views import (
     AttendanceViewSet,
     StudentViewSet
 )
+from . import views
 
 router = DefaultRouter()
 router.register(r'subjects', SubjectViewSet)
@@ -17,4 +18,8 @@ router.register(r'students', StudentViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('', views.dashboard, name='dashboard'),
+    path('homework/', views.homework, name='homework'),
+    path('profile/', views.profile, name='profile'),
+    path('logout/', views.logout_view, name='logout'),
 ] 
