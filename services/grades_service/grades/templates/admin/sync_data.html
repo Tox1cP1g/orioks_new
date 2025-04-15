@@ -1,0 +1,50 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; {% trans 'Синхронизация данных' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <h2>Синхронизация данных</h2>
+        <div style="margin: 20px 0;">
+            <p>
+                Эта страница позволяет синхронизировать данные между сервисами ОРИОКС:
+            </p>
+            <ul>
+                <li>Данные о преподавателях из порта 8004</li>
+                <li>Данные о студентах и группах из порта 8003</li>
+            </ul>
+            <p>
+                Нажмите кнопку ниже для запуска процесса синхронизации:
+            </p>
+            <form method="post" action="{% url 'sync_data_from_portals' %}">
+                {% csrf_token %}
+                <button type="submit" style="background-color: #417690; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">
+                    <i class="fas fa-sync-alt"></i> Запустить синхронизацию
+                </button>
+            </form>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <h3>Важная информация</h3>
+            <p>
+                Для корректной работы синхронизации необходимо:
+            </p>
+            <ol>
+                <li>Убедиться, что сервисы на портах 8003 и 8004 запущены и доступны</li>
+                <li>Иметь авторизационный токен для доступа к API этих сервисов</li>
+                <li>Иметь административные права для синхронизации данных</li>
+            </ol>
+            <p>
+                После успешной синхронизации вы увидите сообщение о результатах.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %} 

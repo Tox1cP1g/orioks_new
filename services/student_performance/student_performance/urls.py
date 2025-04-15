@@ -23,7 +23,7 @@ from performance.views import (
     ScheduleViewSet, AttendanceViewSet, StudentViewSet,
     index, grades, schedule, help, dashboard, grades_view,
     schedule_view, attendance_view, profile_view, logout_view,
-
+    send_homework_view, get_assignments_api
 )
 
 router = DefaultRouter()
@@ -44,6 +44,8 @@ urlpatterns = [
     path('help/', help, name='help'),
     path('profile/', profile_view, name='profile'),
     path('logout/', logout_view, name='logout'),
+    path('send_homework/', send_homework_view, name='send_homework'),
+    path('get_assignments/<int:subject_id>/', get_assignments_api, name='get_assignments'),
     path('api/', include(router.urls)),
     path('', include('performance.urls')),  # Включаем URL из приложения performance
 ]

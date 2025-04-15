@@ -5,8 +5,6 @@ import json
 import logging
 import uuid
 
-from .models import Student, Group
-
 logger = logging.getLogger(__name__)
 
 @csrf_exempt  # Отключаем CSRF для межсервисных вызовов

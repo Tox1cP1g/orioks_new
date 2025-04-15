@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -224,3 +225,33 @@ class Attendance(models.Model):
 
     def __str__(self):
         return f"{self.student.get_full_name()} - {self.schedule_item} ({self.date})"
+
+class HomeworkSubmission(models.Model):
+    STATUS_CHOICES = [
+        ('SUBMITTED', 'Отправлено'),
+        ('REVIEWING', 'На проверке'),
+        ('GRADED', 'Оценено'),
+        ('REJECTED', 'Отклонено')
+    ]
+
+    submission_id = models.IntegerField(unique=True)  # ID из сервиса студента
+    student_name = models.CharField(max_length=255)
+    assignment_name = models.CharField(max_length=255)
+    subject_name = models.CharField(max_length=255)
+    received_at = models.DateTimeField(default=timezone.now)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='SUBMITTED')
+    grade = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    feedback = models.TextField(blank=True)
+    graded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-received_at']
+
+    def __str__(self):
+        return f"{self.student_name} - {self.assignment_name} ({self.subject_name})"
+
+    def save(self, *args, **kwargs):
+        if self.grade and not self.graded_at:
+            self.graded_at = timezone.now()
+            self.status = 'GRADED'
+        super().save(*args, **kwargs)

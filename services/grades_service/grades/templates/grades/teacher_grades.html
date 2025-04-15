@@ -1,0 +1,450 @@
+{% extends "grades/base.html" %}
+
+{% block title %}Оценки - Преподаватель{% endblock %}
+
+{% block nav_items %}
+<li class="nav-item">
+    <a class="nav-link active" href="#">Управление оценками</a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-3 section-title">Управление оценками</h2>
+        <p class="lead">Редактирование и просмотр оценок студентов по группам</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="card-title">Выбор семестра</h5>
+            </div>
+            <div class="card-body">
+                <select class="form-select" id="semesterSelect">
+                    {% for semester in semesters %}
+                        <option value="{{ semester.id }}" {% if semester == selected_semester %}selected{% endif %}>
+                            {{ semester.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title">Группы</h5>
+                <span class="badge bg-primary" id="groupsCount">-</span>
+            </div>
+            <div class="card-body">
+                <div id="groupsList" class="list-group">
+                    <!-- Индикатор загрузки -->
+                    <div class="text-center my-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка групп...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title">Оценки студентов</h5>
+        <div>
+            <span class="badge bg-info me-2" id="gradesCount">-</span>
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addGradeModal">
+                <i class="fas fa-plus-circle me-1"></i> Добавить оценку
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped" id="gradesTable">
+                <thead>
+                    <tr>
+                        <th>Студент</th>
+                        <th>Предмет</th>
+                        <th>Оценка</th>
+                        <th>Максимум</th>
+                        <th>Дата</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Первоначальное сообщение -->
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            Выберите группу для просмотра оценок
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления оценки -->
+<div class="modal fade" id="addGradeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить оценку</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addGradeForm">
+                    <div class="mb-3">
+                        <label for="studentSelect" class="form-label">Студент</label>
+                        <select class="form-select" id="studentSelect" required>
+                            <!-- Студенты будут загружены динамически -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subjectSelect" class="form-label">Предмет</label>
+                        <select class="form-select" id="subjectSelect" required>
+                            <!-- Предметы будут загружены динамически -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gradeValue" class="form-label">Оценка</label>
+                        <input type="number" class="form-control" id="gradeValue" min="0" max="100" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maxValue" class="form-label">Максимальная оценка</label>
+                        <input type="number" class="form-control" id="maxValue" min="0" max="100" value="100" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gradeDate" class="form-label">Дата</label>
+                        <input type="date" class="form-control" id="gradeDate" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gradeComment" class="form-label">Комментарий</label>
+                        <textarea class="form-control" id="gradeComment" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="saveGradeBtn">
+                    <i class="fas fa-save me-1"></i> Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const semesterSelect = document.getElementById('semesterSelect');
+    const groupsList = document.getElementById('groupsList');
+    const gradesTable = document.getElementById('gradesTable').getElementsByTagName('tbody')[0];
+    const addGradeForm = document.getElementById('addGradeForm');
+    const saveGradeBtn = document.getElementById('saveGradeBtn');
+    const groupsCount = document.getElementById('groupsCount');
+    const gradesCount = document.getElementById('gradesCount');
+
+    // Функция для добавления цветовой маркировки оценок
+    function getGradeClass(value, maxValue) {
+        const percent = (value / maxValue) * 100;
+        if (percent >= 85) return 'text-success fw-bold';
+        if (percent >= 70) return 'text-primary';
+        if (percent >= 50) return 'text-warning';
+        return 'text-danger';
+    }
+
+    // Загрузка групп при выборе семестра
+    semesterSelect.addEventListener('change', function() {
+        const semesterId = this.value;
+        
+        // Показываем индикатор загрузки
+        groupsList.innerHTML = `
+            <div class="text-center my-3">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка групп...</span>
+                </div>
+            </div>
+        `;
+        
+        // Сбрасываем таблицу с оценками
+        gradesTable.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center">
+                    Выберите группу для просмотра оценок
+                </td>
+            </tr>
+        `;
+        gradesCount.textContent = '-';
+        
+        fetch(`/api/groups/${semesterId}/`)
+            .then(response => response.json())
+            .then(groups => {
+                if (groups.length === 0) {
+                    groupsList.innerHTML = '<div class="alert alert-info">Нет доступных групп</div>';
+                    groupsCount.textContent = '0';
+                    return;
+                }
+                
+                groupsCount.textContent = groups.length;
+                
+                groupsList.innerHTML = groups.map(group => `
+                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-group-id="${group.id}">
+                        <span>
+                            <i class="fas fa-users me-2"></i>
+                            ${group.name}
+                        </span>
+                        <span class="badge bg-secondary rounded-pill">${group.department || 'Не указан'}</span>
+                    </a>
+                `).join('');
+            })
+            .catch(error => {
+                console.error('Error loading groups:', error);
+                groupsList.innerHTML = '<div class="alert alert-danger">Ошибка загрузки групп</div>';
+                groupsCount.textContent = '-';
+            });
+    });
+
+    // Загрузка оценок при выборе группы
+    groupsList.addEventListener('click', function(e) {
+        if (e.target.classList.contains('list-group-item') || e.target.closest('.list-group-item')) {
+            e.preventDefault();
+            
+            // Находим ближайший элемент списка (если кликнули на вложенный элемент)
+            const listItem = e.target.closest('.list-group-item');
+            const groupId = listItem.dataset.groupId;
+            
+            // Убираем активный класс у всех элементов
+            document.querySelectorAll('.list-group-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Добавляем активный класс выбранному элементу
+            listItem.classList.add('active');
+
+            // Показываем индикатор загрузки
+            gradesTable.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка оценок...</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            // Загружаем оценки для выбранной группы
+            fetch(`/api/grades/${groupId}/`)
+                .then(response => response.json())
+                .then(grades => {
+                    if (grades.length === 0) {
+                        gradesTable.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center">
+                                    Оценки для выбранной группы не найдены
+                                </td>
+                            </tr>
+                        `;
+                        gradesCount.textContent = '0';
+                        return;
+                    }
+                    
+                    gradesCount.textContent = grades.length;
+                    
+                    gradesTable.innerHTML = grades.map(grade => `
+                        <tr>
+                            <td><strong>${grade.student_name}</strong></td>
+                            <td>${grade.subject_name}</td>
+                            <td class="${getGradeClass(grade.value, grade.max_value)}">${grade.value}</td>
+                            <td>${grade.max_value}</td>
+                            <td><small>${grade.date}</small></td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button class="btn btn-outline-primary edit-grade" data-grade-id="${grade.id}" title="Изменить">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger delete-grade" data-grade-id="${grade.id}" title="Удалить">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                    
+                    // Добавляем обработчики для кнопок редактирования и удаления
+                    document.querySelectorAll('.edit-grade').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const gradeId = this.dataset.gradeId;
+                            // Код для редактирования оценки
+                            alert('Редактирование оценки ID: ' + gradeId);
+                        });
+                    });
+                    
+                    document.querySelectorAll('.delete-grade').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const gradeId = this.dataset.gradeId;
+                            if (confirm('Вы уверены, что хотите удалить эту оценку?')) {
+                                deleteGrade(gradeId);
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading grades:', error);
+                    gradesTable.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-danger">
+                                Ошибка загрузки оценок
+                            </td>
+                        </tr>
+                    `;
+                    gradesCount.textContent = '-';
+                });
+        }
+    });
+
+    // Сохранение новой оценки
+    saveGradeBtn.addEventListener('click', function() {
+        if (addGradeForm.checkValidity()) {
+            const formData = {
+                student_id: document.getElementById('studentSelect').value,
+                subject_id: document.getElementById('subjectSelect').value,
+                value: document.getElementById('gradeValue').value,
+                max_value: document.getElementById('maxValue').value,
+                date: document.getElementById('gradeDate').value,
+                comment: document.getElementById('gradeComment').value
+            };
+
+            // Показываем индикатор загрузки
+            saveGradeBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Сохранение...';
+            saveGradeBtn.disabled = true;
+
+            fetch('/api/grades/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                saveGradeBtn.innerHTML = '<i class="fas fa-save me-1"></i> Сохранить';
+                saveGradeBtn.disabled = false;
+                
+                if (result.success) {
+                    // Закрываем модальное окно и обновляем таблицу
+                    bootstrap.Modal.getInstance(document.getElementById('addGradeModal')).hide();
+                    
+                    // Очищаем форму
+                    addGradeForm.reset();
+                    
+                    // Показываем уведомление об успехе
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+                    alertDiv.innerHTML = `
+                        Оценка успешно добавлена
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.querySelector('.container.content').prepend(alertDiv);
+                    
+                    // Автоматически скрываем уведомление через 3 секунды
+                    setTimeout(() => {
+                        alertDiv.classList.remove('show');
+                        setTimeout(() => alertDiv.remove(), 150);
+                    }, 3000);
+                    
+                    // Перезагружаем оценки для текущей группы
+                    const activeGroup = document.querySelector('.list-group-item.active');
+                    if (activeGroup) {
+                        activeGroup.click();
+                    }
+                } else {
+                    alert('Ошибка при сохранении оценки: ' + result.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error saving grade:', error);
+                saveGradeBtn.innerHTML = '<i class="fas fa-save me-1"></i> Сохранить';
+                saveGradeBtn.disabled = false;
+                alert('Ошибка при сохранении оценки: ' + error);
+            });
+        } else {
+            addGradeForm.reportValidity();
+        }
+    });
+
+    // Функция удаления оценки
+    function deleteGrade(gradeId) {
+        fetch(`/api/grades/${gradeId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                // Показываем уведомление об успехе
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+                alertDiv.innerHTML = `
+                    Оценка успешно удалена
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.querySelector('.container.content').prepend(alertDiv);
+                
+                // Автоматически скрываем уведомление через 3 секунды
+                setTimeout(() => {
+                    alertDiv.classList.remove('show');
+                    setTimeout(() => alertDiv.remove(), 150);
+                }, 3000);
+                
+                // Перезагружаем оценки для текущей группы
+                const activeGroup = document.querySelector('.list-group-item.active');
+                if (activeGroup) {
+                    activeGroup.click();
+                }
+            } else {
+                alert('Ошибка при удалении оценки: ' + result.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting grade:', error);
+            alert('Ошибка при удалении оценки: ' + error);
+        });
+    }
+
+    // Получение CSRF токена из cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Инициализируем загрузку групп
+    semesterSelect.dispatchEvent(new Event('change'));
+    
+    // Обработка события изменения темы
+    document.addEventListener('themeChanged', function(event) {
+        // Выполняем действия, зависящие от темы (если необходимо)
+        console.log('Тема изменена на:', event.detail.theme);
+    });
+});
+</script>
+{% endblock %} 

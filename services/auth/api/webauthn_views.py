@@ -737,7 +737,7 @@ def webauthn_authenticate_complete(request):
         # Импортируем RefreshToken для создания JWT токена
         from rest_framework_simplejwt.tokens import RefreshToken
         
-        # Генерируем JWT токен для пользователя (так же, как это делается при входе по паролю)
+        # Генерируем JWT токен для пользователя
         refresh = RefreshToken.for_user(user)
         refresh['first_name'] = user.first_name
         refresh['last_name'] = user.last_name
@@ -753,26 +753,13 @@ def webauthn_authenticate_complete(request):
             'redirect_url': redirect_url,
             'username': user.username,
             'key_id': str(stored_credential.id),
-            'key_name': stored_credential.credential_name
+            'key_name': stored_credential.credential_name,
+            'token': str(refresh.access_token)  # Добавляем токен в ответ
         }
         
         logger.debug(f"Отправляем ответ: {response_data}")
         
-        # Создаем ответ с установкой cookie токена
-        response = JsonResponse(response_data)
-        
-        # Устанавливаем JWT токен в cookie (это ключевой момент!)
-        response.set_cookie(
-            'token',
-            str(refresh.access_token),
-            max_age=3600,
-            httponly=True,
-            samesite='Lax'
-        )
-        
-        logger.debug(f"Токен JWT установлен в cookie для пользователя {user.username}")
-        
-        return response
+        return JsonResponse(response_data)
 
     except webauthn.helpers.exceptions.InvalidAuthenticationResponse as e:
         logger.error(f"Ошибка при проверке ключа: {str(e)}")
