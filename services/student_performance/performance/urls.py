@@ -1,11 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import SemesterViewSet, SubjectViewSet, GradeViewSet, ScheduleViewSet, AttendanceViewSet, StudentViewSet
-from .api_views import create_user_profile
 from .views import (
-    SemesterViewSet, SubjectViewSet, GradeViewSet,
-    ScheduleViewSet, AttendanceViewSet, StudentViewSet
+    SemesterViewSet, SubjectViewSet, GradeViewSet, ScheduleViewSet,
+    AttendanceViewSet, StudentViewSet, add_grade_view
 )
+from .api_views import create_user_profile, get_groups, get_student_info, update_student_group
+
 
 router = DefaultRouter()
 router.register(r'semesters', SemesterViewSet)
