@@ -583,4 +583,45 @@ def get_assignments_api(request, subject_id):
         
         return JsonResponse(static_assignments, safe=False)
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500) 
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+@ensure_csrf_cookie
+@csrf_protect
+def add_grade_view(request):
+    if request.method == 'POST':
+        try:
+            student_id = request.POST.get('student_id')
+            subject_id = request.POST.get('subject_id')
+            grade_value = request.POST.get('grade')
+            semester_id = request.POST.get('semester_id')
+            
+            student = get_object_or_404(Student, id=student_id)
+            subject = get_object_or_404(Subject, id=subject_id)
+            semester = get_object_or_404(Semester, id=semester_id)
+            
+            grade = Grade.objects.create(
+                student=student,
+                subject=subject,
+                grade=grade_value,
+                semester=semester,
+                teacher=request.user.get_full_name()
+            )
+            
+            messages.success(request, 'Оценка успешно добавлена')
+            return redirect('grades')
+            
+        except Exception as e:
+            messages.error(request, f'Ошибка при добавлении оценки: {str(e)}')
+            return redirect('grades')
+    
+    # Если метод GET, показываем форму
+    students = Student.objects.all()
+    subjects = Subject.objects.all()
+    semesters = Semester.objects.all()
+    
+    return render(request, 'performance/add_grade.html', {
+        'students': students,
+        'subjects': subjects,
+        'semesters': semesters
+    }) 

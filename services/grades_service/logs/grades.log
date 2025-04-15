@@ -1456,3 +1456,26 @@ INFO 2025-04-15 19:10:14,413 views 56123 6252457984 Token found, preserving for 
 INFO 2025-04-15 19:10:14,413 views 56123 6252457984 Token cookie set for localhost domain
 INFO 2025-04-15 19:10:14,414 basehttp 56123 6252457984 "GET /logout/ HTTP/1.1" 302 0
 INFO 2025-04-15 19:36:46,892 autoreload 58698 8432191552 Watching for file changes with StatReloader
+INFO 2025-04-15 20:01:12,663 autoreload 59910 8432191552 Watching for file changes with StatReloader
+INFO 2025-04-15 20:17:16,080 middleware 59910 6192852992 Processing token (first 10 chars): eyJhbGciOi...
+DEBUG 2025-04-15 20:17:16,083 middleware 59910 6192852992 Decoded token: {'token_type': 'access', 'exp': 1744737670, 'iat': 1744737370, 'jti': '8eb14c8280f34d96b28827048666afe5', 'user_id': 2, 'first_name': '', 'last_name': '', 'email': 'kobelev@orioks.ru', 'is_staff': True, 'is_superuser': True, 'role': 'STUDENT'}
+INFO 2025-04-15 20:17:16,083 middleware 59910 6192852992 Successfully authenticated user: user_2 (role: STUDENT)
+INFO 2025-04-15 20:17:16,087 views 59910 6192852992 User accessing index: user_2, role: STUDENT
+INFO 2025-04-15 20:17:16,087 views 59910 6192852992 User is STUDENT, redirecting to student_grades
+INFO 2025-04-15 20:17:16,095 basehttp 59910 6192852992 "GET / HTTP/1.1" 302 0
+INFO 2025-04-15 20:17:16,099 middleware 59910 6192852992 Processing token (first 10 chars): eyJhbGciOi...
+DEBUG 2025-04-15 20:17:16,099 middleware 59910 6192852992 Decoded token: {'token_type': 'access', 'exp': 1744737670, 'iat': 1744737370, 'jti': '8eb14c8280f34d96b28827048666afe5', 'user_id': 2, 'first_name': '', 'last_name': '', 'email': 'kobelev@orioks.ru', 'is_staff': True, 'is_superuser': True, 'role': 'STUDENT'}
+INFO 2025-04-15 20:17:16,099 middleware 59910 6192852992 Successfully authenticated user: user_2 (role: STUDENT)
+INFO 2025-04-15 20:17:16,100 views 59910 6192852992 User accessing student grades: user_2, role: STUDENT, authenticated: True
+WARNING 2025-04-15 20:17:17,596 views 59910 6192852992 No student record found for user user_2, creating new one
+ERROR 2025-04-15 20:17:17,698 services 59910 6192852992 Ошибка при получении списка групп: (1146, "Table 'grades_service.performance_group' doesn't exist")
+WARNING 2025-04-15 20:17:17,699 services 59910 6192852992 Не получены данные о группах для синхронизации
+INFO 2025-04-15 20:17:18,017 views 59910 6192852992 Created new student record for user user_2
+INFO 2025-04-15 20:17:18,275 basehttp 59910 6192852992 "GET /student-grades/ HTTP/1.1" 200 21969
+INFO 2025-04-15 20:17:18,404 middleware 59910 6192852992 Processing token (first 10 chars): eyJhbGciOi...
+DEBUG 2025-04-15 20:17:18,405 middleware 59910 6192852992 Decoded token: {'token_type': 'access', 'exp': 1744737670, 'iat': 1744737370, 'jti': '8eb14c8280f34d96b28827048666afe5', 'user_id': 2, 'first_name': '', 'last_name': '', 'email': 'kobelev@orioks.ru', 'is_staff': True, 'is_superuser': True, 'role': 'STUDENT'}
+INFO 2025-04-15 20:17:18,405 middleware 59910 6192852992 Successfully authenticated user: user_2 (role: STUDENT)
+WARNING 2025-04-15 20:17:20,019 views 59910 6192852992 No grades found for student Student 2 in semester Текущий семестр
+ERROR 2025-04-15 20:17:20,092 views 59910 6192852992 Error getting student grades: type object 'datetime.timezone' has no attribute 'now'
+ERROR 2025-04-15 20:17:20,092 log 59910 6192852992 Internal Server Error: /api/student/grades/1/
+ERROR 2025-04-15 20:17:20,093 basehttp 59910 6192852992 "GET /api/student/grades/1/ HTTP/1.1" 500 34

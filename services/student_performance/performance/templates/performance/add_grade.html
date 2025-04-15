@@ -1,0 +1,61 @@
+{% extends 'performance/base.html' %}
+{% load static %}
+
+{% block title %}Добавить оценку{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Добавить оценку</h2>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="student_id">Студент:</label>
+            <select class="form-control" id="student_id" name="student_id" required>
+                <option value="">Выберите студента</option>
+                {% for student in students %}
+                <option value="{{ student.id }}">{{ student.user.get_full_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="subject_id">Предмет:</label>
+            <select class="form-control" id="subject_id" name="subject_id" required>
+                <option value="">Выберите предмет</option>
+                {% for subject in subjects %}
+                <option value="{{ subject.id }}">{{ subject.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="semester_id">Семестр:</label>
+            <select class="form-control" id="semester_id" name="semester_id" required>
+                <option value="">Выберите семестр</option>
+                {% for semester in semesters %}
+                <option value="{{ semester.id }}">{{ semester.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="grade">Оценка:</label>
+            <input type="number" class="form-control" id="grade" name="grade" min="1" max="5" required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary mt-3">Добавить оценку</button>
+    </form>
+</div>
+{% endblock %} 

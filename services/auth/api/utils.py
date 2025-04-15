@@ -24,17 +24,15 @@ def create_student_profile(user):
         logger.debug(f"Отправка запроса на создание профиля для пользователя {user.username}")
         logger.debug(f"Данные отправляемые в запросе: {user_data}")
         
-        # Используем имя сервиса в Docker-сети, но запрос делаем без порта в URL
-        # и устанавливаем отдельный заголовок Host
+        # Используем локальный URL для запуска сервисов по отдельности
         headers = {
-            'Host': 'student_portal:8003',
             'User-Agent': 'auth-service/1.0',
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         }
         
         response = requests.post(
-            'http://student_portal:8003/api/create-profile/',
+            'http://localhost:8003/api/create-profile/',
             json=user_data,
             headers=headers,
             timeout=5

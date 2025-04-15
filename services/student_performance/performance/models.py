@@ -189,22 +189,38 @@ class Attendance(models.Model):
     def __str__(self):
         return f"{self.student_id} - {self.schedule_item} - {self.date}"
 
+class Group(models.Model):
+    """Модель группы студентов"""
+    name = models.CharField(max_length=50, unique=True, verbose_name="Название группы")
+    faculty = models.CharField(max_length=100, verbose_name="Факультет")
+    course = models.IntegerField(verbose_name="Курс")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Группа"
+        verbose_name_plural = "Группы"
+        ordering = ['course', 'name']
+
+    def __str__(self):
+        return f"{self.name} ({self.faculty}, {self.course} курс)"
+
 class Student(models.Model):
     """Модель студента"""
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='student_profile')
+    user_id = models.IntegerField(unique=True, verbose_name="ID пользователя")
     student_number = models.CharField(max_length=50, unique=True)
-    group = models.CharField(max_length=50, blank=True, null=True)
+    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True, related_name='students')
     faculty = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user.get_full_name()} ({self.student_number})"
+        return f"{self.user_id} ({self.student_number})"
 
     class Meta:
         verbose_name = "Студент"
         verbose_name_plural = "Студенты"
-        ordering = ['user__last_name', 'user__first_name']
+        ordering = ['student_number']
 
 class Performance(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
@@ -257,7 +273,7 @@ class HomeworkSubmission(models.Model):
     checked_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.student.user.get_full_name()} - {self.assignment.name}"
+        return f"{self.student.user_id} - {self.assignment.name}"
 
     class Meta:
         ordering = ['-submitted_at'] 

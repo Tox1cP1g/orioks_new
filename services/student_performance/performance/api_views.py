@@ -1,11 +1,15 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
+from django.contrib.auth import get_user_model
 import json
 import logging
 import uuid
+from .models import Student, Group  # Добавляем импорт моделей
+from django.utils.crypto import get_random_string
 
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
 @csrf_exempt  # Отключаем CSRF для межсервисных вызовов
 @require_POST
@@ -65,6 +69,8 @@ def create_user_profile(request):
         
         user_id = data.get('user_id')
         username = data.get('username')
+        email = data.get('email', '')
+        role = data.get('role', 'STUDENT')
         
         logger.info(f"Получен запрос на создание профиля для пользователя {username} (ID: {user_id})")
         
@@ -75,6 +81,27 @@ def create_user_profile(request):
                 'status': 'error',
                 'message': 'Не указаны обязательные поля: user_id, username'
             }, status=400)
+        
+        # Создаем или получаем пользователя в Django
+        try:
+            user, created = User.objects.get_or_create(
+                id=user_id,
+                defaults={
+                    'username': username,
+                    'email': email,
+                    'password': get_random_string(length=12)  # Создаем случайный пароль
+                }
+            )
+            if created:
+                logger.info(f"Создан новый пользователь Django: {username}")
+            else:
+                logger.info(f"Найден существующий пользователь Django: {username}")
+        except Exception as e:
+            logger.error(f"Ошибка при создании пользователя Django: {str(e)}")
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Ошибка при создании пользователя Django: {str(e)}'
+            }, status=500)
         
         # Проверяем, существует ли уже профиль
         if Student.objects.filter(user_id=user_id).exists():
@@ -98,59 +125,54 @@ def create_user_profile(request):
                 name=default_group_name,
                 defaults={
                     'faculty': default_faculty,
-                    'course': 1  # Устанавливаем 1 курс по умолчанию
-                }
-            )
-            logger.debug(f"Group {'created' if created else 'found'}: {group}")
-        except Exception as e:
-            logger.error(f"Error creating/getting group: {str(e)}")
-            group = None
-        
-        # Если группа не найдена или не создана, создаем стандартную группу
-        if group is None:
-            logger.warning("Creating default group 'Не определена'")
-            group, created = Group.objects.get_or_create(
-                name='Не определена',
-                defaults={
-                    'faculty': 'Не определен',
                     'course': 1
                 }
             )
+            if created:
+                logger.info(f"Group created: {default_group_name} ({default_faculty}, 1 курс)")
+            else:
+                logger.info(f"Group found: {default_group_name}")
+        except Exception as e:
+            logger.error(f"Ошибка при создании группы: {str(e)}")
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Ошибка при создании группы: {str(e)}'
+            }, status=500)
         
-        # Создаем профиль
+        # Создаем профиль студента
         try:
             student = Student.objects.create(
                 user_id=user_id,
                 student_number=student_number,
                 group=group,
-                faculty=default_faculty,
+                faculty=default_faculty
             )
-            logger.info(f"Создан профиль для пользователя {username} (ID: {user_id})")
+            logger.info(f"Создан профиль студента: {student_number}")
+            
+            return JsonResponse({
+                'status': 'success',
+                'student_id': student.id,
+                'student_number': student_number,
+                'message': f'Профиль студента успешно создан'
+            })
         except Exception as e:
-            logger.error(f"Error creating student profile: {str(e)}")
+            logger.error(f"Ошибка при создании профиля студента: {str(e)}")
             return JsonResponse({
                 'status': 'error',
-                'message': f'Ошибка при создании профиля: {str(e)}'
+                'message': f'Ошибка при создании профиля студента: {str(e)}'
             }, status=500)
-        
-        return JsonResponse({
-            'status': 'success', 
-            'student_id': student.id,
-            'student_number': student.student_number,
-            'message': f'Профиль для пользователя {username} успешно создан'
-        })
-        
+            
     except json.JSONDecodeError:
-        logger.error("Получены некорректные данные JSON")
+        logger.error("Ошибка декодирования JSON")
         return JsonResponse({
             'status': 'error',
-            'message': 'Некорректный формат JSON'
+            'message': 'Ошибка декодирования JSON'
         }, status=400)
     except Exception as e:
-        logger.error(f"Ошибка при создании профиля пользователя: {str(e)}")
+        logger.error(f"Неожиданная ошибка: {str(e)}")
         return JsonResponse({
             'status': 'error',
-            'message': f'Ошибка при создании профиля: {str(e)}'
+            'message': f'Неожиданная ошибка: {str(e)}'
         }, status=500)
 
 @csrf_exempt
