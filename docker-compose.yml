@@ -27,7 +27,7 @@ services:
       - DEBUG=1
       - ALLOWED_HOSTS=localhost,127.0.0.1,student_portal
       - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8002,http://localhost:8004
-      - USE_SQLITE=True
+      - USE_SQLITE=False
     volumes:
       - ./services/student_performance:/app
     depends_on:
@@ -47,6 +47,7 @@ services:
       - DEBUG=1
       - ALLOWED_HOSTS=localhost,127.0.0.1,teacher_portal
       - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8002,http://localhost:8003
+      - USE_SQLITE=False
     volumes:
       - ./services/teacher_portal:/app
     depends_on:

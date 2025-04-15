@@ -42,8 +42,8 @@
 
 ```
 ├── services/
-│   ├── authorization/      # Сервис авторизации и аутентификации
-│   ├── student_performance/  # Сервис студенческого портала
+│   ├── auth/               # Сервис авторизации и аутентификации
+│   ├── student_performance/ # Сервис студенческого портала
 │   └── teacher_portal/     # Сервис для преподавателей
 ├── docker-compose.yml     # Конфигурация Docker для запуска всех сервисов
 ├── README.md              # Документация проекта
@@ -92,49 +92,44 @@
    DB_PORT=3306
    ```
 
-4. Запустите сервисы с помощью Docker Compose:
+4. Убедитесь, что в файле docker-compose.yml для сервисов student_portal и teacher_portal установлено:
+   ```
+   USE_SQLITE=False
+   ```
+
+5. Убедитесь что в requirements.txt для student_portal и teacher_portal указана библиотека mysqlclient:
+   ```
+   mysqlclient==2.2.4
+   ```
+
+6. Запустите сервисы с помощью Docker Compose:
    ```bash
    docker-compose up -d
    ```
 
-5. Выполните миграции для каждого сервиса:
+7. Выполните миграции для каждого сервиса:
    ```bash
-   docker-compose exec authorization python manage.py migrate
-   docker-compose exec student_performance python manage.py migrate
+   docker-compose exec auth python manage.py migrate
+   docker-compose exec student_portal python manage.py migrate
    docker-compose exec teacher_portal python manage.py migrate
    ```
 
-6. При необходимости создайте суперпользователя для администрирования:
+8. При необходимости создайте тестового студента:
    ```bash
-   docker-compose exec authorization python manage.py createsuperuser
+   docker-compose exec student_portal python manage.py create_test_student
    ```
 
-7. Сервисы будут доступны по следующим адресам:
+9. Сервисы будут доступны по следующим адресам:
    - Авторизационный портал: `http://localhost:8002`
    - Студенческий портал: `http://localhost:8003`
    - Преподавательский портал: `http://localhost:8004`
 
-### Конфигурация портов
+## Конфигурация базы данных
 
-Для изменения портов отредактируйте файл `docker-compose.yml`, указав нужные значения в секции `ports` для каждого сервиса:
+Система настроена на использование удаленной MySQL базы данных. Для переключения между SQLite и MySQL используйте параметр USE_SQLITE в docker-compose.yml:
 
-```yaml
-services:
-  authorization:
-    ports:
-      - "8002:8000"
-    # ...
-
-  student_performance:
-    ports:
-      - "8003:8000"
-    # ...
-
-  teacher_portal:
-    ports:
-      - "8004:8000"
-    # ...
-```
+- Для работы с локальной SQLite: `USE_SQLITE=True`
+- Для работы с удаленной MySQL: `USE_SQLITE=False`
 
 ## Особенности разработки
 
@@ -144,6 +139,7 @@ services:
 - **Отзывчивый интерфейс**: Все страницы оптимизированы для просмотра на устройствах любых размеров
 - **Аналитические панели**: Визуализация данных об успеваемости и посещаемости
 - **Персонализированные уведомления**: Студенты получают актуальную информацию о новых оценках и изменениях в расписании
+- **Интеграция с MySQL**: Система настроена на использование удаленной MySQL базы данных вместо локальной SQLite
 
 ### Модули студенческого портала
 

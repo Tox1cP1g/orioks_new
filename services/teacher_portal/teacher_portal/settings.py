@@ -83,20 +83,31 @@ WSGI_APPLICATION = 'teacher_portal.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'teacher_portal',
-        'USER': 'vkltd',
-        'PASSWORD': 'piskogryz',
-        'HOST': '144.91.72.208',
-        'PORT': '3306',
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+# Переключение между SQLite и MySQL на основе переменной окружения
+USE_SQLITE = os.getenv('USE_SQLITE', 'False') == 'True'
+
+if USE_SQLITE:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'teacher_portal',
+            'USER': 'vkltd',
+            'PASSWORD': 'piskogryz',
+            'HOST': '144.91.72.208',
+            'PORT': '3306',
+            'OPTIONS': {
+                'charset': 'utf8mb4',
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
+        }
+    }
 
 
 # Password validation
