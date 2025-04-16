@@ -1,0 +1,68 @@
+{% extends 'teaching/base.html' %}
+
+{% block title %}Оценки - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Оценки студентов</h2>
+    
+    <div class="row">
+        <div class="col-md-12">
+            {% if courses %}
+                {% for course in courses %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">{{ course.name }}</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if grades_by_course|get_item:course %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Студент</th>
+                                                <th>Задание</th>
+                                                <th>Оценка</th>
+                                                <th>Комментарий</th>
+                                                <th>Дата оценки</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for grade in grades_by_course|get_item:course %}
+                                                <tr>
+                                                    <td>{{ grade.submission.student.get_full_name }}</td>
+                                                    <td>{{ grade.submission.assignment.title }}</td>
+                                                    <td>{{ grade.score }}/{{ grade.submission.assignment.max_score }}</td>
+                                                    <td>{{ grade.feedback|truncatewords:10 }}</td>
+                                                    <td>{{ grade.created_at|date:"d.m.Y H:i" }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">В этом курсе пока нет оценок.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">
+                    У вас пока нет курсов.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Добавляем фильтр для получения значения из словаря по ключу
+    django.jQuery.extend(django.jQuery.fn, {
+        get_item: function(key) {
+            return this[key];
+        }
+    });
+</script>
+{% endblock %} 

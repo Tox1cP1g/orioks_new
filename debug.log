@@ -1,0 +1,128 @@
+INFO 2025-04-07 21:30:22,163 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:30:46,734 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 21:30:47,026 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:30:59,415 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/urls.py changed, reloading.
+INFO 2025-04-07 21:30:59,617 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:31:15,036 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/middleware.py changed, reloading.
+INFO 2025-04-07 21:31:15,356 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:31:25,667 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 21:31:25,900 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:31:40,339 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/urls.py changed, reloading.
+INFO 2025-04-07 21:31:40,543 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:31:53,915 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades_service/urls.py changed, reloading.
+INFO 2025-04-07 21:31:54,168 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:32:31,953 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 21:32:32,216 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:33:28,324 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 21:33:28,605 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:33:39,918 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/urls.py changed, reloading.
+INFO 2025-04-07 21:33:40,298 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:33:53,753 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/urls.py changed, reloading.
+INFO 2025-04-07 21:33:54,074 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:36:11,615 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades_service/urls.py changed, reloading.
+INFO 2025-04-07 21:36:11,941 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:36:33,434 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 21:36:33,673 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:36:51,107 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 21:36:51,426 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:38:52,925 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 21:38:53,222 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:39:08,576 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 21:39:08,820 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:41:50,719 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 21:41:51,014 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:42:09,420 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades_service/urls.py changed, reloading.
+INFO 2025-04-07 21:42:09,731 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:42:27,130 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/urls.py changed, reloading.
+INFO 2025-04-07 21:42:27,309 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:42:42,637 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 21:42:42,897 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:43:12,583 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades_service/urls.py changed, reloading.
+INFO 2025-04-07 21:43:12,828 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:44:35,537 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 21:44:35,791 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:44:47,077 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/urls.py changed, reloading.
+INFO 2025-04-07 21:44:47,295 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:46:59,000 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/urls.py changed, reloading.
+INFO 2025-04-07 21:46:59,257 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:53:39,907 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 21:53:40,192 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:53:53,525 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/urls.py changed, reloading.
+INFO 2025-04-07 21:53:53,792 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:59:16,816 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 21:59:17,100 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:59:28,388 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/middleware.py changed, reloading.
+INFO 2025-04-07 21:59:28,601 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 21:59:40,895 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 21:59:41,140 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 22:02:51,809 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/middleware.py changed, reloading.
+INFO 2025-04-07 22:02:52,055 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 22:03:07,411 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 22:03:07,651 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 22:08:19,442 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/middleware.py changed, reloading.
+INFO 2025-04-07 22:08:19,737 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 22:14:15,085 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 22:14:15,374 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 22:15:46,937 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 22:15:47,241 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 22:19:27,276 autoreload /Users/marksmorckov/Downloads/vus/PIUS/orioks_new/services/grades_service/grades/views.py changed, reloading.
+INFO 2025-04-07 22:19:27,502 autoreload Watching for file changes with StatReloader
+INFO 2025-04-07 22:26:51,382 middleware Middleware processing: original_path=/teacher-grades/, full_path=/teacher-grades/
+INFO 2025-04-07 22:26:51,384 middleware Decoded token: {'token_type': 'access', 'exp': 1743962529, 'iat': 1743962229, 'jti': '7adfb52b628b4608a5b5a1259faa3572', 'user_id': 2, 'first_name': 'Марк', 'last_name': 'Сморчков', 'email': '1@1.ru', 'is_staff': True, 'is_superuser': True, 'role': 'TEACHER'}
+INFO 2025-04-07 22:26:51,384 middleware User authenticated from token: Марк Сморчков, role: TEACHER
+INFO 2025-04-07 22:26:51,385 views User accessing teacher_grades: Марк Сморчков, role: TEACHER, is_authenticated: True
+INFO 2025-04-07 22:26:51,410 basehttp "GET /teacher-grades/ HTTP/1.1" 200 27797
+WARNING 2025-04-07 22:26:51,448 basehttp "GET /static/img/logo.png HTTP/1.1" 404 1896
+INFO 2025-04-07 22:26:51,965 middleware Middleware processing: original_path=/teacher-grades/, full_path=/teacher-grades/
+INFO 2025-04-07 22:26:51,965 middleware Decoded token: {'token_type': 'access', 'exp': 1743962529, 'iat': 1743962229, 'jti': '7adfb52b628b4608a5b5a1259faa3572', 'user_id': 2, 'first_name': 'Марк', 'last_name': 'Сморчков', 'email': '1@1.ru', 'is_staff': True, 'is_superuser': True, 'role': 'TEACHER'}
+INFO 2025-04-07 22:26:51,966 middleware User authenticated from token: Марк Сморчков, role: TEACHER
+INFO 2025-04-07 22:26:51,968 views User accessing teacher_grades: Марк Сморчков, role: TEACHER, is_authenticated: True
+INFO 2025-04-07 22:26:51,977 basehttp "GET /teacher-grades/ HTTP/1.1" 200 27797
+WARNING 2025-04-07 22:26:52,014 basehttp "GET /static/img/logo.png HTTP/1.1" 404 1896
+INFO 2025-04-07 22:26:53,242 middleware Middleware processing: original_path=/8004/, full_path=/8004/
+INFO 2025-04-07 22:26:53,242 middleware Detected teacher port in URL, redirecting to teacher_grades from /8004/
+INFO 2025-04-07 22:26:53,243 basehttp "GET /8004/ HTTP/1.1" 302 0
+INFO 2025-04-07 22:26:53,248 middleware Middleware processing: original_path=/teacher-grades/, full_path=/teacher-grades/
+INFO 2025-04-07 22:26:53,249 middleware Decoded token: {'token_type': 'access', 'exp': 1743962529, 'iat': 1743962229, 'jti': '7adfb52b628b4608a5b5a1259faa3572', 'user_id': 2, 'first_name': 'Марк', 'last_name': 'Сморчков', 'email': '1@1.ru', 'is_staff': True, 'is_superuser': True, 'role': 'TEACHER'}
+INFO 2025-04-07 22:26:53,249 middleware User authenticated from token: Марк Сморчков, role: TEACHER
+INFO 2025-04-07 22:26:53,250 views User accessing teacher_grades: Марк Сморчков, role: TEACHER, is_authenticated: True
+INFO 2025-04-07 22:26:53,262 basehttp "GET /teacher-grades/ HTTP/1.1" 200 27797
+WARNING 2025-04-07 22:26:53,297 basehttp "GET /static/img/logo.png HTTP/1.1" 404 1896
+INFO 2025-04-07 22:26:54,145 middleware Middleware processing: original_path=/8004/, full_path=/8004/
+INFO 2025-04-07 22:26:54,145 middleware Detected teacher port in URL, redirecting to teacher_grades from /8004/
+INFO 2025-04-07 22:26:54,146 basehttp "GET /8004/ HTTP/1.1" 302 0
+INFO 2025-04-07 22:26:54,148 middleware Middleware processing: original_path=/teacher-grades/, full_path=/teacher-grades/
+INFO 2025-04-07 22:26:54,148 middleware Decoded token: {'token_type': 'access', 'exp': 1743962529, 'iat': 1743962229, 'jti': '7adfb52b628b4608a5b5a1259faa3572', 'user_id': 2, 'first_name': 'Марк', 'last_name': 'Сморчков', 'email': '1@1.ru', 'is_staff': True, 'is_superuser': True, 'role': 'TEACHER'}
+INFO 2025-04-07 22:26:54,148 middleware User authenticated from token: Марк Сморчков, role: TEACHER
+INFO 2025-04-07 22:26:54,149 views User accessing teacher_grades: Марк Сморчков, role: TEACHER, is_authenticated: True
+INFO 2025-04-07 22:26:54,159 basehttp "GET /teacher-grades/ HTTP/1.1" 200 27797
+WARNING 2025-04-07 22:26:54,206 basehttp "GET /static/img/logo.png HTTP/1.1" 404 1896
+INFO 2025-04-07 22:26:56,089 middleware Middleware processing: original_path=/teacher-grades/, full_path=/teacher-grades/
+INFO 2025-04-07 22:26:56,090 middleware Decoded token: {'token_type': 'access', 'exp': 1743962529, 'iat': 1743962229, 'jti': '7adfb52b628b4608a5b5a1259faa3572', 'user_id': 2, 'first_name': 'Марк', 'last_name': 'Сморчков', 'email': '1@1.ru', 'is_staff': True, 'is_superuser': True, 'role': 'TEACHER'}
+INFO 2025-04-07 22:26:56,090 middleware User authenticated from token: Марк Сморчков, role: TEACHER
+INFO 2025-04-07 22:26:56,091 views User accessing teacher_grades: Марк Сморчков, role: TEACHER, is_authenticated: True
+INFO 2025-04-07 22:26:56,104 basehttp "GET /teacher-grades/ HTTP/1.1" 200 27797
+WARNING 2025-04-07 22:26:56,154 basehttp "GET /static/img/logo.png HTTP/1.1" 404 1896
+INFO 2025-04-07 22:26:59,145 middleware Middleware processing: original_path=/student-grades/, full_path=/student-grades/
+INFO 2025-04-07 22:26:59,145 middleware Decoded token: {'token_type': 'access', 'exp': 1744051186, 'iat': 1744050886, 'jti': 'eb9d1504866c4d9baa0417383451c12d', 'user_id': 1, 'first_name': 'Виктор', 'last_name': 'Кобелев', 'email': 'kobelev@orioks.ru', 'is_staff': True, 'is_superuser': True, 'role': 'STUDENT'}
+INFO 2025-04-07 22:26:59,145 middleware User authenticated from token: Виктор Кобелев, role: STUDENT
+INFO 2025-04-07 22:26:59,165 basehttp "GET /student-grades/ HTTP/1.1" 200 22991
+WARNING 2025-04-07 22:26:59,185 basehttp "GET /static/img/logo.png HTTP/1.1" 404 1896
+INFO 2025-04-07 22:27:00,752 middleware Middleware processing: original_path=/8003/, full_path=/8003/
+INFO 2025-04-07 22:27:00,753 middleware Detected student port in URL, redirecting to student_grades from /8003/
+INFO 2025-04-07 22:27:00,754 basehttp "GET /8003/ HTTP/1.1" 302 0
+INFO 2025-04-07 22:27:00,758 middleware Middleware processing: original_path=/student-grades/, full_path=/student-grades/
+INFO 2025-04-07 22:27:00,759 middleware Decoded token: {'token_type': 'access', 'exp': 1744051186, 'iat': 1744050886, 'jti': 'eb9d1504866c4d9baa0417383451c12d', 'user_id': 1, 'first_name': 'Виктор', 'last_name': 'Кобелев', 'email': 'kobelev@orioks.ru', 'is_staff': True, 'is_superuser': True, 'role': 'STUDENT'}
+INFO 2025-04-07 22:27:00,759 middleware User authenticated from token: Виктор Кобелев, role: STUDENT
+INFO 2025-04-07 22:27:00,775 basehttp "GET /student-grades/ HTTP/1.1" 200 22991
+WARNING 2025-04-07 22:27:00,797 basehttp "GET /static/img/logo.png HTTP/1.1" 404 1896
+INFO 2025-04-07 22:27:03,226 middleware Middleware processing: original_path=/student-grades/, full_path=/student-grades/
+INFO 2025-04-07 22:27:03,226 middleware Decoded token: {'token_type': 'access', 'exp': 1744051186, 'iat': 1744050886, 'jti': 'eb9d1504866c4d9baa0417383451c12d', 'user_id': 1, 'first_name': 'Виктор', 'last_name': 'Кобелев', 'email': 'kobelev@orioks.ru', 'is_staff': True, 'is_superuser': True, 'role': 'STUDENT'}
+INFO 2025-04-07 22:27:03,226 middleware User authenticated from token: Виктор Кобелев, role: STUDENT
+INFO 2025-04-07 22:27:03,242 basehttp "GET /student-grades/ HTTP/1.1" 200 22991
+WARNING 2025-04-07 22:27:03,275 basehttp "GET /static/img/logo.png HTTP/1.1" 404 1896
+INFO 2025-04-07 22:27:03,281 middleware Middleware processing: original_path=/favicon.ico, full_path=/favicon.ico
+INFO 2025-04-07 22:27:03,281 middleware Decoded token: {'token_type': 'access', 'exp': 1744051186, 'iat': 1744050886, 'jti': 'eb9d1504866c4d9baa0417383451c12d', 'user_id': 1, 'first_name': 'Виктор', 'last_name': 'Кобелев', 'email': 'kobelev@orioks.ru', 'is_staff': True, 'is_superuser': True, 'role': 'STUDENT'}
+INFO 2025-04-07 22:27:03,281 middleware User authenticated from token: Виктор Кобелев, role: STUDENT
+WARNING 2025-04-07 22:27:03,293 log Not Found: /favicon.ico
+WARNING 2025-04-07 22:27:03,293 basehttp "GET /favicon.ico HTTP/1.1" 404 5763

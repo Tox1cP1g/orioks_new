@@ -447,3 +447,9 @@ def logout_view(request):
     response = redirect('http://localhost:8002/login/')
     response.delete_cookie('token')
     return response
+
+@login_required
+def students_list(request):
+    """View for listing all students"""
+    students = User.objects.filter(groups__name='STUDENT').select_related('student')
+    return render(request, 'teaching/students_list.html', {'students': students})

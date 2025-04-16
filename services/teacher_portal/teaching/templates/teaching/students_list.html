@@ -1,0 +1,52 @@
+{% extends 'teaching/base.html' %}
+
+{% block title %}Студенты - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Список студентов</h2>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if students %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ФИО</th>
+                                        <th>Email</th>
+                                        <th>Курсы</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for student in students %}
+                                        <tr>
+                                            <td>{{ student.get_full_name }}</td>
+                                            <td>{{ student.email }}</td>
+                                            <td>
+                                                {% for course in student.student.courses.all %}
+                                                    <span class="badge bg-primary">{{ course.name }}</span>
+                                                {% endfor %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'student_detail' student.id %}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i> Подробнее
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">У вас пока нет студентов.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

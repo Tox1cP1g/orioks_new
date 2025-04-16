@@ -1,0 +1,154 @@
+{% extends 'teaching/base.html' %}
+
+{% block title %}Справка - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Справка по использованию системы</h2>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Основные функции</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="helpAccordion">
+                        <!-- Панель управления -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#dashboardHelp">
+                                    Панель управления
+                                </button>
+                            </h2>
+                            <div id="dashboardHelp" class="accordion-collapse collapse show" data-bs-parent="#helpAccordion">
+                                <div class="accordion-body">
+                                    <p>На панели управления вы можете увидеть:</p>
+                                    <ul>
+                                        <li>Количество ваших курсов</li>
+                                        <li>Количество заданий, ожидающих проверки</li>
+                                        <li>Ближайшие дедлайны</li>
+                                        <li>Последние сданные работы</li>
+                                        <li>Последние добавленные материалы</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Курсы -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#coursesHelp">
+                                    Курсы
+                                </button>
+                            </h2>
+                            <div id="coursesHelp" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                                <div class="accordion-body">
+                                    <p>В разделе "Курсы" вы можете:</p>
+                                    <ul>
+                                        <li>Просматривать список всех курсов</li>
+                                        <li>Создавать новые курсы</li>
+                                        <li>Управлять материалами курса</li>
+                                        <li>Назначать задания</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Задания -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#assignmentsHelp">
+                                    Задания
+                                </button>
+                            </h2>
+                            <div id="assignmentsHelp" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                                <div class="accordion-body">
+                                    <p>В разделе "Задания" вы можете:</p>
+                                    <ul>
+                                        <li>Создавать новые задания</li>
+                                        <li>Устанавливать дедлайны</li>
+                                        <li>Просматривать сданные работы</li>
+                                        <li>Выставлять оценки</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Расписание -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#scheduleHelp">
+                                    Расписание
+                                </button>
+                            </h2>
+                            <div id="scheduleHelp" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                                <div class="accordion-body">
+                                    <p>В разделе "Расписание" вы можете:</p>
+                                    <ul>
+                                        <li>Просматривать расписание занятий</li>
+                                        <li>Видеть все занятия на текущую неделю</li>
+                                        <li>Отслеживать время занятий</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Оценки -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gradesHelp">
+                                    Оценки
+                                </button>
+                            </h2>
+                            <div id="gradesHelp" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                                <div class="accordion-body">
+                                    <p>В разделе "Оценки" вы можете:</p>
+                                    <ul>
+                                        <li>Просматривать все выставленные оценки</li>
+                                        <li>Видеть оценки по каждому курсу</li>
+                                        <li>Отслеживать успеваемость студентов</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Профиль -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#profileHelp">
+                                    Профиль
+                                </button>
+                            </h2>
+                            <div id="profileHelp" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                                <div class="accordion-body">
+                                    <p>В разделе "Профиль" вы можете:</p>
+                                    <ul>
+                                        <li>Просматривать и редактировать личную информацию</li>
+                                        <li>Управлять настройками аккаунта</li>
+                                        <li>Изменять контактные данные</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Поддержка</h5>
+                </div>
+                <div class="card-body">
+                    <p>Если у вас возникли вопросы или проблемы:</p>
+                    <ul>
+                        <li>Обратитесь к администратору системы</li>
+                        <li>Отправьте письмо на support@example.com</li>
+                        <li>Позвоните по телефону: +7 (XXX) XXX-XX-XX</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

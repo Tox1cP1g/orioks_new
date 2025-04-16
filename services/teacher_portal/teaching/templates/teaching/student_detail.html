@@ -1,0 +1,105 @@
+{% extends 'teaching/base.html' %}
+
+{% block title %}{{ student.get_full_name }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Информация о студенте</h5>
+                    <p><strong>ФИО:</strong> {{ student.get_full_name }}</p>
+                    <p><strong>Email:</strong> {{ student.email }}</p>
+                    <p><strong>Курсы:</strong></p>
+                    <ul class="list-unstyled">
+                        {% for course in student.student.courses.all %}
+                            <li><span class="badge bg-primary">{{ course.name }}</span></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Последние сданные задания</h5>
+                </div>
+                <div class="card-body">
+                    {% if submissions %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Задание</th>
+                                        <th>Дата сдачи</th>
+                                        <th>Статус</th>
+                                        <th>Оценка</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for submission in submissions %}
+                                        <tr>
+                                            <td>{{ submission.assignment.title }}</td>
+                                            <td>{{ submission.submitted_at|date:"d.m.Y H:i" }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ submission.status|lower }}">
+                                                    {{ submission.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% if submission.grade %}
+                                                    {{ submission.grade.score }}/{{ submission.assignment.max_score }}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Студент пока не сдал ни одного задания.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Статистика успеваемости</h5>
+                </div>
+                <div class="card-body">
+                    {% if grades %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Задание</th>
+                                        <th>Оценка</th>
+                                        <th>Комментарий</th>
+                                        <th>Дата оценки</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for grade in grades %}
+                                        <tr>
+                                            <td>{{ grade.submission.assignment.title }}</td>
+                                            <td>{{ grade.score }}/{{ grade.submission.assignment.max_score }}</td>
+                                            <td>{{ grade.feedback|truncatewords:10 }}</td>
+                                            <td>{{ grade.created_at|date:"d.m.Y H:i" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Пока нет оценок.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
