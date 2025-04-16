@@ -1508,3 +1508,4 @@ WARNING 2025-04-16 17:33:03,186 views 7 281473179513248 No grades found for stud
 ERROR 2025-04-16 17:33:03,263 views 7 281473179513248 Error getting student grades: type object 'datetime.timezone' has no attribute 'now'
 ERROR 2025-04-16 17:33:03,264 log 7 281473179513248 Internal Server Error: /api/student/grades/1/
 ERROR 2025-04-16 17:33:03,265 basehttp 7 281473179513248 "GET /api/student/grades/1/ HTTP/1.1" 500 34
+INFO 2025-04-16 18:42:09,384 autoreload 14286 8432191552 Watching for file changes with StatReloader
