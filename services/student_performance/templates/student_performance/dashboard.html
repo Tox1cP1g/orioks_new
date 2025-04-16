@@ -113,7 +113,7 @@
                 {% endif %}
             </div>
             <div class="card-footer bg-transparent">
-                <a href="{% url 'schedule' %}" class="btn btn-outline-primary w-100">
+                <a href="http://localhost:8006?group_name={{ user.student.group.name }}&source=student&role=STUDENT" class="btn btn-outline-primary w-100">
                     <i class="fas fa-calendar me-1"></i>Полное расписание
                 </a>
             </div>

@@ -1,0 +1,398 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Расписание - ОРИОКС{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Стили для тёмной темы */
+    [data-theme="dark"] {
+        --page-bg: #1a1a1a;
+        --text-color: #ffffff;
+        --border-color: #333333;
+        --header-bg-color: #2d2d2d;
+        --header-text-color: #ffffff;
+        --cell-bg-color: #2d2d2d;
+        --time-slot-bg-color: #2d2d2d;
+        --lesson-bg-color: #2d2d2d;
+        --empty-cell-bg-color: #2d2d2d;
+        --control-bg-color: #2d2d2d;
+        --control-text-color: #ffffff;
+        --nav-btn-bg: #3498db;
+        --nav-btn-hover: #2980b9;
+        --select-bg: #2d2d2d;
+        --select-text: #ffffff;
+        --select-border: #444444;
+        --today-bg: #3d3d3d;
+        --empty-lesson-bg: #2d2d2d;
+        --empty-lesson-text: #aaaaaa;
+        --lecture-bg: rgba(231, 76, 60, 0.2);
+        --practice-bg: rgba(46, 204, 113, 0.2);
+        --lab-bg: rgba(241, 196, 15, 0.2);
+        --heading-color: #ffffff;
+        --subheading-color: #cccccc;
+    }
+
+    /* Стили для светлой темы */
+    [data-theme="light"] {
+        --page-bg: #ffffff;
+        --text-color: #000000;
+        --border-color: #dee2e6;
+        --header-bg-color: #2c3e50;
+        --header-text-color: #ffffff;
+        --cell-bg-color: #ffffff;
+        --time-slot-bg-color: #f8f9fa;
+        --lesson-bg-color: #ffffff;
+        --empty-cell-bg-color: #ffffff;
+        --control-bg-color: #f8f9fa;
+        --control-text-color: #2c3e50;
+        --nav-btn-bg: #3498db;
+        --nav-btn-hover: #2980b9;
+        --select-bg: #ffffff;
+        --select-text: #2c3e50;
+        --select-border: #cbd5e0;
+        --today-bg: #ebf8ff;
+        --empty-lesson-bg: #f8f9fa;
+        --empty-lesson-text: #718096;
+        --lecture-bg: #fff5f5;
+        --practice-bg: #f0fff4;
+        --lab-bg: #fffff0;
+        --heading-color: #2c3e50;
+        --subheading-color: #718096;
+    }
+
+    body {
+        background-color: var(--page-bg);
+        color: var(--text-color);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        color: var(--heading-color);
+    }
+
+    .text-muted {
+        color: var(--subheading-color) !important;
+    }
+
+    .schedule-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        background: var(--cell-bg-color);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        table-layout: fixed;
+        max-width: 100%;
+        color: var(--text-color);
+        margin-top: 20px;
+    }
+
+    .schedule-table th {
+        background: var(--header-bg-color);
+        color: var(--header-text-color);
+        font-weight: 600;
+        text-align: center;
+        padding: 12px;
+        font-size: 0.9rem;
+        border-bottom: 2px solid var(--border-color);
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+    }
+
+    .schedule-table td {
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        vertical-align: top;
+        min-height: 80px;
+        background: var(--cell-bg-color);
+        font-size: 0.9rem;
+    }
+
+    .time-column {
+        background: var(--time-slot-bg-color);
+        font-weight: 600;
+        text-align: center;
+        width: 100px;
+        color: var(--text-color);
+        white-space: nowrap;
+    }
+
+    .lesson-card {
+        background: var(--lesson-bg-color);
+        border-radius: 4px;
+        padding: 10px;
+        margin-bottom: 4px;
+        border-left: 3px solid #3498db;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        color: var(--text-color);
+        transition: transform 0.2s;
+    }
+
+    .lesson-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .lesson-card.lecture {
+        border-left-color: #e74c3c;
+        background: var(--lecture-bg);
+    }
+
+    .lesson-card.practice {
+        border-left-color: #2ecc71;
+        background: var(--practice-bg);
+    }
+
+    .lesson-card.lab {
+        border-left-color: #f1c40f;
+        background: var(--lab-bg);
+    }
+
+    .lesson-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 0.9rem;
+        color: var(--text-color);
+    }
+
+    .lesson-info {
+        font-size: 0.8rem;
+        color: var(--text-color);
+        opacity: 0.8;
+    }
+
+    .lesson-room {
+        font-weight: 500;
+        margin-bottom: 2px;
+    }
+
+    .lesson-teacher {
+        font-style: italic;
+    }
+
+    .schedule-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 20px 0;
+        background: var(--control-bg-color);
+        padding: 15px;
+        border-radius: 8px;
+        color: var(--control-text-color);
+    }
+
+    .form-select {
+        padding: 8px 12px;
+        border: 1px solid var(--select-border);
+        border-radius: 4px;
+        background: var(--select-bg);
+        color: var(--select-text);
+        font-size: 0.9rem;
+        min-width: 150px;
+        margin-right: 10px;
+    }
+
+    .theme-toggle {
+        padding: 8px 15px;
+        background: var(--nav-btn-bg);
+        border: none;
+        border-radius: 4px;
+        color: white;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+
+    .theme-toggle:hover {
+        background: var(--nav-btn-hover);
+        transform: translateY(-1px);
+    }
+
+    .empty-lesson {
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--empty-lesson-text);
+        font-style: italic;
+        font-size: 0.8rem;
+        background: var(--empty-lesson-bg);
+        border-radius: 4px;
+    }
+
+    .fas {
+        width: 16px;
+        text-align: center;
+        color: var(--text-color);
+    }
+
+    .today {
+        background: var(--today-bg) !important;
+    }
+
+    @media (max-width: 768px) {
+        .schedule-controls {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-select {
+            width: 100%;
+            margin-right: 0;
+            margin-bottom: 10px;
+        }
+
+        .theme-toggle {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-2">Расписание</h1>
+            <p class="text-muted">на неделю: {{ week_start|date:"d.m.Y" }} - {{ week_end|date:"d.m.Y" }}</p>
+        </div>
+    </div>
+
+    {% if not groups %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Не настроены группы. Пожалуйста, обратитесь к администратору.
+        </div>
+    {% else %}
+        <div class="schedule-controls">
+            <div class="d-flex align-items-center">
+                <form class="d-flex align-items-center">
+                    <select name="group" class="form-select" onchange="this.form.submit()">
+                        <option value="">Выберите группу</option>
+                        {% for group in groups %}
+                            <option value="{{ group }}" {% if group == selected_group %}selected{% endif %}>
+                                {{ group }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <select name="semester" class="form-select" onchange="this.form.submit()">
+                        <option value="1" {% if semester == '1' %}selected{% endif %}>1 семестр</option>
+                        <option value="2" {% if semester == '2' %}selected{% endif %}>2 семестр</option>
+                        <option value="3" {% if semester == '3' %}selected{% endif %}>3 семестр</option>
+                        <option value="4" {% if semester == '4' %}selected{% endif %}>4 семестр</option>
+                        <option value="5" {% if semester == '5' %}selected{% endif %}>5 семестр</option>
+                        <option value="6" {% if semester == '6' %}selected{% endif %}>6 семестр</option>
+                        <option value="7" {% if semester == '7' %}selected{% endif %}>7 семестр</option>
+                        <option value="8" {% if semester == '8' %}selected{% endif %}>8 семестр</option>
+                    </select>
+                    {% if source %}
+                        <input type="hidden" name="source" value="{{ source }}">
+                    {% endif %}
+                    {% if role %}
+                        <input type="hidden" name="role" value="{{ role }}">
+                    {% endif %}
+                </form>
+                <button id="theme-toggle" class="theme-toggle">
+                    <i class="fas fa-moon"></i>
+                    <span>Тёмная тема</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th class="time-column">Время</th>
+                        {% for day in days %}
+                            <th {% if day == today %}class="today"{% endif %}>
+                                {{ day|date:"l"|capfirst }}<br>
+                                {{ day|date:"d.m.Y" }}
+                            </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for slot in schedule_data %}
+                        <tr>
+                            <td class="time-column">{{ slot.time }}</td>
+                            {% for day in slot.days %}
+                                <td {% if day.date == today %}class="today"{% endif %}>
+                                    {% if day.lessons %}
+                                        {% for lesson in day.lessons %}
+                                            <div class="lesson-card {% if lesson.is_lecture %}lecture{% elif lesson.is_practice %}practice{% elif lesson.is_lab %}lab{% endif %}">
+                                                <div class="lesson-title">
+                                                    {% if lesson.is_lecture %}
+                                                        <i class="fas fa-book me-1"></i>
+                                                    {% elif lesson.is_practice %}
+                                                        <i class="fas fa-flask me-1"></i>
+                                                    {% elif lesson.is_lab %}
+                                                        <i class="fas fa-microscope me-1"></i>
+                                                    {% endif %}
+                                                    {{ lesson.subject }}
+                                                </div>
+                                                <div class="lesson-info">
+                                                    <div class="lesson-room">
+                                                        <i class="fas fa-door-open me-1"></i>
+                                                        {{ lesson.room }}
+                                                    </div>
+                                                    <div class="lesson-teacher">
+                                                        <i class="fas fa-user me-1"></i>
+                                                        {{ lesson.teacher }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="empty-lesson">
+                                            <i class="fas fa-calendar-times me-1"></i>
+                                            Нет занятий
+                                        </div>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = themeToggle.querySelector('i');
+        const themeText = themeToggle.querySelector('span');
+        
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeButton(savedTheme);
+
+        themeToggle.addEventListener('click', function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeButton(newTheme);
+        });
+
+        function updateThemeButton(theme) {
+            if (theme === 'dark') {
+                themeIcon.className = 'fas fa-sun';
+                themeText.textContent = 'Светлая тема';
+            } else {
+                themeIcon.className = 'fas fa-moon';
+                themeText.textContent = 'Тёмная тема';
+            }
+        }
+    });
+</script>
+{% endblock %} 

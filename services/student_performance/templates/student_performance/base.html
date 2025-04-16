@@ -848,7 +848,7 @@
                         <a class="nav-link" href="{% url 'assignments' %}">Задания</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'schedule' %}">Расписание</a>
+                        <a class="nav-link" href="http://localhost:8006?group_name={{ user.student.group.name }}&source=student&role=STUDENT">Расписание</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'attendance' %}">Посещаемость</a>

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Занятие - ОРИОКС{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>Информация о занятии
+                    </h3>
+                    {% if is_teacher %}
+                    <div>
+                        <a href="{% url 'edit_schedule' schedule.id %}?source={{ source }}&role={{ role }}" 
+                           class="btn btn-outline-primary me-2">
+                            <i class="fas fa-edit me-2"></i>Редактировать
+                        </a>
+                        <a href="{% url 'delete_schedule' schedule.id %}?source={{ source }}&role={{ role }}" 
+                           class="btn btn-outline-danger"
+                           onclick="return confirm('Вы уверены, что хотите удалить это занятие?')">
+                            <i class="fas fa-trash me-2"></i>Удалить
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="text-muted">День недели</h5>
+                        <p>{{ schedule.get_day_of_week_display }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="text-muted">Время</h5>
+                        <p>{{ schedule.get_lesson_number_display }}</p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h5 class="text-muted">Предмет</h5>
+                        <p>{{ schedule.subject }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="text-muted">Преподаватель</h5>
+                        <p>{{ schedule.teacher }}</p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h5 class="text-muted">Аудитория</h5>
+                        <p>{{ schedule.classroom }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="text-muted">Группа</h5>
+                        <p>{{ schedule.group }}</p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h5 class="text-muted">Семестр</h5>
+                        <p>{{ schedule.semester }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="text-muted">Дата создания</h5>
+                        <p>{{ schedule.created_at|date:"d.m.Y H:i" }}</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'schedule_list' %}?source={{ source }}&role={{ role }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Назад к расписанию
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
