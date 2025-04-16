@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c7d46fe2-66a5-4343-86ae-f86525f4f30b" name="Changes" comment="Third version of schedule.&#10;Problem: when selecting a group, the schedule isn't show.">
+    <list default="true" id="c7d46fe2-66a5-4343-86ae-f86525f4f30b" name="Changes" comment="Fourth version of schedule.&#10;It's finally working">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/templates/schedule/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/templates/schedule/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/config/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/core/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/urls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -147,7 +148,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744796183435</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Fourth version of schedule.&#10;It's finally working">
+      <option name="closed" value="true" />
+      <created>1744804112186</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1744804112187</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -165,6 +174,7 @@
     <MESSAGE value="First version of schedule.&#10;Problem: when selecting a group, the schedule isn't show." />
     <MESSAGE value="Second version of schedule.&#10;Problem: the main page isn't working" />
     <MESSAGE value="Third version of schedule.&#10;Problem: when selecting a group, the schedule isn't show." />
-    <option name="LAST_COMMIT_MESSAGE" value="Third version of schedule.&#10;Problem: when selecting a group, the schedule isn't show." />
+    <MESSAGE value="Fourth version of schedule.&#10;It's finally working" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fourth version of schedule.&#10;It's finally working" />
   </component>
 </project>
