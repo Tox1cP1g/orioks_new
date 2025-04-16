@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c7d46fe2-66a5-4343-86ae-f86525f4f30b" name="Changes" comment="First version of schedule.&#10;Problem: when selecting a group, the schedule isn't show.">
-      <change beforePath="$PROJECT_DIR$/services/schedule/schedule/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/migrations/__init__.py" afterDir="false" />
+    <list default="true" id="c7d46fe2-66a5-4343-86ae-f86525f4f30b" name="Changes" comment="Second version of schedule.&#10;Problem: the main page isn't working">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/core/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,6 +21,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="Yakov" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -46,16 +52,16 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.activate_this.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Yakov&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.activate_this.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "Yakov__new",
+    "ignore.virus.scanning.warn.message": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\yakov\PycharmProjects\orioks_new\services\schedule\core" />
@@ -125,7 +131,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744794745879</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Second version of schedule.&#10;Problem: the main page isn't working">
+      <option name="closed" value="true" />
+      <created>1744794851762</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1744794851762</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -141,6 +155,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="First version of schedule.&#10;Problem: when selecting a group, the schedule isn't show." />
-    <option name="LAST_COMMIT_MESSAGE" value="First version of schedule.&#10;Problem: when selecting a group, the schedule isn't show." />
+    <MESSAGE value="Second version of schedule.&#10;Problem: the main page isn't working" />
+    <option name="LAST_COMMIT_MESSAGE" value="Second version of schedule.&#10;Problem: the main page isn't working" />
   </component>
 </project>

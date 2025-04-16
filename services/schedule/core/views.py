@@ -5,11 +5,11 @@ from django.shortcuts import render
 
 def schedule_view(request):
     try:
-        groups = Group.objects.all().prefetch_related('schedule_set')
-        return render(request, 'core/index.html', {'groups': groups})
+        groups = Group.objects.all()
+        return render(request, 'schedule/index.html', {'groups': groups})
     except Exception as e:
         print(f"Error: {e}")  # Для отладки
-        return render(request, 'core/index.html', {'groups': []})
+        return render(request, 'schedule/index.html', {'groups': []})
 
 
 class GroupListView(generics.ListAPIView):
