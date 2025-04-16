@@ -172,7 +172,7 @@ class Migration(migrations.Migration):
                 ('date', models.DateField(verbose_name='Дата')),
                 ('is_present', models.BooleanField(default=False, verbose_name='Присутствовал')),
                 ('reason', models.TextField(blank=True, verbose_name='Причина отсутствия')),
-                ('schedule_item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attendances', to='performance.schedule', verbose_name='Занятие')),
+                ('schedule_item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attendances', to='performance.config', verbose_name='Занятие')),
             ],
             options={
                 'verbose_name': 'Посещаемость',

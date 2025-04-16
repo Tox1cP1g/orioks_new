@@ -10,7 +10,7 @@ router = DefaultRouter()
 router.register(r'semesters', SemesterViewSet)
 router.register(r'subjects', SubjectViewSet, basename='subject')
 router.register(r'grades', GradeViewSet, basename='grade')
-router.register(r'schedule', ScheduleViewSet, basename='schedule')
+router.register(r'config', ScheduleViewSet, basename='config')
 router.register(r'attendance', AttendanceViewSet, basename='attendance')
 router.register(r'students', StudentViewSet, basename='student')
 

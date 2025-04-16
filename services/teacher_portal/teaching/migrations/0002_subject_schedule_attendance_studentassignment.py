@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
                 ('is_present', models.BooleanField(default=False, verbose_name='Присутствовал')),
                 ('note', models.TextField(blank=True, verbose_name='Примечание')),
                 ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attendances', to=settings.AUTH_USER_MODEL, verbose_name='Студент')),
-                ('schedule_item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attendances', to='teaching.schedule', verbose_name='Занятие')),
+                ('schedule_item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attendances', to='teaching.config', verbose_name='Занятие')),
             ],
             options={
                 'verbose_name': 'Посещаемость',

@@ -33,7 +33,7 @@
         document.getElementById('groupSelect').addEventListener('change', function() {
             const groupId = this.value;
             if (groupId) {
-                fetch(`/api/v1/schedule/?group=${groupId}`)
+                fetch(`/core/schedule/?group=${groupId}`)
                     .then(response => response.json())
                     .then(data => renderSchedule(data));
             }

@@ -4,18 +4,35 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c7d46fe2-66a5-4343-86ae-f86525f4f30b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/orioks_new.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/material_theme_project_new.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/meganew_orioks.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirememts.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirememts.txt" afterDir="false" />
+    <list default="true" id="c7d46fe2-66a5-4343-86ae-f86525f4f30b" name="Changes" comment="First version of schedule.&#10;Problem: when selecting a group, the schedule isn't show.">
+      <change beforePath="$PROJECT_DIR$/.idea/orioks_new.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/orioks_new.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirememts.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/api_gateway/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/api_gateway/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/api/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/migrations/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/api/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/api/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/api/fixtures/test_data.json" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/fixtures/test_data.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/api/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/api/migrations/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/api/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/api/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/api/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/tests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/manage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/schedule/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/schedule/asgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/config/asgi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/schedule/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/config/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/schedule/urls.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/schedule/wsgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/config/wsgi.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/templates/schedule/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/templates/schedule/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/student_performance/performance/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/student_performance/performance/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/student_performance/performance/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/student_performance/performance/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/student_performance/performance/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/student_performance/performance/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/student_performance/student_performance/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/student_performance/student_performance/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/teacher_portal/teaching/migrations/0002_subject_schedule_attendance_studentassignment.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/teacher_portal/teaching/migrations/0002_subject_schedule_attendance_studentassignment.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/teacher_portal/teaching/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/teacher_portal/teaching/urls.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,18 +73,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.activate_this.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "Yakov",
-    "ignore.virus.scanning.warn.message": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.activate_this.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Yakov&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\yakov\PycharmProjects\orioks_new\services\schedule\core" />
+      <recent name="C:\Users\yakov\PycharmProjects\orioks_new\services\schedule\schedule" />
       <recent name="C:\Users\yakov\PycharmProjects\orioks_new\services\schedule" />
       <recent name="C:\Users\yakov\PycharmProjects\orioks_new\services\schedule\api" />
     </key>
@@ -117,6 +136,30 @@
       <option name="presentableId" value="Default" />
       <updated>1744736683346</updated>
     </task>
+    <task id="LOCAL-00001" summary="First version of schedule.&#10;Problem: when selecting a group, the schedule isn't show.">
+      <option name="closed" value="true" />
+      <created>1744744991575</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1744744991575</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="First version of schedule.&#10;Problem: when selecting a group, the schedule isn't show." />
+    <option name="LAST_COMMIT_MESSAGE" value="First version of schedule.&#10;Problem: when selecting a group, the schedule isn't show." />
   </component>
 </project>

@@ -127,11 +127,11 @@ async def get_teacher_subjects(token: str = Depends(get_token_header)):
         )
         return response.json()
 
-@app.get("/api/teacher/schedule")
+@app.get("/api/teacher/config")
 async def get_teacher_schedule(token: str = Depends(get_token_header)):
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            f"{TEACHER_SERVICE_URL}/api/schedule/",
+            f"{TEACHER_SERVICE_URL}/api/config/",
             headers={"Authorization": token}
         )
         return response.json()

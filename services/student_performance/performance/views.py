@@ -177,7 +177,7 @@ def grades(request):
 
 @login_required
 def schedule(request):
-    return render(request, 'student_performance/schedule.html')
+    return render(request, 'student_performance/config.html')
 
 def help(request):
     return render(request, 'student_performance/help.html')
@@ -327,14 +327,14 @@ def schedule_view(request):
     # Получаем текущий семестр
     current_semester = Semester.objects.filter(is_current=True).first()
     if not current_semester:
-        return render(request, 'student_performance/schedule.html', {
+        return render(request, 'student_performance/config.html', {
             'error': 'Текущий семестр не найден'
         })
 
     # Получаем студента и его группу
     student = Student.objects.filter(user_id=request.user.id).first()
     if not student:
-        return render(request, 'student_performance/schedule.html', {
+        return render(request, 'student_performance/config.html', {
             'error': 'Профиль студента не найден'
         })
 
@@ -402,7 +402,7 @@ def schedule_view(request):
         'schedule_data': schedule_data,
     }
 
-    return render(request, 'student_performance/schedule.html', context)
+    return render(request, 'student_performance/config.html', context)
 
 @login_required
 def attendance_view(request):

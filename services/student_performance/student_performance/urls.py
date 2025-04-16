@@ -30,7 +30,7 @@ router = DefaultRouter()
 router.register(r'api/semesters', SemesterViewSet)
 router.register(r'api/subjects', SubjectViewSet, basename='subject')
 router.register(r'api/grades', GradeViewSet, basename='grade')
-router.register(r'api/schedule', ScheduleViewSet, basename='schedule')
+router.register(r'api/config', ScheduleViewSet, basename='config')
 router.register(r'api/attendance', AttendanceViewSet, basename='attendance')
 router.register(r'api/students', StudentViewSet, basename='student')
 
@@ -39,7 +39,7 @@ urlpatterns = [
     path('', index, name='index'),
     path('dashboard/', dashboard, name='dashboard'),
     path('grades/', grades_view, name='grades'),
-    path('schedule/', schedule_view, name='schedule'),
+    path('config/', schedule_view, name='config'),
     path('attendance/', attendance_view, name='attendance'),
     path('help/', help, name='help'),
     path('profile/', profile_view, name='profile'),

@@ -11,6 +11,7 @@ class Group(models.Model):
         return self.name
 
 
+
 class Schedule(models.Model):
     DAY_CHOICES = [
         (1, 'Понедельник'),
@@ -29,5 +30,9 @@ class Schedule(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
 
+    def __str__(self):
+        return f"{self.group.name} - {self.get_day_display()}"
+
     class Meta:
         ordering = ['day', 'start_time']
+        app_label = 'core'
