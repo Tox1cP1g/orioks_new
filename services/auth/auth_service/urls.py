@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -37,6 +37,9 @@ urlpatterns = [
     path('', redirect_authenticated_user, name='index'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    
+    # API URLs
+    path('api/', include('api.urls')),  # Включаем все URL из api.urls
     
     # Временная заглушка для webauthn_keys_list
     path('webauthn/keys/', webauthn_keys_list_placeholder, name='webauthn_keys_list'),

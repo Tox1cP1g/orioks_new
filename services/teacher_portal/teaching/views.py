@@ -10,7 +10,7 @@ from decimal import Decimal, InvalidOperation
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from .models import (
-    Teacher, Course, LearningMaterial, Assignment, 
+    Teacher, Course, LearningMaterial, Assignment,
     GradingCriteria, StudentSubmission, Grade,
     Subject, StudentAssignment, Schedule, Attendance,
     SubjectTeacher, SubjectTeacherGroup
@@ -32,18 +32,23 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_GET
 from django import forms
 from django.contrib.auth.models import Group
+from django.views.decorators.csrf import csrf_protect
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 @login_required
 def dashboard(request):
     teacher = get_object_or_404(Teacher, user=request.user)
-    
+
     # Получаем статистику
     courses_count = Course.objects.filter(teachers=teacher).count()
     pending_submissions_count = StudentSubmission.objects.filter(
         assignment__course__teachers=teacher,
         status='SUBMITTED'
     ).count()
-    
+
     # Получаем задания на следующую неделю
     next_week = timezone.now() + timedelta(days=7)
     upcoming_assignments = Assignment.objects.filter(
@@ -51,20 +56,20 @@ def dashboard(request):
         deadline__lte=next_week,
         deadline__gte=timezone.now()
     ).order_by('deadline')[:5]
-    
+
     upcoming_assignments_count = upcoming_assignments.count()
-    
+
     # Получаем последние решения
     recent_submissions = StudentSubmission.objects.filter(
         assignment__course__teachers=teacher,
         status='SUBMITTED'
     ).order_by('-submitted_at')[:10]
-    
+
     # Получаем последние материалы
     recent_materials = LearningMaterial.objects.filter(
         course__teachers=teacher
     ).order_by('-created_at')[:5]
-    
+
     context = {
         'courses_count': courses_count,
         'pending_submissions_count': pending_submissions_count,
@@ -73,8 +78,9 @@ def dashboard(request):
         'recent_submissions': recent_submissions,
         'recent_materials': recent_materials,
     }
-    
+
     return render(request, 'teaching/dashboard.html', context)
+
 
 @login_required
 def profile(request):
@@ -90,11 +96,12 @@ def profile(request):
         teacher.phone = request.POST.get('phone', teacher.phone)
         teacher.office_hours = request.POST.get('office_hours', teacher.office_hours)
         teacher.save()
-        
+
         messages.success(request, 'Профиль успешно обновлен')
         return redirect('profile')
-    
+
     return render(request, 'teaching/profile.html', {'teacher': teacher})
+
 
 @login_required
 def courses(request):
@@ -102,6 +109,7 @@ def courses(request):
     Представление для страницы курсов
     """
     return render(request, 'teaching/courses.html')
+
 
 @login_required
 def create_course(request):
@@ -133,6 +141,7 @@ def create_course(request):
     teachers = Teacher.objects.all()
     return render(request, 'teaching/create_course.html', {'teachers': teachers})
 
+
 @login_required
 def assignments(request):
     teacher = get_object_or_404(Teacher, user=request.user)
@@ -140,6 +149,7 @@ def assignments(request):
         course__teachers=teacher
     ).order_by('deadline')
     return render(request, 'teaching/assignments.html', {'assignments': assignments})
+
 
 @login_required
 def create_assignment(request):
@@ -159,7 +169,6 @@ def create_assignment(request):
         # Проверяем, существует ли курс
         course = get_object_or_404(Course, id=course_id)
 
-
         if max_score:
             try:
                 max_score = Decimal(max_score)
@@ -177,7 +186,6 @@ def create_assignment(request):
                 })
         else:
             max_score = None
-
 
         Assignment.objects.create(
             course=course,
@@ -197,6 +205,7 @@ def create_assignment(request):
         "assignment_types": assignment_types
     })
 
+
 @login_required
 def submissions(request):
     """
@@ -204,18 +213,19 @@ def submissions(request):
     """
     return render(request, 'teaching/submissions.html')
 
+
 @login_required
 def grade_submission(request, submission_id):
     teacher = get_object_or_404(Teacher, user=request.user)
-    submission = get_object_or_404(StudentSubmission, 
-        id=submission_id,
-        assignment__course__teachers=teacher
-    )
-    
+    submission = get_object_or_404(StudentSubmission,
+                                   id=submission_id,
+                                   assignment__course__teachers=teacher
+                                   )
+
     if request.method == 'POST':
         score = request.POST.get('score')
         feedback = request.POST.get('feedback')
-        
+
         if score and feedback:
             Grade.objects.create(
                 submission=submission,
@@ -225,20 +235,21 @@ def grade_submission(request, submission_id):
             )
             submission.status = 'COMPLETED'
             submission.save()
-            
+
             messages.success(request, 'Оценка успешно выставлена')
             return redirect('submissions')
         else:
             messages.error(request, 'Пожалуйста, заполните все поля')
-    
+
     return render(request, 'teaching/grade_submission.html', {'submission': submission})
+
 
 # ViewSets для API
 class TeacherViewSet(viewsets.ModelViewSet):
     """API для управления преподавателями"""
     queryset = Teacher.objects.all().order_by('id')
     serializer_class = TeacherSerializer
-    
+
     def get_permissions(self):
         """Определение прав доступа в зависимости от действия"""
         if self.action == 'list' or self.action == 'retrieve':
@@ -252,19 +263,19 @@ class TeacherViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Фильтрация преподавателей"""
         queryset = Teacher.objects.all().order_by('id')
-        
+
         # Фильтр по кафедре
         department = self.request.query_params.get('department')
         if department:
             queryset = queryset.filter(department__icontains=department)
-        
+
         # Фильтр по должности
         position = self.request.query_params.get('position')
         if position:
             queryset = queryset.filter(position__icontains=position)
-            
+
         return queryset
-    
+
     @action(detail=True, methods=['get'])
     def subjects(self, request, pk=None):
         """Получить все предметы для преподавателя"""
@@ -273,6 +284,7 @@ class TeacherViewSet(viewsets.ModelViewSet):
         subject_teachers = SubjectTeacher.objects.filter(teacher=teacher)
         subjects = [st.subject for st in subject_teachers]
         return Response(SubjectSerializer(subjects, many=True).data)
+
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
@@ -289,6 +301,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         teacher = Teacher.objects.get(user=self.request.user)
         course.teachers.add(teacher)
 
+
 class LearningMaterialViewSet(viewsets.ModelViewSet):
     queryset = LearningMaterial.objects.all()
     serializer_class = LearningMaterialSerializer
@@ -302,6 +315,7 @@ class LearningMaterialViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         teacher = Teacher.objects.get(user=self.request.user)
         serializer.save(created_by=teacher)
+
 
 class AssignmentViewSet(viewsets.ModelViewSet):
     queryset = Assignment.objects.all()
@@ -326,6 +340,7 @@ class AssignmentViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class StudentSubmissionViewSet(viewsets.ModelViewSet):
     queryset = StudentSubmission.objects.all()
     serializer_class = StudentSubmissionSerializer
@@ -335,6 +350,7 @@ class StudentSubmissionViewSet(viewsets.ModelViewSet):
         if self.request.user.is_staff:
             return StudentSubmission.objects.all()
         return StudentSubmission.objects.filter(assignment__course__teachers__user=self.request.user)
+
 
 class GradeViewSet(viewsets.ModelViewSet):
     queryset = Grade.objects.all()
@@ -349,23 +365,24 @@ class GradeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         teacher = Teacher.objects.get(user=self.request.user)
         submission = get_object_or_404(StudentSubmission, id=self.request.data.get('submission'))
-        
+
         # Проверяем, что преподаватель имеет доступ к этому заданию
         if not submission.assignment.course.teachers.filter(user=self.request.user).exists():
             return Response(
                 {'error': 'У вас нет прав для оценки этого задания'},
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         # Обновляем статус задания
         submission.status = 'COMPLETED'
         submission.save()
-        
+
         serializer.save(
             graded_by=teacher,
             submission=submission,
             graded_at=timezone.now()
         )
+
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'teaching/dashboard.html'
@@ -373,25 +390,26 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         teacher = Teacher.objects.get(user=self.request.user)
-        
+
         # Получаем курсы преподавателя
         courses = Course.objects.filter(teachers=teacher)
         context['courses'] = courses
-        
+
         # Получаем последние задания
         recent_assignments = Assignment.objects.filter(
             course__teachers=teacher
         ).order_by('-created_at')[:5]
         context['recent_assignments'] = recent_assignments
-        
+
         # Получаем работы, ожидающие проверки
         pending_submissions = StudentAssignment.objects.filter(
             assignment__course__teachers=teacher,
             status='submitted'
         ).order_by('submitted_at')
         context['pending_submissions'] = pending_submissions
-        
+
         return context
+
 
 class SubjectViewSet(viewsets.ModelViewSet):
     queryset = Subject.objects.all().order_by('id')
@@ -418,6 +436,7 @@ class SubjectViewSet(viewsets.ModelViewSet):
         teacher = Teacher.objects.get(user=self.request.user)
         serializer.save(teacher=teacher)
 
+
 class ScheduleViewSet(viewsets.ModelViewSet):
     queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
@@ -431,6 +450,7 @@ class ScheduleViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         teacher = Teacher.objects.get(user=self.request.user)
         serializer.save(teacher=teacher)
+
 
 class AttendanceViewSet(viewsets.ModelViewSet):
     queryset = Attendance.objects.all()
@@ -446,7 +466,7 @@ class AttendanceViewSet(viewsets.ModelViewSet):
     def student_attendance(self, request):
         student_id = request.query_params.get('student_id')
         subject_id = request.query_params.get('subject_id')
-        
+
         if not student_id or not subject_id:
             return Response(
                 {"error": "Both student_id and subject_id are required"},
@@ -479,6 +499,7 @@ class AttendanceViewSet(viewsets.ModelViewSet):
 
         return Response(data)
 
+
 class StudentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.filter(groups__name='STUDENT')
     serializer_class = StudentSerializer
@@ -492,16 +513,40 @@ class StudentViewSet(viewsets.ReadOnlyModelViewSet):
             studentassignment__assignment__course__teachers__user=self.request.user
         ).distinct()
 
+
+@csrf_protect
 def logout_view(request):
     """
-    Представление для выхода из системы
+    Выход из системы и перенаправление на страницу входа auth_service
     """
-    logout(request)
-    return redirect('index')
+    try:
+        # Выполняем выход
+        logout(request)
+        
+        # Создаем response с перенаправлением на страницу входа auth_service
+        response = redirect('http://localhost:8002/login/')
+        
+        # Удаляем JWT токен из cookie
+        response.delete_cookie('token', domain=None)
+        response.delete_cookie('token', domain='localhost')
+        
+        # Удаляем все остальные связанные cookie
+        response.delete_cookie('sessionid')
+        response.delete_cookie('csrftoken')
+        
+        logger.info("Logout completed successfully")
+        return response
+        
+    except Exception as e:
+        logger.error(f"Ошибка при выходе из системы: {str(e)}")
+        # В случае ошибки все равно пытаемся перенаправить на страницу входа
+        return redirect('http://localhost:8002/login/')
+
 
 @login_required
 def homework(request):
     return render(request, 'teaching/homework.html')
+
 
 @login_required
 def subject_teachers(request):
@@ -512,7 +557,7 @@ def subject_teachers(request):
     subjects = Subject.objects.all()
     teachers = Teacher.objects.all()
     subject_teachers = SubjectTeacher.objects.all().prefetch_related('groups')
-    
+
     # Получаем все доступные группы
     groups = Group.objects.all()
 
@@ -524,6 +569,7 @@ def subject_teachers(request):
         'groups': groups
     })
 
+
 @login_required
 def subject_teacher_create(request):
     """
@@ -532,33 +578,33 @@ def subject_teacher_create(request):
     if request.method == 'POST':
         subject_id = request.POST.get('subject')
         groups_names = request.POST.getlist('groups', [])  # Имена/коды групп
-        
+
         # Отладочная информация
-        print("="*50)
+        print("=" * 50)
         print("ФОРМА ОТПРАВЛЕНА:")
         print(f"Метод: {request.method}")
         print(f"subject_id: {subject_id}")
         print(f"groups_names: {groups_names}")
         print(f"Все поля: {request.POST}")
         print(f"AJAX запрос: {'X-Requested-With' in request.headers}")
-        print("="*50)
-        
+        print("=" * 50)
+
         success = False
         error_message = ""
-        
+
         if subject_id:  # Проверяем только наличие subject_id
             try:
                 subject = Subject.objects.get(pk=subject_id)
                 current_teacher = Teacher.objects.get(user=request.user)
-                
+
                 # Создаем связь между текущим преподавателем и предметом
                 subject_teacher = SubjectTeacher.objects.create(
                     subject=subject,
                     teacher=current_teacher,
                     role='LECTURER',  # Роль по умолчанию
-                    is_main=True     # Первый преподаватель считается основным
+                    is_main=True  # Первый преподаватель считается основным
                 )
-                
+
                 # Сохраняем связь с группами, если они выбраны
                 if groups_names:
                     for group_name in groups_names:
@@ -567,18 +613,18 @@ def subject_teacher_create(request):
                             group, created = Group.objects.get_or_create(name=group_name)
                             if created:
                                 print(f"Создана новая группа: {group.name}")
-                            
+
                             # Добавляем группу к связи преподаватель-предмет
                             subject_teacher.groups.add(group)
                             print(f"Добавлена группа {group.name} для связи {subject_teacher}")
                         except Exception as e:
                             print(f"Ошибка при добавлении группы {group_name}: {str(e)}")
-                    
+
                     groups_str = ", ".join(groups_names)
                     print(f"Для связи {subject_teacher} выбраны группы: {groups_str}")
                 else:
                     print(f"Для связи {subject_teacher} группы не выбраны")
-                
+
                 success = True
                 messages.success(request, f'Связь с предметом "{subject.name}" успешно создана')
             except Subject.DoesNotExist:
@@ -596,7 +642,7 @@ def subject_teacher_create(request):
             error_message = 'Пожалуйста, выберите предмет'
             messages.error(request, error_message)
             print("Ошибка: не выбран предмет")
-        
+
         # Если это AJAX запрос, возвращаем JSON ответ
         if 'X-Requested-With' in request.headers and request.headers['X-Requested-With'] == 'XMLHttpRequest':
             if success:
@@ -605,8 +651,9 @@ def subject_teacher_create(request):
                 return JsonResponse({'success': False, 'message': error_message}, status=400)
     else:
         print("Запрос к subject_teacher_create не методом POST", request.method)
-            
+
     return redirect('subject_teachers')
+
 
 @login_required
 def subject_teacher_delete(request, subject_teacher_id):
@@ -614,21 +661,23 @@ def subject_teacher_delete(request, subject_teacher_id):
     Представление для удаления связи преподаватель-предмет
     """
     subject_teacher = get_object_or_404(SubjectTeacher, pk=subject_teacher_id)
-    
+
     if request.method == 'POST':
         subject_name = subject_teacher.subject.name
         teacher_name = subject_teacher.teacher.user.get_full_name()
-        
+
         subject_teacher.delete()
-        messages.success(request, f'Связь между преподавателем {teacher_name} и предметом {subject_name} успешно удалена')
-        
+        messages.success(request,
+                         f'Связь между преподавателем {teacher_name} и предметом {subject_name} успешно удалена')
+
     return redirect('subject_teachers')
+
 
 class SubjectTeacherViewSet(viewsets.ModelViewSet):
     """API для управления связями преподавателей с предметами"""
     queryset = SubjectTeacher.objects.all().order_by('id')
     serializer_class = SubjectTeacherSerializer
-    
+
     def get_permissions(self):
         """Определение прав доступа в зависимости от действия"""
         if self.action == 'list' or self.action == 'retrieve':
@@ -638,34 +687,34 @@ class SubjectTeacherViewSet(viewsets.ModelViewSet):
             # Для изменения данных требуются права преподавателя или админа
             permission_classes = [IsTeacherOrAdmin]
         return [permission() for permission in permission_classes]
-    
+
     def get_queryset(self):
         """Фильтрация связей"""
         queryset = SubjectTeacher.objects.all().order_by('id')
-        
+
         # Фильтр по предмету
         subject_id = self.request.query_params.get('subject_id')
         if subject_id:
             queryset = queryset.filter(subject_id=subject_id)
-            
+
         # Фильтр по преподавателю
         teacher_id = self.request.query_params.get('teacher_id')
         if teacher_id:
             queryset = queryset.filter(teacher_id=teacher_id)
-            
+
         # Фильтр по роли
         role = self.request.query_params.get('role')
         if role:
             queryset = queryset.filter(role=role)
-            
+
         # Фильтр по основному преподавателю
         is_main = self.request.query_params.get('is_main')
         if is_main is not None:
             is_main_bool = is_main.lower() == 'true'
             queryset = queryset.filter(is_main=is_main_bool)
-            
+
         return queryset
-    
+
     def perform_create(self, serializer):
         """При создании связи, если не указан teacher, использовать текущего пользователя"""
         if not self.request.data.get('teacher_id') and not self.request.user.is_staff:
@@ -682,10 +731,10 @@ class SubjectTeacherViewSet(viewsets.ModelViewSet):
         """API для интеграции с порталом студента - получение связей преподаватель-предмет"""
         # Получаем все активные связи (можно добавить дополнительную фильтрацию)
         teacher_subjects = SubjectTeacher.objects.all().order_by('id')
-        
+
         # Формируем данные в удобном для студенческого портала формате
         result = []
-        
+
         for ts in teacher_subjects:
             teacher_data = {
                 'id': ts.teacher.id,
@@ -695,14 +744,14 @@ class SubjectTeacherViewSet(viewsets.ModelViewSet):
                 'academic_degree': ts.teacher.academic_degree,
                 'email': ts.teacher.user.email
             }
-            
+
             subject_data = {
                 'id': ts.subject.id,
                 'name': ts.subject.name,
                 'semester': ts.subject.semester,
                 'description': ts.subject.description
             }
-            
+
             result.append({
                 'teacher': teacher_data,
                 'subject': subject_data,
@@ -710,7 +759,7 @@ class SubjectTeacherViewSet(viewsets.ModelViewSet):
                 'role_display': ts.get_role_display(),
                 'is_main': ts.is_main
             })
-        
+
         return Response(result, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], url_path='service-token', permission_classes=[permissions.AllowAny])
@@ -719,21 +768,21 @@ class SubjectTeacherViewSet(viewsets.ModelViewSet):
         service_username = request.data.get('username')
         service_password = request.data.get('password')
         service_key = request.data.get('service_key')
-        
+
         # Проверяем специальный ключ сервиса для дополнительной безопасности
         if service_key != 'student_performance_integration_key':
             return Response(
                 {"detail": "Неверный ключ сервиса."},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        
+
         # Проверяем учетные данные администратора
         if service_username != 'admin' or service_password != 'admin':
             return Response(
                 {"detail": "Неверные учетные данные."},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        
+
         # Получаем пользователя (администратора)
         user = User.objects.filter(is_staff=True).first()
         if not user:
@@ -741,14 +790,15 @@ class SubjectTeacherViewSet(viewsets.ModelViewSet):
                 {"detail": "Не найдено ни одного администратора."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Создаем токен для пользователя
         refresh = RefreshToken.for_user(user)
-        
+
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         })
+
 
 # Добавляем публичное представление, полностью отключающее аутентификацию и проверку прав
 @api_view(['GET'])
@@ -762,10 +812,10 @@ def public_teachers_api(request):
     try:
         # Получаем все активные связи
         teacher_subjects = SubjectTeacher.objects.all().order_by('id')
-        
+
         # Формируем данные в удобном для студенческого портала формате
         result = []
-        
+
         for ts in teacher_subjects:
             teacher_data = {
                 'id': ts.teacher.id,
@@ -775,14 +825,14 @@ def public_teachers_api(request):
                 'academic_degree': ts.teacher.academic_degree,
                 'email': ts.teacher.user.email
             }
-            
+
             subject_data = {
                 'id': ts.subject.id,
                 'name': ts.subject.name,
                 'semester': ts.subject.semester,
                 'description': ts.subject.description
             }
-            
+
             result.append({
                 'teacher': teacher_data,
                 'subject': subject_data,
@@ -790,22 +840,22 @@ def public_teachers_api(request):
                 'role_display': ts.get_role_display(),
                 'is_main': ts.is_main
             })
-        
+
         # Принудительно создаем JSON с форматом даты по умолчанию
         json_data = json.dumps(result, default=str)
-        
+
         # Возвращаем чистый HttpResponse с явными заголовками
         response = HttpResponse(
             content=json_data,
             content_type='application/json',
             status=200
         )
-        
+
         # Добавляем заголовки для предотвращения кэширования и обхода CORS
         response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response['Access-Control-Allow-Origin'] = '*'
         response['Content-Type'] = 'application/json; charset=utf-8'
-        
+
         return response
     except Exception as e:
         # Возвращаем ошибку в JSON формате
@@ -813,12 +863,13 @@ def public_teachers_api(request):
             'error': 'Произошла ошибка при выполнении запроса',
             'details': str(e)
         }
-        
+
         return HttpResponse(
             content=json.dumps(error_data),
             content_type='application/json',
             status=500
         )
+
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
@@ -831,13 +882,13 @@ def json_teachers_api(request):
     try:
         # Получение записей о связях преподавателей и предметов
         teacher_subject_relations = SubjectTeacher.objects.select_related('teacher', 'subject').all()
-        
+
         # Формирование списка данных для ответа
         result = []
         for relation in teacher_subject_relations:
             teacher = relation.teacher
             subject = relation.subject
-            
+
             result.append({
                 'id': relation.id,
                 'teacher': {
@@ -855,7 +906,7 @@ def json_teachers_api(request):
                 'role_display': relation.get_role_display(),
                 'is_main': relation.is_main
             })
-        
+
         # Возвращаем JSON-ответ
         return JsonResponse(result, safe=False)
     except Exception as e:
@@ -864,8 +915,9 @@ def json_teachers_api(request):
             'error': 'Произошла ошибка при выполнении запроса',
             'details': str(e)
         }
-        
+
         return JsonResponse(error_data, status=500)
+
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
@@ -878,13 +930,13 @@ def raw_json_teachers_api(request):
     try:
         # Получение записей о связях преподавателей и предметов
         teacher_subject_relations = SubjectTeacher.objects.select_related('teacher', 'subject').all()
-        
+
         # Формирование списка данных для ответа
         result = []
         for relation in teacher_subject_relations:
             teacher = relation.teacher
             subject = relation.subject
-            
+
             result.append({
                 'id': relation.id,
                 'teacher_id': teacher.id,
@@ -895,22 +947,22 @@ def raw_json_teachers_api(request):
                 'role': relation.role,
                 'is_main': relation.is_main
             })
-        
+
         # Принудительно создаем JSON с форматом даты по умолчанию
         json_data = json.dumps(result, default=str)
-        
+
         # Возвращаем чистый HttpResponse с явными заголовками
         response = HttpResponse(
             content=json_data,
             content_type='application/json',
             status=200
         )
-        
+
         # Добавляем заголовки для предотвращения кэширования и обхода CORS
         response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response['Access-Control-Allow-Origin'] = '*'
         response['Content-Type'] = 'application/json; charset=utf-8'
-        
+
         return response
     except Exception as e:
         # Логируем ошибку, но возвращаем JSON-ответ с информацией об ошибке
@@ -918,12 +970,13 @@ def raw_json_teachers_api(request):
             'error': 'Произошла ошибка при выполнении запроса',
             'details': str(e)
         }
-        
+
         return HttpResponse(
             content=json.dumps(error_data),
             content_type='application/json',
             status=500
         )
+
 
 def index_new(request):
     """
@@ -937,46 +990,60 @@ def index_new(request):
     }
     return render(request, 'teaching/index_new.html', context)
 
+
 # Заглушки для представлений, используемых в навигации
 def index(request):
     return render(request, 'teaching/index.html')
 
+
 def schedule(request):
     return render(request, 'teaching/schedule.html')
+
 
 def students(request):
     return render(request, 'teaching/students.html')
 
+
 def grades(request):
     return render(request, 'teaching/grades.html')
+
 
 def materials(request):
     return render(request, 'teaching/materials.html')
 
+
 def messages_list(request):
     return render(request, 'teaching/messages.html')
+
 
 def reports(request):
     return render(request, 'teaching/reports.html')
 
+
 def settings(request):
     return render(request, 'teaching/settings.html')
 
+
 def notifications(request):
     return render(request, 'teaching/notifications.html')
+
 
 def search(request):
     query = request.GET.get('q', '')
     return render(request, 'teaching/search.html', {'query': query})
 
+
 def course_create(request):
     return render(request, 'teaching/course_create.html')
+
 
 def assignment_create(request):
     return render(request, 'teaching/assignment_create.html')
 
+
 def material_upload(request):
     return render(request, 'teaching/material_upload.html')
+
 
 @login_required
 def subject_teacher_detail(request, subject_teacher_id):
@@ -985,16 +1052,18 @@ def subject_teacher_detail(request, subject_teacher_id):
     """
     teacher = get_object_or_404(Teacher, user=request.user)
     subject_teacher = get_object_or_404(SubjectTeacher, pk=subject_teacher_id)
-    
+
     return render(request, 'teaching/subject_teacher_detail.html', {
         'teacher': teacher,
         'subject_teacher': subject_teacher
     })
 
+
 class SubjectTeacherForm(forms.ModelForm):
     class Meta:
         model = SubjectTeacher
         fields = ['role', 'is_main', 'groups']
+
 
 @login_required
 def subject_teacher_edit(request, subject_teacher_id):
@@ -1006,30 +1075,32 @@ def subject_teacher_edit(request, subject_teacher_id):
     subjects = Subject.objects.all()
     teachers = Teacher.objects.all()
     groups = Group.objects.all()
-    
+
     if request.method == 'POST':
         form = SubjectTeacherForm(request.POST, instance=subject_teacher)
         subject_id = request.POST.get('subject')
         teacher_id = request.POST.get('teacher')
         groups_ids = request.POST.getlist('groups', [])
-        
+
         if subject_id and teacher_id and form.is_valid():
             try:
                 subject = Subject.objects.get(pk=subject_id)
                 selected_teacher = Teacher.objects.get(pk=teacher_id)
-                
+
                 # Проверка наличия дубликатов, исключая текущую запись
-                if not SubjectTeacher.objects.filter(subject=subject, teacher=selected_teacher).exclude(pk=subject_teacher_id).exists():
+                if not SubjectTeacher.objects.filter(subject=subject, teacher=selected_teacher).exclude(
+                        pk=subject_teacher_id).exists():
                     # Сохраняем форму, но пока не коммитим изменения
                     subject_teacher_obj = form.save(commit=False)
                     subject_teacher_obj.subject = subject
                     subject_teacher_obj.teacher = selected_teacher
                     subject_teacher_obj.save()
-                    
+
                     # Сохраняем отношение many-to-many для групп
                     form.save_m2m()
-                    
-                    messages.success(request, f'Связь между преподавателем {selected_teacher.user.get_full_name()} и предметом {subject.name} успешно обновлена')
+
+                    messages.success(request,
+                                     f'Связь между преподавателем {selected_teacher.user.get_full_name()} и предметом {subject.name} успешно обновлена')
                     return redirect('subject_teachers')
                 else:
                     messages.warning(request, 'Такая связь уже существует')
@@ -1039,7 +1110,7 @@ def subject_teacher_edit(request, subject_teacher_id):
             messages.error(request, 'Пожалуйста, заполните все обязательные поля')
     else:
         form = SubjectTeacherForm(instance=subject_teacher)
-    
+
     return render(request, 'teaching/subject_teacher_edit.html', {
         'teacher': teacher,
         'subject_teacher': subject_teacher,

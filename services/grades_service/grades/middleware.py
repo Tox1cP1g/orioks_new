@@ -1,11 +1,10 @@
 import logging
 from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from rest_framework_simplejwt.authentication import JWTAuthentication
 import traceback
-import jwt
+import requests
+from django.http import HttpResponseRedirect
+from urllib.parse import urljoin
 
 # Импорт DEBUG из настроек
 from django.conf import settings
@@ -16,28 +15,19 @@ logger = logging.getLogger(__name__)
 class CustomUser:
     """Пользовательский класс для хранения информации о пользователе"""
     def __init__(self, user_info):
-        self.user_id = user_info.get('user_id', '')
-        # Добавляем id как синоним для user_id для совместимости
+        self.user_id = user_info.get('id')  # Изменено с 'user_id' на 'id' для соответствия с auth сервисом
         self.id = self.user_id
         self.is_authenticated = True
         
-        # Приоритет для username: из токена -> составной -> на основе ID
         self.username = user_info.get('username', '')
-        if not self.username and user_info.get('first_name') and user_info.get('last_name'):
-            self.username = f"{user_info['first_name']} {user_info['last_name']}"
-        if not self.username:
-            self.username = f"user_{self.id}"
-            
         self.email = user_info.get('email', '')
         self.first_name = user_info.get('first_name', '')
         self.last_name = user_info.get('last_name', '')
+        
+        # Дополнительные поля
         self.role = user_info.get('role', '')
-        self.group = user_info.get('group', '')
         self.is_staff = user_info.get('is_staff', False)
         self.is_superuser = user_info.get('is_superuser', False)
-        self.student_id = user_info.get('student_id', '')
-        self.department = user_info.get('department', '')
-        self.position = user_info.get('position', '')
 
     def get_full_name(self):
         """Получение полного имени пользователя"""
@@ -53,22 +43,51 @@ class JWTAuthMiddleware:
     
     def __init__(self, get_response):
         self.get_response = get_response
-        # Используем обычный JWTAuthentication для проверки JWT
-        self.jwt_auth = JWTAuthentication()
-        
-        # Создадим собственный JWT_SECRET_KEY, который будет использоваться для проверки подписи
-        # К сожалению, это необходимо потому что у разных сервисов разные SECRET_KEY
-        self.jwt_secret_key = settings.SIMPLE_JWT.get('SIGNING_KEY', settings.SECRET_KEY)
+        # URL для auth сервиса
+        self.auth_service_url = "http://localhost:8002"  # Базовый URL
+        self.user_info_endpoint = "/api/user/info/"  # Endpoint для получения информации о пользователе
+        self.login_url = "http://localhost:8002/login/"  # URL для логина
+        logger.info(f"Auth service URL configured as: {self.auth_service_url}")
+
+    def get_user_info_from_auth_service(self, token):
+        """Получает информацию о пользователе из auth сервиса"""
+        try:
+            headers = {
+                'Authorization': f'Bearer {token}',
+                'Accept': 'application/json'
+            }
+            
+            url = urljoin(self.auth_service_url, self.user_info_endpoint)
+            logger.debug(f"Making request to auth service: {url}")
+            
+            response = requests.get(url, headers=headers)
+            
+            if response.status_code == 200:
+                user_data = response.json()
+                logger.info(f"Successfully retrieved user info: {user_data.get('username')}")
+                return user_data
+            else:
+                logger.error(f"Failed to get user info from auth service. Status: {response.status_code}")
+                logger.error(f"Response content: {response.text}")
+                return None
+        except Exception as e:
+            logger.error(f"Error getting user info from auth service: {str(e)}")
+            logger.debug(traceback.format_exc())
+            return None
 
     def __call__(self, request):
         try:
+            # Пропускаем проверку для определенных путей
+            if any(request.path.startswith(prefix) for prefix in ['/static/', '/admin/', '/login/', '/api/token/']):
+                return self.get_response(request)
+
             token = None
             
-            # Сначала проверяем cookie
+            # Проверяем cookie
             if 'token' in request.COOKIES:
                 token = request.COOKIES['token']
             
-            # Затем проверяем заголовок Authorization
+            # Проверяем заголовок Authorization
             elif 'HTTP_AUTHORIZATION' in request.META:
                 auth_header = request.META['HTTP_AUTHORIZATION']
                 if auth_header.startswith('Bearer '):
@@ -76,53 +95,30 @@ class JWTAuthMiddleware:
 
             if token:
                 logger.info(f"Processing token (first 10 chars): {token[:10]}...")
-                try:
-                    # Для отладки: декодируем токен без проверки подписи
-                    decoded_token = jwt.decode(token, options={"verify_signature": False})
-                    logger.debug(f"Decoded token: {decoded_token}")
-                    
-                    # Создаем объект пользователя с учетом всех полей из auth сервиса
-                    user_info = {
-                        'user_id': str(decoded_token.get('user_id', '')),
-                        'username': decoded_token.get('username', 
-                                       decoded_token.get('first_name', '') + ' ' + decoded_token.get('last_name', '') 
-                                       if decoded_token.get('first_name') and decoded_token.get('last_name') 
-                                       else f"user_{decoded_token.get('user_id', 'unknown')}"),
-                        'email': decoded_token.get('email', ''),
-                        'first_name': decoded_token.get('first_name', ''),
-                        'last_name': decoded_token.get('last_name', ''),
-                        'role': decoded_token.get('role', ''),
-                        'is_staff': decoded_token.get('is_staff', False),
-                        'is_superuser': decoded_token.get('is_superuser', False),
-                        'student_id': decoded_token.get('student_id', ''),
-                        'department': decoded_token.get('department', ''),
-                        'position': decoded_token.get('position', ''),
-                        'group': decoded_token.get('group', '')
-                    }
-                    
-                    # В режиме отладки, если роль не указана, но указаны другие признаки преподавателя,
-                    # устанавливаем роль TEACHER
-                    if DEBUG and not user_info['role'] and (
-                        user_info['is_staff'] or 
-                        user_info['is_superuser'] or 
-                        user_info['position'] or 
-                        user_info['department']
-                    ):
-                        user_info['role'] = 'TEACHER'
-                        logger.warning(f"Auto-assigned TEACHER role for user {user_info['username']} in DEBUG mode")
-                    
+                
+                # Получаем информацию о пользователе из auth сервиса
+                user_info = self.get_user_info_from_auth_service(token)
+                
+                if user_info:
                     request.user = CustomUser(user_info)
-                    logger.info(f"Successfully authenticated user: {request.user.username} (role: {request.user.role})")
-                    
-                except Exception as e:
-                    logger.warning(f"Invalid token: {str(e)}")
+                    logger.info(f"Successfully authenticated user: {request.user.username}")
+                else:
+                    logger.warning("Failed to get user info from auth service")
                     request.user = AnonymousUser()
+                    if not request.path.startswith('/api/'):  # Не делаем редирект для API endpoints
+                        return HttpResponseRedirect(self.login_url)
             else:
                 logger.debug("No token found in request")
                 request.user = AnonymousUser()
+                if not request.path.startswith('/api/'):  # Не делаем редирект для API endpoints
+                    return HttpResponseRedirect(self.login_url)
+
         except Exception as e:
-            logger.error(f"Error in JWT middleware: {str(e)}\n{traceback.format_exc()}")
+            logger.error(f"Error in JWT middleware: {str(e)}")
+            logger.debug(traceback.format_exc())
             request.user = AnonymousUser()
+            if not request.path.startswith('/api/'):  # Не делаем редирект для API endpoints
+                return HttpResponseRedirect(self.login_url)
 
         response = self.get_response(request)
         return response 

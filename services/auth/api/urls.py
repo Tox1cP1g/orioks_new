@@ -11,5 +11,6 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('user/info/', views.get_user_info, name='user_info'),
     # path('webauthn/keys/', webauthn_views.webauthn_keys_list, name='webauthn_keys_list'),
 ] 

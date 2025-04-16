@@ -29,7 +29,7 @@ urlpatterns = [
     path('homework/', views.homework, name='homework'),
     path('profile/', views.profile, name='profile'),
     path('logout/', views.logout_view, name='logout'),
-    
+
     # Публичный API доступный без аутентификации
     path('public-teacher-subjects/', public_teachers_api, name='public_teacher_subjects'),
     path('public-teacher-subjects.json', public_teachers_api, name='public_teacher_subjects_json'),
@@ -37,7 +37,7 @@ urlpatterns = [
     # Новый гарантированный JSON API
     path('raw-json-api/teachers/', raw_json_teachers_api, name='raw_json_teachers_api'),
     path('api/v1/public/data.json', public_teachers_api, name='data_json_api'),
-    
+
     # JWT аутентификация
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

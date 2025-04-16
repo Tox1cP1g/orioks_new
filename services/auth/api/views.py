@@ -6,6 +6,9 @@ from django.contrib import messages
 from rest_framework_simplejwt.views import TokenVerifyView
 import logging
 from .utils import create_student_profile_with_retry  # Добавляем импорт
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 logger = logging.getLogger(__name__)
 
@@ -230,3 +233,25 @@ def logout_view(request):
     
     logger.info("Logout completed successfully")
     return response
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_info(request):
+    """
+    Возвращает информацию о текущем пользователе
+    """
+    user = request.user
+    user_data = {
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'role': user.role,
+        'is_staff': user.is_staff,
+        'is_superuser': user.is_superuser,
+        'student_id': getattr(user, 'student_id', None),
+        'department': getattr(user, 'department', None),
+        'position': getattr(user, 'position', None),
+    }
+    return Response(user_data)
