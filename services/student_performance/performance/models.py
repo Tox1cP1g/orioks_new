@@ -276,4 +276,54 @@ class HomeworkSubmission(models.Model):
         return f"{self.student.user_id} - {self.assignment.name}"
 
     class Meta:
-        ordering = ['-submitted_at'] 
+        ordering = ['-submitted_at']
+
+class Teacher(models.Model):
+    """Модель преподавателя"""
+    user_id = models.IntegerField(unique=True, verbose_name="ID пользователя")
+    first_name = models.CharField(max_length=100, verbose_name="Имя")
+    last_name = models.CharField(max_length=100, verbose_name="Фамилия")
+    middle_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="Отчество")
+    academic_degree = models.CharField(max_length=100, blank=True, null=True, verbose_name="Ученая степень")
+    academic_title = models.CharField(max_length=100, blank=True, null=True, verbose_name="Ученое звание")
+    department = models.CharField(max_length=200, blank=True, null=True, verbose_name="Кафедра")
+    position = models.CharField(max_length=100, blank=True, null=True, verbose_name="Должность")
+    email = models.EmailField(blank=True, null=True, verbose_name="Email")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        """Строковое представление преподавателя"""
+        full_name = f"{self.last_name} {self.first_name}"
+        if self.middle_name:
+            full_name += f" {self.middle_name}"
+        return full_name
+
+    class Meta:
+        verbose_name = "Преподаватель"
+        verbose_name_plural = "Преподаватели"
+        ordering = ['last_name', 'first_name']
+
+class SubjectTeacher(models.Model):
+    """Модель для связи предмета с преподавателями"""
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='teachers_link', verbose_name="Предмет")
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='subjects_link', verbose_name="Преподаватель")
+    is_main = models.BooleanField(default=False, verbose_name="Основной преподаватель")
+    role = models.CharField(max_length=100, choices=[
+        ('LECTURER', 'Лектор'),
+        ('PRACTICIAN', 'Практик'),
+        ('ASSISTANT', 'Ассистент'),
+        ('EXAMINER', 'Экзаменатор'),
+    ], default='LECTURER', verbose_name="Роль")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        """Строковое представление связи предмет-преподаватель"""
+        return f"{self.subject} - {self.teacher} ({self.get_role_display()})"
+
+    class Meta:
+        verbose_name = "Связь предмет-преподаватель"
+        verbose_name_plural = "Связи предмет-преподаватель"
+        unique_together = ('subject', 'teacher', 'role')
+        ordering = ['subject', 'is_main', 'role'] 

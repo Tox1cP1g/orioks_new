@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Student, Subject, Grade, Schedule,
     Attendance, Semester, HomeworkAssignment,
-    HomeworkSubmission, Group
+    HomeworkSubmission, Group, Teacher, SubjectTeacher
 )
 
 @admin.register(Semester)
@@ -62,4 +62,18 @@ class GroupAdmin(admin.ModelAdmin):
     list_display = ('name', 'faculty', 'course')
     list_filter = ('faculty', 'course')
     search_fields = ('name', 'faculty')
-    ordering = ('course', 'name') 
+    ordering = ('course', 'name')
+
+@admin.register(Teacher)
+class TeacherAdmin(admin.ModelAdmin):
+    list_display = ('user_id', 'last_name', 'first_name', 'department', 'position', 'email')
+    list_filter = ('department', 'position', 'academic_degree')
+    search_fields = ('user_id', 'last_name', 'first_name', 'department')
+    ordering = ('last_name', 'first_name')
+
+@admin.register(SubjectTeacher)
+class SubjectTeacherAdmin(admin.ModelAdmin):
+    list_display = ('subject', 'teacher', 'role', 'is_main')
+    list_filter = ('role', 'is_main', 'subject')
+    search_fields = ('subject__name', 'teacher__last_name', 'teacher__first_name')
+    ordering = ('subject', '-is_main', 'role') 

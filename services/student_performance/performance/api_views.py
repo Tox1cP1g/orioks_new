@@ -5,8 +5,17 @@ from django.contrib.auth import get_user_model
 import json
 import logging
 import uuid
-from .models import Student, Group  # Добавляем импорт моделей
+from .models import Student, Group, Teacher, Subject, SubjectTeacher  # Добавляем импорт моделей
 from django.utils.crypto import get_random_string
+from rest_framework import viewsets, status, generics
+from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+from .serializers import (
+    TeacherSerializer, TeacherBasicSerializer, SubjectSerializer,
+    SubjectTeacherSerializer, GroupSerializer, StudentSerializer
+)
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -285,4 +294,157 @@ def update_student_group(request, user_id):
         return JsonResponse({
             'status': 'error',
             'message': str(e)
-        }, status=500) 
+        }, status=500)
+
+# API для преподавателей
+class TeacherViewSet(viewsets.ModelViewSet):
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSerializer
+    permission_classes = [IsAuthenticated]
+    
+    @action(detail=False, methods=['get'])
+    def by_user_id(self, request):
+        """Получить преподавателя по user_id"""
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return Response({"error": "Параметр user_id обязателен"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        teacher = get_object_or_404(Teacher, user_id=user_id)
+        serializer = self.get_serializer(teacher)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'])
+    def subjects(self, request, pk=None):
+        """Получить все предметы данного преподавателя"""
+        teacher = self.get_object()
+        subject_links = SubjectTeacher.objects.filter(teacher=teacher)
+        
+        result = []
+        for link in subject_links:
+            subject_data = SubjectSerializer(link.subject).data
+            subject_data['role'] = link.get_role_display()
+            subject_data['is_main'] = link.is_main
+            result.append(subject_data)
+            
+        return Response(result)
+
+# API для предметов и связи с преподавателями
+class SubjectViewSet(viewsets.ModelViewSet):
+    queryset = Subject.objects.all()
+    serializer_class = SubjectSerializer
+    permission_classes = [IsAuthenticated]
+    
+    @action(detail=True, methods=['get'])
+    def teachers(self, request, pk=None):
+        """Получить всех преподавателей данного предмета"""
+        subject = self.get_object()
+        subject_teachers = SubjectTeacher.objects.filter(subject=subject).order_by('-is_main', 'role')
+        serializer = SubjectTeacherSerializer(subject_teachers, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'])
+    def add_teacher(self, request, pk=None):
+        """Добавить преподавателя к предмету"""
+        subject = self.get_object()
+        
+        # Проверяем данные
+        teacher_id = request.data.get('teacher_id')
+        role = request.data.get('role', 'LECTURER')
+        is_main = request.data.get('is_main', False)
+        
+        if not teacher_id:
+            return Response({"error": "teacher_id обязателен"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            teacher = Teacher.objects.get(id=teacher_id)
+        except Teacher.DoesNotExist:
+            return Response({"error": "Преподаватель не найден"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Проверяем, существует ли уже такая связь
+        existing = SubjectTeacher.objects.filter(subject=subject, teacher=teacher, role=role).first()
+        if existing:
+            return Response({"error": "Такая связь уже существует"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Если это основной преподаватель и уже есть другой основной преподаватель с той же ролью,
+        # снимаем флаг "основной" с других преподавателей
+        if is_main:
+            SubjectTeacher.objects.filter(subject=subject, role=role, is_main=True).update(is_main=False)
+        
+        # Создаем связь
+        subject_teacher = SubjectTeacher.objects.create(
+            subject=subject,
+            teacher=teacher,
+            role=role,
+            is_main=is_main
+        )
+        
+        serializer = SubjectTeacherSerializer(subject_teacher)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=['delete'])
+    def remove_teacher(self, request, pk=None):
+        """Удалить преподавателя из предмета"""
+        subject = self.get_object()
+        
+        link_id = request.data.get('link_id')
+        if not link_id:
+            return Response({"error": "link_id обязателен"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            link = SubjectTeacher.objects.get(id=link_id, subject=subject)
+        except SubjectTeacher.DoesNotExist:
+            return Response({"error": "Связь не найдена"}, status=status.HTTP_404_NOT_FOUND)
+        
+        link.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# API для получения всех студентов группы
+class GroupStudentsAPIView(generics.RetrieveAPIView):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def retrieve(self, request, *args, **kwargs):
+        group = self.get_object()
+        students = Student.objects.filter(group=group)
+        group_data = self.get_serializer(group).data
+        students_data = StudentSerializer(students, many=True).data
+        
+        return Response({
+            'group': group_data,
+            'students': students_data
+        })
+
+# API для получения всех преподавателей предмета
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_subject_teachers(request, subject_id):
+    """API для получения всех преподавателей конкретного предмета"""
+    subject = get_object_or_404(Subject, id=subject_id)
+    subject_teachers = SubjectTeacher.objects.filter(subject=subject).order_by('-is_main', 'role')
+    
+    result = []
+    for link in subject_teachers:
+        teacher_data = TeacherBasicSerializer(link.teacher).data
+        teacher_data['role'] = link.get_role_display()
+        teacher_data['is_main'] = link.is_main
+        result.append(teacher_data)
+    
+    return Response(result)
+
+# API для получения всех предметов преподавателя
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_teacher_subjects(request, teacher_id):
+    """API для получения всех предметов конкретного преподавателя"""
+    teacher = get_object_or_404(Teacher, id=teacher_id)
+    subject_links = SubjectTeacher.objects.filter(teacher=teacher)
+    
+    result = []
+    for link in subject_links:
+        subject_data = SubjectSerializer(link.subject).data
+        subject_data['role'] = link.get_role_display()
+        subject_data['is_main'] = link.is_main
+        result.append(subject_data)
+    
+    return Response(result) 

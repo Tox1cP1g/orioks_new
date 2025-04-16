@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from teaching.views import DashboardView, logout_view, profile, courses, assignments, submissions, grade_submission, create_course, create_assignment
+from teaching.views import DashboardView, logout_view, profile, courses, assignments, submissions, grade_submission, create_course, create_assignment, subject_teachers, subject_teacher_create, subject_teacher_detail, subject_teacher_edit, subject_teacher_delete
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,5 +31,10 @@ urlpatterns = [
     path('assignments/', assignments, name='assignments'),
     path("assignments/", assignments, name="assignments_list"),
     path("assignments/create/", create_assignment, name="assignment_form"),
+    path('subject-teachers/', subject_teachers, name='subject_teachers'),
+    path('subject-teachers/create/', subject_teacher_create, name='subject_teacher_create'),
+    path('subject-teachers/<int:subject_teacher_id>/', subject_teacher_detail, name='subject_teacher_detail'),
+    path('subject-teachers/<int:subject_teacher_id>/edit/', subject_teacher_edit, name='subject_teacher_edit'),
+    path('subject-teachers/<int:subject_teacher_id>/delete/', subject_teacher_delete, name='subject_teacher_delete'),
     path('logout/', logout_view, name='logout'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

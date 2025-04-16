@@ -3,72 +3,108 @@
 {% block title %}Предметы - ОРИОКС{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
+<div class="container-fluid py-4">
+    <div class="row mb-4">
         <div class="col-12">
-            <h1 class="mb-4">
-                <i class="fas fa-book me-2"></i>Предметы
-            </h1>
-            
-            {% if current_semester %}
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>
-                Текущий семестр: {{ current_semester.name }}
-            </div>
-            {% endif %}
+            <h1 class="mb-3">Предметы</h1>
+            <p class="text-muted">{{ current_semester.name }}</p>
+        </div>
+    </div>
 
-            <div class="row">
-                {% for subject_data in subjects_data %}
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ subject_data.subject.name }}</h5>
-                            <div class="mb-3">
-                                <small class="text-muted">
-                                    <i class="fas fa-chalkboard-teacher me-1"></i>
-                                    Преподаватель: {{ subject_data.subject.teacher }}
-                                </small>
-                            </div>
-                            
-                            <div class="progress mb-2" style="height: 20px;">
-                                <div class="progress-bar bg-success" role="progressbar" 
-                                     style="width: {{ subject_data.attendance_percentage }}%">
-                                    {{ subject_data.attendance_percentage|floatformat:1 }}%
+    <div class="row">
+        {% for subject_data in subjects_data %}
+        <div class="col-md-6 col-xl-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        {{ subject_data.subject.name }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <strong>Код предмета:</strong> {{ subject_data.subject.code }}
+                    </p>
+                    <p class="card-text">
+                        <strong>Кредиты:</strong> {{ subject_data.subject.credits }}
+                    </p>
+                    
+                    <!-- Блок преподавателей -->
+                    <div class="teacher-info mb-3">
+                        <h6 class="fw-bold mb-2">Преподаватели:</h6>
+                        <ul class="list-group list-group-flush">
+                            {% for teacher_link in subject_data.subject.teachers_link.all %}
+                                <li class="list-group-item px-0 py-1 border-0">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user-tie text-primary me-2"></i>
+                                        <div>
+                                            <strong>{{ teacher_link.teacher }}</strong>
+                                            {% if teacher_link.is_main %}<span class="badge bg-primary ms-2">Основной</span>{% endif %}
+                                            <div class="text-muted small">{{ teacher_link.get_role_display }}</div>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% empty %}
+                                <li class="list-group-item px-0 py-1 border-0 text-muted">
+                                    <i class="fas fa-info-circle me-2"></i>Информация о преподавателях отсутствует
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="progress mb-3" style="height: 5px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ subject_data.completed_assignments|default:0 }}%;" 
+                             aria-valuenow="{{ subject_data.completed_assignments|default:0 }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100"></div>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted small mb-3">
+                        <span>Задания: {{ subject_data.completed_assignments }} / {{ subject_data.total_assignments }}</span>
+                        <span>{{ subject_data.completed_assignments|default:0 }}%</span>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-info-subtle p-2 rounded me-2">
+                                    <i class="fas fa-chart-line text-info"></i>
                                 </div>
-                            </div>
-                            <small class="text-muted">Посещаемость</small>
-                            
-                            <div class="mt-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span>Средняя оценка:</span>
-                                    <span class="badge bg-primary">{{ subject_data.average_grade|floatformat:1 }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span>Задания:</span>
-                                    <span class="badge bg-info">
-                                        {{ subject_data.completed_assignments }}/{{ subject_data.total_assignments }}
-                                    </span>
+                                <div>
+                                    <div class="small text-muted">Средний балл</div>
+                                    <div class="fw-bold">{{ subject_data.average_grade|floatformat:1 }}</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer bg-transparent">
-                            <a href="{% url 'assignments' %}?subject={{ subject_data.subject.id }}" 
-                               class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-tasks me-1"></i>Задания
-                            </a>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-warning-subtle p-2 rounded me-2">
+                                    <i class="fas fa-user-check text-warning"></i>
+                                </div>
+                                <div>
+                                    <div class="small text-muted">Посещаемость</div>
+                                    <div class="fw-bold">{{ subject_data.attendance_percentage|floatformat:0 }}%</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                {% empty %}
-                <div class="col-12">
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Нет доступных предметов в текущем семестре.
-                    </div>
+                <div class="card-footer bg-transparent border-top-0">
+                    <a href="{% url 'assignments' %}?subject={{ subject_data.subject.id }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-tasks me-1"></i>Задания
+                    </a>
+                    <a href="#" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-info-circle me-1"></i>Подробнее
+                    </a>
                 </div>
-                {% endfor %}
             </div>
         </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                В текущем семестре нет предметов.
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %} 

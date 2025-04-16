@@ -1,14 +1,28 @@
 from django.contrib import admin
 from .models import (
     Teacher, Course, LearningMaterial, Assignment,
-    GradingCriteria, StudentSubmission, Grade
+    GradingCriteria, StudentSubmission, Grade,
+    Subject, SubjectTeacher, Schedule, Attendance,
+    Group
 )
 
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
     list_display = ('user', 'department', 'position', 'academic_degree')
     search_fields = ('user__username', 'user__first_name', 'user__last_name', 'department')
-    list_filter = ('position', 'academic_degree')
+    list_filter = ('department', 'position')
+
+@admin.register(Subject)
+class SubjectAdmin(admin.ModelAdmin):
+    list_display = ('name', 'teacher', 'semester', 'created_at')
+    search_fields = ('name', 'teacher__user__first_name', 'teacher__user__last_name')
+    list_filter = ('semester',)
+    
+@admin.register(SubjectTeacher)
+class SubjectTeacherAdmin(admin.ModelAdmin):
+    list_display = ('subject', 'teacher', 'role', 'is_main')
+    search_fields = ('subject__name', 'teacher__user__first_name', 'teacher__user__last_name')
+    list_filter = ('role', 'is_main')
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
@@ -46,3 +60,9 @@ class GradeAdmin(admin.ModelAdmin):
     list_display = ('submission', 'graded_by', 'score', 'graded_at')
     search_fields = ('feedback', 'submission__student_id')
     list_filter = ('graded_at', 'score')
+
+@admin.register(Group)
+class GroupAdmin(admin.ModelAdmin):
+    list_display = ('name', 'faculty', 'year', 'created_at')
+    search_fields = ('name', 'faculty')
+    list_filter = ('year',)

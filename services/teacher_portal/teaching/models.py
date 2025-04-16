@@ -147,7 +147,68 @@ class Subject(models.Model):
         ordering = ['-semester', 'name']
 
     def __str__(self):
-        return f"{self.name} (Семестр {self.semester})"
+        return self.name
+
+class Group(models.Model):
+    """Модель академической группы"""
+    name = models.CharField(max_length=20, unique=True, verbose_name="Название группы")
+    faculty = models.CharField(max_length=100, verbose_name="Факультет", blank=True)
+    year = models.PositiveSmallIntegerField(verbose_name="Год обучения", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Группа"
+        verbose_name_plural = "Группы"
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name
+
+# Роли преподавателей для предмета
+TEACHER_ROLES = [
+    ('LECTURER', 'Лектор'),
+    ('PRACTICE', 'Руководитель практики'),
+    ('ASSISTANT', 'Ассистент'),
+    ('TUTOR', 'Куратор'),
+    ('LAB', 'Лабораторные работы'),
+]
+
+class SubjectTeacher(models.Model):
+    """
+    Модель связи между предметом и преподавателем.
+    Определяет, какие преподаватели ведут какие предметы.
+    """
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='teachers', verbose_name='Предмет')
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='subject_teachers', verbose_name='Преподаватель')
+    role = models.CharField(max_length=20, choices=TEACHER_ROLES, default='LECTURER', verbose_name='Роль')
+    is_main = models.BooleanField(default=False, verbose_name='Основной преподаватель')
+    groups = models.ManyToManyField(Group, related_name='subject_teachers', verbose_name='Группы')
+    
+    class Meta:
+        verbose_name = 'Связь предмет-преподаватель'
+        verbose_name_plural = 'Связи предмет-преподаватель'
+        unique_together = ['subject', 'teacher', 'role']
+
+    def __str__(self):
+        return f"{self.teacher} - {self.subject} ({self.get_role_display()})"
+
+class SubjectTeacherGroup(models.Model):
+    """
+    Устаревшая модель связи между преподавателем предмета и группой.
+    Заменена на ManyToMany поле groups в модели SubjectTeacher.
+    """
+    subject_teacher = models.ForeignKey(SubjectTeacher, on_delete=models.CASCADE, 
+                                        related_name='old_groups', verbose_name='Связь предмет-преподаватель')
+    group_code = models.CharField(max_length=20, verbose_name='Код группы')
+    
+    class Meta:
+        verbose_name = 'Группа преподавателя предмета (устарело)'
+        verbose_name_plural = 'Группы преподавателей предметов (устарело)'
+        unique_together = ['subject_teacher', 'group_code']
+        
+    def __str__(self):
+        return f"{self.subject_teacher} - Группа {self.group_code}"
 
 class StudentAssignment(models.Model):
     STATUS_CHOICES = [

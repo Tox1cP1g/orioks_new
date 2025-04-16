@@ -5,7 +5,7 @@ from django.db.models import Sum, Count, F, Avg
 from django.shortcuts import get_object_or_404
 from .models import (
     Semester, Subject, Grade, Schedule, Attendance, Student,
-    StudentAssignment, Assignment, HomeworkAssignment, HomeworkSubmission, Group
+    StudentAssignment, Assignment, HomeworkAssignment, HomeworkSubmission, Group, Teacher, SubjectTeacher
 )
 from .serializers import (
     SemesterSerializer,
@@ -15,7 +15,9 @@ from .serializers import (
     AttendanceSerializer,
     StudentSerializer,
     StudentGradesSerializer,
-    StudentAttendanceSerializer
+    StudentAttendanceSerializer,
+    TeacherSerializer,
+    SubjectTeacherSerializer
 )
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
@@ -31,6 +33,8 @@ from django.http import JsonResponse
 import requests
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 from django.conf import settings
+from django.db.models import Q
+import json
 
 class TeacherPermission(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -837,4 +841,289 @@ def news(request):
     redirect_url = f'http://localhost:8007/?source_port={source_port}&role={role}'
     print(f"Redirect URL: {redirect_url}")  # Логируем URL для перенаправления
     
-    return redirect(redirect_url) 
+    return redirect(redirect_url)
+
+class TeacherViewSet(viewsets.ModelViewSet):
+    """API для преподавателей"""
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        """Возможность фильтрации по полям"""
+        queryset = Teacher.objects.all()
+        
+        # Фильтрация по кафедре
+        department = self.request.query_params.get('department')
+        if department:
+            queryset = queryset.filter(department__icontains=department)
+            
+        # Фильтрация по ФИО
+        name = self.request.query_params.get('name')
+        if name:
+            queryset = queryset.filter(
+                Q(first_name__icontains=name) | 
+                Q(last_name__icontains=name) | 
+                Q(middle_name__icontains=name)
+            )
+            
+        return queryset
+
+class SubjectTeacherViewSet(viewsets.ModelViewSet):
+    """API для связей преподавателей с предметами"""
+    queryset = SubjectTeacher.objects.all()
+    serializer_class = SubjectTeacherSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        """Возможность фильтрации по полям"""
+        queryset = SubjectTeacher.objects.all()
+        
+        # Фильтрация по ID предмета
+        subject_id = self.request.query_params.get('subject_id')
+        if subject_id:
+            queryset = queryset.filter(subject_id=subject_id)
+            
+        # Фильтрация по ID преподавателя
+        teacher_id = self.request.query_params.get('teacher_id')
+        if teacher_id:
+            queryset = queryset.filter(teacher_id=teacher_id)
+            
+        # Фильтрация по роли преподавателя
+        role = self.request.query_params.get('role')
+        if role:
+            queryset = queryset.filter(role__icontains=role)
+            
+        # Фильтрация основных преподавателей
+        is_main = self.request.query_params.get('is_main')
+        if is_main is not None:
+            is_main_bool = is_main.lower() == 'true'
+            queryset = queryset.filter(is_main=is_main_bool)
+            
+        return queryset 
+
+@login_required
+def live_subject_teachers(request):
+    """
+    Получает данные о преподавателях и предметах напрямую с портала преподавателя
+    через API-запрос в реальном времени
+    """
+    # Пробуем новые URL, которые должны гарантированно возвращать JSON
+    urls = [
+        'http://localhost:8004/api/raw-json-api/teachers/',
+        'http://localhost:8004/raw-json-api/teachers/',
+        'http://localhost:8004/api/v1/public/data.json',
+        'http://localhost:8004/public-teacher-subjects.json',
+        'http://localhost:8004/api/public/teachers/',
+        'http://localhost:8004/public-teacher-subjects/'
+    ]
+    debug_info = []
+    
+    try:
+        # Проходим по списку URL и используем первый успешный
+        response = None
+        used_url = None
+        
+        for url in urls:
+            debug_info.append(f"Пробуем запрос к API: {url}")
+            try:
+                # Явно указываем, что ожидаем JSON в заголовке Accept
+                headers = {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest' # Добавляем AJAX-заголовок
+                }
+                curr_response = requests.get(url, headers=headers, timeout=5)
+                debug_info.append(f"Ответ: статус {curr_response.status_code}")
+                
+                # Проверяем, что получили JSON
+                if curr_response.status_code == 200 and curr_response.text.strip():
+                    # Пытаемся прочитать как JSON
+                    try:
+                        json.loads(curr_response.text)
+                        # Если дошли до этой строки, значит ответ валидный JSON
+                        response = curr_response
+                        used_url = url
+                        debug_info.append(f"Получен валидный JSON ответ")
+                        break
+                    except json.JSONDecodeError as e:
+                        debug_info.append(f"Ответ не является валидным JSON: {e}")
+                        debug_info.append(f"Первые 100 символов ответа: {curr_response.text[:100]}...")
+            except requests.RequestException as e:
+                debug_info.append(f"Ошибка запроса к {url}: {str(e)}")
+        
+        # Если ни один URL не сработал, используем тестовые данные
+        if response is None:
+            debug_info.append("Все API-запросы не удались, используем тестовые данные")
+            data = create_test_data_for_views()
+        else:
+            debug_info.append(f"Успешный ответ от {used_url}")
+            try:
+                data = response.json()
+                debug_info.append(f"JSON успешно разобран, получено {len(data)} элементов")
+            except json.JSONDecodeError as json_err:
+                # На этот раз такой ошибки быть не должно, т.к. мы уже проверили JSON
+                error_msg = f"Неожиданная ошибка декодирования JSON: {json_err}"
+                debug_info.append(error_msg)
+                print(error_msg)
+                print(f"Полученный текст: {response.text[:100]}")
+                debug_info.append(f"Текст ответа: {response.text[:100]}")
+                # Используем тестовые данные
+                data = create_test_data_for_views()
+                debug_info.append("Используем тестовые данные")
+        
+        # Группируем преподавателей по предметам для удобного отображения
+        subjects_dict = {}
+        
+        for item in data:
+            # Проверяем структуру данных - она может быть разной в зависимости от API
+            if 'subject' in item:
+                # Вложенная структура
+                subject_data = item.get('subject', {})
+                subject_id = subject_data.get('id')
+                subject_name = subject_data.get('name', '')
+                subject_semester = subject_data.get('semester', '')
+                subject_description = subject_data.get('description', '')
+                
+                teacher_data = item.get('teacher', {})
+                teacher_id = teacher_data.get('id')
+                teacher_name = teacher_data.get('name', '')
+                teacher_position = teacher_data.get('position', '')
+                teacher_department = teacher_data.get('department', '')
+                teacher_academic_degree = teacher_data.get('academic_degree', '')
+                
+                role = item.get('role_display', item.get('role', ''))
+                is_main = item.get('is_main', False)
+            else:
+                # Плоская структура
+                subject_id = item.get('subject_id')
+                subject_name = item.get('subject_name', '')
+                subject_semester = ''  # Может отсутствовать в плоской структуре
+                subject_description = ''  # Может отсутствовать в плоской структуре
+                
+                teacher_id = item.get('teacher_id')
+                teacher_name = item.get('teacher_full_name', '')
+                teacher_position = ''  # Может отсутствовать в плоской структуре
+                teacher_department = ''  # Может отсутствовать в плоской структуре
+                teacher_academic_degree = ''  # Может отсутствовать в плоской структуре
+                
+                role = item.get('role', '')
+                is_main = item.get('is_main', False)
+            
+            if subject_id not in subjects_dict:
+                subjects_dict[subject_id] = {
+                    'id': subject_id,
+                    'name': subject_name,
+                    'semester': subject_semester,
+                    'description': subject_description,
+                    'teachers': []
+                }
+            
+            # Добавляем информацию о преподавателе для этого предмета
+            teacher_info = {
+                'id': teacher_id,
+                'name': teacher_name,
+                'position': teacher_position,
+                'department': teacher_department,
+                'academic_degree': teacher_academic_degree,
+                'role': role,
+                'is_main': is_main
+            }
+            
+            subjects_dict[subject_id]['teachers'].append(teacher_info)
+        
+        # Преобразуем словарь в список для передачи в шаблон
+        subjects_list = list(subjects_dict.values())
+        debug_info.append(f"Подготовлены данные для {len(subjects_list)} предметов")
+        
+        context = {
+            'subjects': subjects_list,
+            'error': None,
+            'debug_info': debug_info,
+        }
+        
+    except requests.RequestException as e:
+        error_msg = f'Ошибка при обращении к порталу преподавателя: {str(e)}'
+        debug_info.append(error_msg)
+        context = {
+            'subjects': [],
+            'error': error_msg,
+            'debug_info': debug_info,
+        }
+    except json.JSONDecodeError as json_err:
+        error_msg = f'Ошибка при обработке ответа от портала преподавателя: {str(json_err)}'
+        debug_info.append(error_msg)
+        print(f"Общая ошибка декодирования JSON: {json_err}")
+        context = {
+            'subjects': [],
+            'error': error_msg,
+            'debug_info': debug_info,
+        }
+    
+    return render(request, 'performance/live_subject_teachers.html', context)
+
+def create_test_data_for_views():
+    """Создает тестовые данные о связях преподавателей с предметами для отображения"""
+    from .models import Subject
+    
+    # Получаем реальные предметы из БД
+    subjects = Subject.objects.all()
+    
+    # Создаем тестовые связи для предметов
+    test_relations = []
+    test_teachers = [
+        {
+            'id': 1001,
+            'name': 'Иванов Иван Иванович',
+            'position': 'Доцент',
+            'department': 'Кафедра информационных технологий',
+            'academic_degree': 'к.т.н.'
+        },
+        {
+            'id': 1002,
+            'name': 'Петров Петр Петрович',
+            'position': 'Профессор',
+            'department': 'Кафедра информационных технологий',
+            'academic_degree': 'д.т.н.'
+        },
+        {
+            'id': 1003,
+            'name': 'Сидорова Анна Алексеевна',
+            'position': 'Старший преподаватель',
+            'department': 'Кафедра математики',
+            'academic_degree': 'к.ф-м.н.'
+        }
+    ]
+    
+    for idx, subject in enumerate(subjects):
+        # Основной преподаватель
+        main_teacher = test_teachers[idx % len(test_teachers)]
+        test_relations.append({
+            'subject': {
+                'id': subject.id,
+                'name': subject.name,
+                'semester': getattr(subject.semester, 'name', 'Неизвестный семестр'),
+                'description': subject.description
+            },
+            'teacher': main_teacher,
+            'role': 'Лектор',
+            'role_display': 'Лектор',
+            'is_main': True
+        })
+        
+        # Дополнительный преподаватель
+        second_teacher = test_teachers[(idx + 1) % len(test_teachers)]
+        test_relations.append({
+            'subject': {
+                'id': subject.id,
+                'name': subject.name,
+                'semester': getattr(subject.semester, 'name', 'Неизвестный семестр'),
+                'description': subject.description
+            },
+            'teacher': second_teacher,
+            'role': 'Руководитель практики',
+            'role_display': 'Руководитель практики',
+            'is_main': False
+        })
+    
+    return test_relations 

@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'performance',
+    # 'background_task',  # Закомментировано, так как пакет не установлен
 ]
 
 MIDDLEWARE = [

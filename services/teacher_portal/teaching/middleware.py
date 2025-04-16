@@ -22,7 +22,13 @@ class JWTAuthenticationMiddleware:
             '/api/',
             '/favicon.ico',
             '/media/',
-            '/logout/'
+            '/logout/',
+            '/raw-json-api/',
+            '/public-teacher-subjects/',
+            '/public-teacher-subjects.json',
+            '/api/public/',
+            '/api/v1/public/',
+            '/teachers.json'
         ]
 
     def __call__(self, request):
