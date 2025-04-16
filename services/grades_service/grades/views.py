@@ -10,6 +10,8 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.conf import settings
 from django.views.decorators.http import require_http_methods
 from django.contrib.admin.views.decorators import staff_member_required
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import AllowAny
 
 from .models import Semester, Subject, Student, Grade, Group, Teacher
 from .services import sync_teachers_from_portal, sync_students_and_groups_from_portal
@@ -653,3 +655,160 @@ def sync_data_from_portals(request):
     
     # Возвращаемся на предыдущую страницу
     return redirect(request.META.get('HTTP_REFERER', '/admin/'))
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def get_groups_api(request):
+    """
+    API endpoint для получения списка групп.
+    """
+    try:
+        # Получаем все группы
+        groups = Group.objects.all()
+        
+        # Формируем данные для ответа
+        result = []
+        for group in groups:
+            result.append({
+                'id': group.id,
+                'name': group.name,
+                'department': group.department or 'Не указан',
+                'students_count': group.students.count()
+            })
+        
+        # Возвращаем чистый HttpResponse с явными заголовками
+        response = HttpResponse(
+            content=json.dumps(result, default=str),
+            content_type='application/json',
+            status=200
+        )
+        
+        # Добавляем заголовки для предотвращения кэширования и обхода CORS
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Content-Type'] = 'application/json; charset=utf-8'
+        
+        return response
+    except Exception as e:
+        error_data = {
+            'error': 'Произошла ошибка при выполнении запроса',
+            'details': str(e)
+        }
+        return HttpResponse(
+            content=json.dumps(error_data),
+            content_type='application/json',
+            status=500
+        )
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def get_students_by_group_api(request, group_id):
+    """
+    API endpoint для получения списка студентов в группе.
+    """
+    try:
+        # Получаем группу
+        group = Group.objects.get(id=group_id)
+        
+        # Получаем студентов группы
+        students = group.students.all()
+        
+        # Формируем данные для ответа
+        result = {
+            'group': {
+                'id': group.id,
+                'name': group.name,
+                'department': group.department or 'Не указан'
+            },
+            'students': [
+                {
+                    'id': student.id,
+                    'full_name': f"{student.last_name} {student.first_name}",
+                    'email': student.email,
+                    'student_id': getattr(student, 'student_id', None)
+                }
+                for student in students
+            ]
+        }
+        
+        # Возвращаем чистый HttpResponse с явными заголовками
+        response = HttpResponse(
+            content=json.dumps(result, default=str),
+            content_type='application/json',
+            status=200
+        )
+        
+        # Добавляем заголовки для предотвращения кэширования и обхода CORS
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Content-Type'] = 'application/json; charset=utf-8'
+        
+        return response
+    except Group.DoesNotExist:
+        error_data = {
+            'error': 'Группа не найдена',
+            'details': f'Группа с ID {group_id} не существует'
+        }
+        return HttpResponse(
+            content=json.dumps(error_data),
+            content_type='application/json',
+            status=404
+        )
+    except Exception as e:
+        error_data = {
+            'error': 'Произошла ошибка при выполнении запроса',
+            'details': str(e)
+        }
+        return HttpResponse(
+            content=json.dumps(error_data),
+            content_type='application/json',
+            status=500
+        )
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def get_semesters_api(request):
+    """
+    API endpoint для получения списка семестров.
+    """
+    try:
+        # Получаем все семестры
+        semesters = Semester.objects.all().order_by('-start_date')
+        
+        # Формируем данные для ответа
+        result = []
+        for semester in semesters:
+            result.append({
+                'id': semester.id,
+                'name': semester.name,
+                'start_date': semester.start_date.strftime('%Y-%m-%d'),
+                'end_date': semester.end_date.strftime('%Y-%m-%d'),
+                'is_current': semester.is_current
+            })
+        
+        # Возвращаем чистый HttpResponse с явными заголовками
+        response = HttpResponse(
+            content=json.dumps(result, default=str),
+            content_type='application/json',
+            status=200
+        )
+        
+        # Добавляем заголовки для предотвращения кэширования и обхода CORS
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Content-Type'] = 'application/json; charset=utf-8'
+        
+        return response
+    except Exception as e:
+        error_data = {
+            'error': 'Произошла ошибка при выполнении запроса',
+            'details': str(e)
+        }
+        return HttpResponse(
+            content=json.dumps(error_data),
+            content_type='application/json',
+            status=500
+        )
