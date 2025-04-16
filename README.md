@@ -48,23 +48,26 @@
 
 ```
 ├── services/
-│   ├── auth/               # Сервис авторизации и аутентификации
+│   ├── auth/                # Сервис авторизации и аутентификации
 │   ├── student_performance/ # Сервис студенческого портала
-│   ├── teacher_portal/     # Сервис для преподавателей
-│   └── grades_service/     # Сервис оценок и успеваемости
-├── docker-compose.yml     # Конфигурация Docker для запуска всех сервисов
-├── README.md              # Документация проекта
-└── .env                   # Файл с переменными окружения
+│   ├── teacher_portal/      # Сервис для преподавателей
+│   ├── grades_service/      # Сервис оценок и успеваемости
+│   ├── schedule_service/    # Сервис расписания
+│   └── news_service/        # Сервис новостей
+    └──   
+├── docker-compose.yml           # Конфигурация Docker для запуска всех сервисов
+├── README.md                    # Документация проекта
+├── Currently_plan_of_develop.md # План разработки проекта
+└── .env                         # Файл с переменными окружения
 ```
 
 ### Технологический стек
 
-- **Backend**: Python 3.9+, Django 4.2
-- **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
+- **Backend**: Python 3.9+, Django 5.1.2
+- **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 4/5
 - **Базы данных**: MySQL (на удаленном сервере)
 - **Контейнеризация**: Docker, Docker Compose
-- **Инструменты разработки**: Git, VS Code
-- **Визуализация данных**: Chart.js
+- **Инструменты разработки**: Git, PyCharm Professional Edition
 
 ## Установка и запуск
 
@@ -92,7 +95,7 @@
    ```
    SECRET_KEY=your_secret_key
    DEBUG=True
-   DB_NAME=orioks
+   DB_NAME=your_db_name
    DB_USER=your_db_user
    DB_PASSWORD=your_db_password
    DB_HOST=remote_mysql_host
@@ -130,6 +133,9 @@
    - Авторизационный портал: `http://localhost:8002`
    - Студенческий портал: `http://localhost:8003`
    - Преподавательский портал: `http://localhost:8004`
+   - Сервис оценок: `http://localhost:8005`
+   - Сервис расписания: `http://localhost:8006`
+   - Сервис новостей: `http://localhost:8007`
 
 ## Конфигурация базы данных
 
@@ -165,6 +171,7 @@
 - `/api/raw-json-api/teachers/` - импорт преподавателей, предметов и их связей
 - `/api/subject-teachers/for-student-portal/` - получение связей преподаватель-предмет для студенческого портала
 - `/api/public/teachers/` - публичный API для доступа к данным о преподавателях
+- `/api/` - на ключевых микросервисах проекта
 
 Для импорта данных через административный интерфейс добавлены специальные действия:
 1. Импорт преподавателей из API
