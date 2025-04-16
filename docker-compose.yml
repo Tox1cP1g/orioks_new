@@ -1,15 +1,21 @@
+version: '3.8'
+
 services:
   auth:
-    build: 
+    build:
       context: ./services/auth
-      dockerfile: Dockerfile
+    container_name: orioks_auth
     ports:
       - "8002:8002"
+    env_file:
+      - .env
     environment:
-      - DJANGO_SETTINGS_MODULE=auth_service.settings
-      - DEBUG=1
-      - ALLOWED_HOSTS=localhost,127.0.0.1,auth
-      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8003,http://localhost:8004
+      - USE_SQLITE=${USE_SQLITE:-False}
+      - DB_NAME=${AUTH_DB_NAME}
+      - DB_USER=${AUTH_DB_USER}
+      - DB_PASSWORD=${AUTH_DB_PASSWORD}
+      - DB_HOST=${AUTH_DB_HOST}
+      - DB_PORT=${AUTH_DB_PORT:-3306}
     volumes:
       - ./services/auth:/app
     networks:
@@ -17,45 +23,132 @@ services:
     restart: unless-stopped
 
   student_portal:
-    build: 
+    build:
       context: ./services/student_performance
-      dockerfile: Dockerfile
+    container_name: orioks_student
     ports:
       - "8003:8003"
+    env_file:
+      - .env
     environment:
-      - DJANGO_SETTINGS_MODULE=student_performance.settings
-      - DEBUG=1
-      - ALLOWED_HOSTS=localhost,127.0.0.1,student_portal
-      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8002,http://localhost:8004
-      - USE_SQLITE=False
+      - USE_SQLITE=${USE_SQLITE:-False}
+      - DB_NAME=${STUDENT_DB_NAME}
+      - DB_USER=${STUDENT_DB_USER}
+      - DB_PASSWORD=${STUDENT_DB_PASSWORD}
+      - DB_HOST=${STUDENT_DB_HOST}
+      - DB_PORT=${STUDENT_DB_PORT:-3306}
     volumes:
       - ./services/student_performance:/app
-    depends_on:
-      - auth
+      - ./media/student_portal:/app/media
     networks:
       - orioks_network
     restart: unless-stopped
+    depends_on:
+      - auth
 
   teacher_portal:
-    build: 
+    build:
       context: ./services/teacher_portal
-      dockerfile: Dockerfile
+    container_name: orioks_teacher
     ports:
       - "8004:8004"
+    env_file:
+      - .env
     environment:
-      - DJANGO_SETTINGS_MODULE=teacher_portal.settings
-      - DEBUG=1
-      - ALLOWED_HOSTS=localhost,127.0.0.1,teacher_portal
-      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:8002,http://localhost:8003
-      - USE_SQLITE=False
+      - USE_SQLITE=${USE_SQLITE:-False}
+      - DB_NAME=${TEACHER_DB_NAME}
+      - DB_USER=${TEACHER_DB_USER}
+      - DB_PASSWORD=${TEACHER_DB_PASSWORD}
+      - DB_HOST=${TEACHER_DB_HOST}
+      - DB_PORT=${TEACHER_DB_PORT:-3306}
     volumes:
       - ./services/teacher_portal:/app
-    depends_on:
-      - auth
+      - ./media/teacher_portal:/app/media
     networks:
       - orioks_network
     restart: unless-stopped
+    depends_on:
+      - auth
+
+  grades_service:
+    build:
+      context: ./services/grades_service
+    container_name: orioks_grades
+    ports:
+      - "8005:8005"
+    env_file:
+      - .env
+    environment:
+      - USE_SQLITE=${USE_SQLITE:-False}
+      - DB_NAME=${GRADES_DB_NAME}
+      - DB_USER=${GRADES_DB_USER}
+      - DB_PASSWORD=${GRADES_DB_PASSWORD}
+      - DB_HOST=${GRADES_DB_HOST}
+      - DB_PORT=${GRADES_DB_PORT:-3306}
+    volumes:
+      - ./services/grades_service:/app
+    networks:
+      - orioks_network
+    restart: unless-stopped
+    depends_on:
+      - auth
+      - student_portal
+      - teacher_portal
+
+  schedule:
+    build:
+      context: ./services/schedule_service
+    container_name: orioks_schedule
+    ports:
+      - "8006:8006"
+    env_file:
+      - .env
+    environment:
+      - USE_SQLITE=${USE_SQLITE:-False}
+      - DB_NAME=${SCHEDULE_DB_NAME}
+      - DB_USER=${SCHEDULE_DB_USER}
+      - DB_PASSWORD=${SCHEDULE_DB_PASSWORD}
+      - DB_HOST=${SCHEDULE_DB_HOST}
+      - DB_PORT=${SCHEDULE_DB_PORT:-3306}
+    volumes:
+      - ./services/schedule_service:/app
+      - ./media/schedule:/app/media
+    networks:
+      - orioks_network
+    restart: unless-stopped
+    depends_on:
+      - auth
+      - student_portal
+      - teacher_portal
+
+  news:
+    build:
+      context: ./services/news_service
+    container_name: orioks_news
+    ports:
+      - "8007:8007"
+    env_file:
+      - .env
+    environment:
+      - USE_SQLITE=${USE_SQLITE:-False}
+      - DB_NAME=${NEWS_DB_NAME}
+      - DB_USER=${NEWS_DB_USER}
+      - DB_PASSWORD=${NEWS_DB_PASSWORD}
+      - DB_HOST=${NEWS_DB_HOST}
+      - DB_PORT=${NEWS_DB_PORT:-3306}
+    volumes:
+      - ./services/news_service:/app
+      - ./media/news:/app/media
+    networks:
+      - orioks_network
+    restart: unless-stopped
+    depends_on:
+      - auth
 
 networks:
   orioks_network:
-    driver: bridge 
+    driver: bridge
+
+volumes:
+  media:
+    driver: local 

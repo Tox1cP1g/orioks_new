@@ -1483,3 +1483,28 @@ INFO 2025-04-16 12:46:13,056 autoreload 15416 13216 Watching for file changes wi
 INFO 2025-04-16 12:48:55,023 autoreload 7512 14372 Watching for file changes with StatReloader
 INFO 2025-04-16 13:41:38,175 autoreload 9556 7436 Watching for file changes with StatReloader
 INFO 2025-04-16 16:20:55,586 autoreload 13600 1076 Watching for file changes with StatReloader
+INFO 2025-04-16 17:21:03,264 autoreload 6 281472902033440 Watching for file changes with StatReloader
+INFO 2025-04-16 17:31:07,840 autoreload 7 281472957939744 Watching for file changes with StatReloader
+INFO 2025-04-16 17:32:41,686 autoreload 7 281473254031392 Watching for file changes with StatReloader
+INFO 2025-04-16 17:33:00,326 middleware 7 281473179513248 Processing token (first 10 chars): eyJhbGciOi...
+DEBUG 2025-04-16 17:33:00,335 middleware 7 281473179513248 Decoded token: {'token_type': 'access', 'exp': 1744813761, 'iat': 1744813461, 'jti': '9166663e08a545019bf11caed4f6e116', 'user_id': 3, 'first_name': '', 'last_name': '', 'email': 'kobelev@diagxpert.ru', 'is_staff': True, 'is_superuser': True, 'role': 'STUDENT'}
+INFO 2025-04-16 17:33:00,337 middleware 7 281473179513248 Successfully authenticated user: user_3 (role: STUDENT)
+INFO 2025-04-16 17:33:00,346 views 7 281473179513248 User accessing index: user_3, role: STUDENT
+INFO 2025-04-16 17:33:00,348 views 7 281473179513248 User is STUDENT, redirecting to student_grades
+INFO 2025-04-16 17:33:00,406 basehttp 7 281473179513248 "GET / HTTP/1.1" 302 0
+INFO 2025-04-16 17:33:00,439 middleware 7 281473179513248 Processing token (first 10 chars): eyJhbGciOi...
+DEBUG 2025-04-16 17:33:00,441 middleware 7 281473179513248 Decoded token: {'token_type': 'access', 'exp': 1744813761, 'iat': 1744813461, 'jti': '9166663e08a545019bf11caed4f6e116', 'user_id': 3, 'first_name': '', 'last_name': '', 'email': 'kobelev@diagxpert.ru', 'is_staff': True, 'is_superuser': True, 'role': 'STUDENT'}
+INFO 2025-04-16 17:33:00,442 middleware 7 281473179513248 Successfully authenticated user: user_3 (role: STUDENT)
+INFO 2025-04-16 17:33:00,444 views 7 281473179513248 User accessing student grades: user_3, role: STUDENT, authenticated: True
+WARNING 2025-04-16 17:33:01,251 views 7 281473179513248 No student record found for user user_3, creating new one
+ERROR 2025-04-16 17:33:01,316 services 7 281473179513248 Ошибка при получении списка групп: (1146, "Table 'grades_service.performance_group' doesn't exist")
+WARNING 2025-04-16 17:33:01,317 services 7 281473179513248 Не получены данные о группах для синхронизации
+INFO 2025-04-16 17:33:01,563 views 7 281473179513248 Created new student record for user user_3
+INFO 2025-04-16 17:33:01,767 basehttp 7 281473179513248 "GET /student-grades/ HTTP/1.1" 200 21969
+INFO 2025-04-16 17:33:02,383 middleware 7 281473179513248 Processing token (first 10 chars): eyJhbGciOi...
+DEBUG 2025-04-16 17:33:02,384 middleware 7 281473179513248 Decoded token: {'token_type': 'access', 'exp': 1744813761, 'iat': 1744813461, 'jti': '9166663e08a545019bf11caed4f6e116', 'user_id': 3, 'first_name': '', 'last_name': '', 'email': 'kobelev@diagxpert.ru', 'is_staff': True, 'is_superuser': True, 'role': 'STUDENT'}
+INFO 2025-04-16 17:33:02,384 middleware 7 281473179513248 Successfully authenticated user: user_3 (role: STUDENT)
+WARNING 2025-04-16 17:33:03,186 views 7 281473179513248 No grades found for student Student 3 in semester Текущий семестр
+ERROR 2025-04-16 17:33:03,263 views 7 281473179513248 Error getting student grades: type object 'datetime.timezone' has no attribute 'now'
+ERROR 2025-04-16 17:33:03,264 log 7 281473179513248 Internal Server Error: /api/student/grades/1/
+ERROR 2025-04-16 17:33:03,265 basehttp 7 281473179513248 "GET /api/student/grades/1/ HTTP/1.1" 500 34

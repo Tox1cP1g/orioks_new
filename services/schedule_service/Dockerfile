@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Порт для внешних подключений
-EXPOSE 8002
+EXPOSE 8006
 
 # Запуск сервера при старте контейнера
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8002"] 
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8006"] 
