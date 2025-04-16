@@ -5,34 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c7d46fe2-66a5-4343-86ae-f86525f4f30b" name="Changes" comment="First version of schedule.&#10;Problem: when selecting a group, the schedule isn't show.">
-      <change beforePath="$PROJECT_DIR$/.idea/orioks_new.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/orioks_new.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirememts.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/api_gateway/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/api_gateway/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/api/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/migrations/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/api/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/api/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/apps.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/api/fixtures/test_data.json" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/fixtures/test_data.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/api/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/api/migrations/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/api/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/api/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/api/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/tests.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/api/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/api/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/manage.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/manage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/schedule/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/schedule/asgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/config/asgi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/schedule/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/config/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/schedule/urls.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/schedule/wsgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/config/wsgi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/schedule/templates/schedule/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/templates/schedule/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/student_performance/performance/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/student_performance/performance/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/student_performance/performance/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/student_performance/performance/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/student_performance/performance/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/student_performance/performance/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/student_performance/student_performance/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/student_performance/student_performance/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/teacher_portal/teaching/migrations/0002_subject_schedule_attendance_studentassignment.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/teacher_portal/teaching/migrations/0002_subject_schedule_attendance_studentassignment.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/services/teacher_portal/teaching/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/teacher_portal/teaching/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/services/schedule/schedule/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/services/schedule/core/migrations/__init__.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -144,7 +117,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744744991575</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="First version of schedule.&#10;Problem: when selecting a group, the schedule isn't show.">
+      <option name="closed" value="true" />
+      <created>1744794745879</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1744794745879</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
