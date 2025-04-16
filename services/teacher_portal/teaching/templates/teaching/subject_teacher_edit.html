@@ -1,0 +1,95 @@
+{% extends 'teaching/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Редактирование связи преподаватель-предмет{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Редактирование связи преподаватель-предмет</h5>
+                    <a href="{% url 'subject_teachers' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Назад к списку
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Предмет:</div>
+                            <div class="col-md-8">
+                                <select name="subject" class="form-select" required>
+                                    {% for subject in subjects %}
+                                        <option value="{{ subject.id }}" {% if subject.id == subject_teacher.subject.id %}selected{% endif %}>
+                                            {{ subject.name }} ({{ subject.code }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Преподаватель:</div>
+                            <div class="col-md-8">
+                                <select name="teacher" class="form-select" required>
+                                    {% for teacher_item in teachers %}
+                                        <option value="{{ teacher_item.id }}" {% if teacher_item.id == subject_teacher.teacher.id %}selected{% endif %}>
+                                            {{ teacher_item.user.get_full_name }} ({{ teacher_item.position }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Роль:</div>
+                            <div class="col-md-8">
+                                {{ form.role|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Основной преподаватель:</div>
+                            <div class="col-md-8">
+                                {{ form.is_main|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Группы:</div>
+                            <div class="col-md-8">
+                                <select name="groups" class="form-select" multiple>
+                                    {% for group in groups %}
+                                        <option value="{{ group.id }}" 
+                                            {% if group in subject_teacher.groups.all %}selected{% endif %}>
+                                            {{ group.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Удерживайте Ctrl (Cmd на Mac) для выбора нескольких групп</div>
+                            </div>
+                        </div>
+                        
+                        {% if messages %}
+                        <div class="alert alert-danger">
+                            {% for message in messages %}
+                                {{ message }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Сохранить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

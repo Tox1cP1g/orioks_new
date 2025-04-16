@@ -1,0 +1,149 @@
+{% extends 'student_performance/base.html' %}
+{% load static %}
+
+{% block title %}Преподаватели и предметы{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Преподаватели и предметы</h2>
+    <p class="text-muted mb-4">Данные получены в реальном времени с портала преподавателя.</p>
+
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">Ошибка!</h4>
+        <p>{{ error }}</p>
+        <hr>
+        <p class="mb-0">Попробуйте обновить страницу позже или обратитесь к администратору системы.</p>
+        
+        <!-- Отладочная информация -->
+        <div class="mt-4">
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#debugInfo" aria-expanded="false" aria-controls="debugInfo">
+                Показать отладочную информацию
+            </button>
+            <div class="collapse mt-2" id="debugInfo">
+                <div class="card card-body bg-light">
+                    <h6>Ход выполнения запроса:</h6>
+                    <ol class="small">
+                        {% for info in debug_info %}
+                        <li>{{ info }}</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% elif not subjects %}
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">Нет данных</h4>
+        <p>В настоящее время нет информации о преподавателях и предметах.</p>
+        
+        <!-- Отладочная информация -->
+        <div class="mt-4">
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#debugInfo" aria-expanded="false" aria-controls="debugInfo">
+                Показать отладочную информацию
+            </button>
+            <div class="collapse mt-2" id="debugInfo">
+                <div class="card card-body bg-light">
+                    <h6>Ход выполнения запроса:</h6>
+                    <ol class="small">
+                        {% for info in debug_info %}
+                        <li>{{ info }}</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        {% for subject in subjects %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ subject.name }}</h5>
+                    <span class="badge bg-light text-dark">Семестр {{ subject.semester }}</span>
+                </div>
+                <div class="card-body">
+                    {% if subject.description %}
+                    <p class="card-text">{{ subject.description }}</p>
+                    <hr>
+                    {% endif %}
+                    
+                    <h6 class="mb-3">Преподаватели:</h6>
+                    
+                    {% if not subject.teachers %}
+                    <p class="text-muted">Нет информации о преподавателях.</p>
+                    {% else %}
+                    <div class="list-group mb-3">
+                        {% for teacher in subject.teachers %}
+                        <div class="list-group-item list-group-item-action{% if teacher.is_main %} list-group-item-primary{% endif %}">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ teacher.name }}</h6>
+                                <small>
+                                    {% if teacher.is_main %}
+                                    <span class="badge bg-success">Основной</span>
+                                    {% endif %}
+                                    {% if teacher.role %}
+                                    <span class="badge bg-info text-dark">{{ teacher.role }}</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                            {% if teacher.position or teacher.department or teacher.academic_degree %}
+                            <p class="mb-1">
+                                {% if teacher.position %}{{ teacher.position }}{% endif %}
+                                {% if teacher.academic_degree %}, {{ teacher.academic_degree }}{% endif %}
+                                {% if teacher.department %}<br>{{ teacher.department }}{% endif %}
+                            </p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-4">
+        <button id="refreshBtn" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-clockwise"></i> Обновить данные
+        </button>
+        
+        <!-- Отладочная информация -->
+        <div class="mt-4">
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#debugInfo" aria-expanded="false" aria-controls="debugInfo">
+                Показать отладочную информацию
+            </button>
+            <div class="collapse mt-2" id="debugInfo">
+                <div class="card card-body bg-light">
+                    <h6>Ход выполнения запроса:</h6>
+                    <ol class="small">
+                        {% for info in debug_info %}
+                        <li>{{ info }}</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Обработчик кнопки обновления
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+                // Индикатор загрузки
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Загрузка...';
+                this.disabled = true;
+                
+                // Перезагрузка страницы
+                window.location.reload();
+            });
+        }
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,485 @@
+{% extends 'teaching/base_new.html' %}
+
+{% block title %}Главная - ОРИОКС Преподаватель{% endblock %}
+{% block page_title %}Главная панель{% endblock %}
+{% block mobile_title %}Главная панель{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="welcome-card">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="mb-2">Добро пожаловать, {{ user.get_full_name }}!</h2>
+                    <p class="text-muted mb-0">Ваш персональный кабинет преподавателя ОРИОКС</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="{% url 'submissions' %}" class="btn btn-primary">
+                        <i class="fas fa-tasks me-2"></i>Проверить работы
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Статистика -->
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="stat-card">
+                    <div class="icon-circle icon-lg mb-3">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-value">{{ courses_count|default:"5" }}</div>
+                    <div class="stat-label">Активных курсов</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="stat-card">
+                    <div class="icon-circle icon-lg mb-3" style="background-color: rgba(253, 126, 20, 0.1); color: var(--accent);">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-value" style="color: var(--accent);">{{ students_count|default:"127" }}</div>
+                    <div class="stat-label">Студентов</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="stat-card">
+                    <div class="icon-circle icon-lg mb-3" style="background-color: rgba(220, 53, 69, 0.1); color: var(--danger);">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="stat-value" style="color: var(--danger);">{{ pending_submissions_count|default:"12" }}</div>
+                    <div class="stat-label">Работ на проверке</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="stat-card">
+                    <div class="icon-circle icon-lg mb-3" style="background-color: rgba(25, 135, 84, 0.1); color: var(--success);">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="stat-value" style="color: var(--success);">{{ today_classes_count|default:"3" }}</div>
+                    <div class="stat-label">Занятий сегодня</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ближайшие занятия и предстоящие дедлайны -->
+<div class="row mb-4">
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5><i class="fas fa-clock me-2"></i>Ближайшие занятия</h5>
+                <div class="actions">
+                    <a href="{% url 'schedule' %}" class="btn btn-sm btn-outline-primary">Все занятия</a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if classes %}
+                    <div class="table-container">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Дисциплина</th>
+                                    <th>Группа</th>
+                                    <th>Тип</th>
+                                    <th>Время</th>
+                                    <th>Аудитория</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for class in classes %}
+                                <tr>
+                                    <td>{{ class.subject }}</td>
+                                    <td>{{ class.group }}</td>
+                                    <td>{{ class.type }}</td>
+                                    <td>{{ class.time }}</td>
+                                    <td>{{ class.room }}</td>
+                                </tr>
+                                {% endfor %}
+                                <!-- Тестовые данные (заменить на actual data) -->
+                                <tr>
+                                    <td>Математический анализ</td>
+                                    <td>ИУ5-32Б</td>
+                                    <td><span class="badge bg-primary">Лекция</span></td>
+                                    <td>10:15 - 11:50</td>
+                                    <td>501л</td>
+                                </tr>
+                                <tr>
+                                    <td>Программирование</td>
+                                    <td>ИУ7-11Б</td>
+                                    <td><span class="badge bg-success">Лабораторная</span></td>
+                                    <td>12:00 - 15:20</td>
+                                    <td>1024л</td>
+                                </tr>
+                                <tr>
+                                    <td>Физика</td>
+                                    <td>РЛ2-14</td>
+                                    <td><span class="badge bg-warning text-dark">Практика</span></td>
+                                    <td>15:40 - 17:15</td>
+                                    <td>324л</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state text-center py-5">
+                        <div class="icon-circle icon-lg mx-auto mb-3" style="background-color: rgba(25, 135, 84, 0.1); color: var(--success);">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h5>Нет запланированных занятий</h5>
+                        <p class="text-muted">На ближайшее время у вас нет занятий в расписании</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5><i class="fas fa-hourglass-end me-2"></i>Приближающиеся дедлайны</h5>
+                <div class="actions">
+                    <a href="{% url 'assignments' %}" class="btn btn-sm btn-outline-primary">Все задания</a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if upcoming_deadlines %}
+                    <div class="deadline-list">
+                        {% for deadline in upcoming_deadlines %}
+                        <div class="deadline-item">
+                            <div class="deadline-header">
+                                <div class="deadline-title">{{ deadline.title }}</div>
+                                <div class="deadline-date {% if deadline.is_soon %}text-danger{% endif %}">{{ deadline.date }}</div>
+                            </div>
+                            <div class="deadline-details">
+                                <div class="deadline-course">{{ deadline.course }}</div>
+                                <div class="deadline-stats">
+                                    <span>Сдано: {{ deadline.submitted }} / {{ deadline.total }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <!-- Тестовые данные (заменить на actual data) -->
+                        <div class="deadline-item">
+                            <div class="deadline-header">
+                                <div class="deadline-title">Лабораторная работа №3</div>
+                                <div class="deadline-date text-danger">Завтра, 23:59</div>
+                            </div>
+                            <div class="deadline-details">
+                                <div class="deadline-course">Программирование (ИУ7-11Б)</div>
+                                <div class="deadline-stats">
+                                    <span>Сдано: 15 / 28</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="deadline-item">
+                            <div class="deadline-header">
+                                <div class="deadline-title">Контрольная работа</div>
+                                <div class="deadline-date">21.11.2023, 23:59</div>
+                            </div>
+                            <div class="deadline-details">
+                                <div class="deadline-course">Математический анализ (ИУ5-32Б)</div>
+                                <div class="deadline-stats">
+                                    <span>Сдано: 5 / 30</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="deadline-item">
+                            <div class="deadline-header">
+                                <div class="deadline-title">Домашнее задание №5</div>
+                                <div class="deadline-date">28.11.2023, 23:59</div>
+                            </div>
+                            <div class="deadline-details">
+                                <div class="deadline-course">Физика (РЛ2-14)</div>
+                                <div class="deadline-stats">
+                                    <span>Сдано: 0 / 25</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="empty-state text-center py-5">
+                        <div class="icon-circle icon-lg mx-auto mb-3" style="background-color: rgba(253, 126, 20, 0.1); color: var(--accent);">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h5>Нет приближающихся дедлайнов</h5>
+                        <p class="text-muted">У студентов нет заданий с приближающимися сроками сдачи</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Последние загруженные работы -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-upload me-2"></i>Последние загруженные работы</h5>
+                <div class="actions">
+                    <a href="{% url 'submissions' %}" class="btn btn-sm btn-outline-primary">Все работы</a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if recent_submissions %}
+                    <div class="table-container">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Студент</th>
+                                    <th>Задание</th>
+                                    <th>Курс</th>
+                                    <th>Дата загрузки</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for submission in recent_submissions %}
+                                <tr>
+                                    <td>{{ submission.student }}</td>
+                                    <td>{{ submission.assignment }}</td>
+                                    <td>{{ submission.course }}</td>
+                                    <td>{{ submission.date }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ submission.status_color }}">
+                                            {{ submission.status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                <!-- Тестовые данные (заменить на actual data) -->
+                                <tr>
+                                    <td>Иванов Иван Иванович</td>
+                                    <td>Лабораторная работа №3</td>
+                                    <td>Программирование</td>
+                                    <td>15.11.2023 14:23</td>
+                                    <td><span class="badge bg-warning text-dark">На проверке</span></td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Петров Петр Петрович</td>
+                                    <td>Лабораторная работа №2</td>
+                                    <td>Программирование</td>
+                                    <td>14.11.2023 21:45</td>
+                                    <td><span class="badge bg-warning text-dark">На проверке</span></td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Сидоров Сидор Сидорович</td>
+                                    <td>Контрольная работа</td>
+                                    <td>Математический анализ</td>
+                                    <td>14.11.2023 16:30</td>
+                                    <td><span class="badge bg-warning text-dark">На проверке</span></td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state text-center py-5">
+                        <div class="icon-circle icon-lg mx-auto mb-3" style="background-color: rgba(13, 110, 253, 0.1); color: var(--primary);">
+                            <i class="fas fa-inbox"></i>
+                        </div>
+                        <h5>Нет новых работ</h5>
+                        <p class="text-muted">Студенты пока не загрузили новых работ на проверку</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Быстрые действия -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-bolt me-2"></i>Быстрые действия</h5>
+            </div>
+            <div class="card-body">
+                <div class="row row-cols-1 row-cols-md-4 g-4">
+                    <div class="col">
+                        <a href="{% url 'course_create' %}" class="card h-100 action-card text-decoration-none">
+                            <div class="card-body text-center">
+                                <div class="icon-circle icon-lg mx-auto mb-3" style="background-color: rgba(13, 110, 253, 0.1); color: var(--primary);">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <h5 class="card-title">Добавить курс</h5>
+                                <p class="card-text text-muted">Создайте новый учебный курс</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="{% url 'assignment_create' %}" class="card h-100 action-card text-decoration-none">
+                            <div class="card-body text-center">
+                                <div class="icon-circle icon-lg mx-auto mb-3" style="background-color: rgba(25, 135, 84, 0.1); color: var(--success);">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                                <h5 class="card-title">Создать задание</h5>
+                                <p class="card-text text-muted">Добавьте новое задание для студентов</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="{% url 'material_upload' %}" class="card h-100 action-card text-decoration-none">
+                            <div class="card-body text-center">
+                                <div class="icon-circle icon-lg mx-auto mb-3" style="background-color: rgba(253, 126, 20, 0.1); color: var(--accent);">
+                                    <i class="fas fa-file-upload"></i>
+                                </div>
+                                <h5 class="card-title">Загрузить материал</h5>
+                                <p class="card-text text-muted">Добавьте учебный материал</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="{% url 'messages_list' %}" class="card h-100 action-card text-decoration-none">
+                            <div class="card-body text-center">
+                                <div class="icon-circle icon-lg mx-auto mb-3" style="background-color: rgba(13, 202, 240, 0.1); color: var(--info);">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <h5 class="card-title">Написать сообщение</h5>
+                                <p class="card-text text-muted">Отправьте сообщение студентам</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .welcome-card {
+        background-color: #fff;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-sm);
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+    
+    .deadline-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .deadline-item {
+        background-color: #fff;
+        border-radius: var(--border-radius);
+        border-left: 3px solid var(--primary);
+        box-shadow: var(--shadow-sm);
+        padding: 15px;
+        transition: transform var(--transition-time) ease, box-shadow var(--transition-time) ease;
+    }
+    
+    .deadline-item:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow);
+    }
+    
+    .deadline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+    
+    .deadline-title {
+        font-weight: 500;
+    }
+    
+    .deadline-date {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+    
+    .deadline-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+    
+    .empty-state {
+        padding: 30px;
+    }
+    
+    .action-card:hover .card-title {
+        color: var(--primary);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Дополнительный JavaScript для страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        // Пример инициализации любых специфичных для страницы компонентов
+    });
+</script>
+{% endblock %} 

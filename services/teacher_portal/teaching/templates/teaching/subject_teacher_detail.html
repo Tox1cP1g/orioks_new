@@ -1,0 +1,61 @@
+{% extends 'teaching/base.html' %}
+
+{% block title %}Детали связи преподаватель-предмет{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Информация о связи преподаватель-предмет</h5>
+                    <a href="{% url 'subject_teachers' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Назад к списку
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Предмет:</div>
+                        <div class="col-md-8">{{ subject_teacher.subject.name }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Преподаватель:</div>
+                        <div class="col-md-8">{{ subject_teacher.teacher.user.get_full_name }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Роль:</div>
+                        <div class="col-md-8">
+                            {% if subject_teacher.role == 'LECTURER' %}
+                                Лектор
+                            {% elif subject_teacher.role == 'ASSISTANT' %}
+                                Ассистент
+                            {% elif subject_teacher.role == 'EXAMINER' %}
+                                Экзаменатор
+                            {% else %}
+                                {{ subject_teacher.role }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Основной преподаватель:</div>
+                        <div class="col-md-8">
+                            {% if subject_teacher.is_main %}
+                                <span class="badge bg-success">Да</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Нет</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-end">
+                        <a href="{% url 'subject_teacher_edit' subject_teacher.id %}" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Редактировать
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
