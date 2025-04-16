@@ -31,13 +31,32 @@
 
     <script>
         document.getElementById('groupSelect').addEventListener('change', function() {
-            const groupId = this.value;
-            if (groupId) {
-                fetch(`/core/schedule/?group=${groupId}`)
-                    .then(response => response.json())
-                    .then(data => renderSchedule(data));
-            }
-        });
+    const groupId = this.value;
+    if (groupId) {
+        fetch(`/api/schedule/?group=${groupId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.length === 0) {
+                    document.getElementById('scheduleContent').innerHTML =
+                        '<div class="alert alert-info">Нет расписания для выбранной группы</div>';
+                } else {
+                    renderSchedule(data);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('scheduleContent').innerHTML =
+                    '<div class="alert alert-danger">Ошибка загрузки расписания</div>';
+            });
+    } else {
+        document.getElementById('scheduleContent').innerHTML = '';
+    }
+});
 
         function renderSchedule(schedule) {
             const container = document.getElementById('scheduleContent');
